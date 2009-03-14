@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: DataOrganizer - Video
+Bundle-SymbolicName: net.lecousin.dataorganizer.video;singleton:=true
+Bundle-Version: 0.1.0
+Bundle-Activator: net.lecousin.dataorganizer.video.internal.EclipsePlugin
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ net.lecousin.dataorganizer,
+ net.lecousin.framework,
+ net.lecousin.framework.ui,
+ org.eclipse.core.filesystem;bundle-version="1.2.0",
+ org.eclipse.ui.ide;bundle-version="3.4.1",
+ org.eclipse.core.resources;bundle-version="3.4.1",
+ org.eclipse.ui.forms;bundle-version="3.3.101",
+ net.lecousin.framework.media,
+ net.lecousin.dataorganizer.people,
+ net.lecousin.dataorganizer.mediaplayer
+Eclipse-LazyStart: true
+Export-Package: net.lecousin.dataorganizer.video
+Bundle-Vendor: Guillaume LE COUSIN

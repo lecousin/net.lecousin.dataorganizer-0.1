@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: DataOrganizer - People
+Bundle-SymbolicName: net.lecousin.dataorganizer.people;singleton:=true
+Bundle-Version: 0.1.0
+Bundle-Activator: net.lecousin.dataorganizer.people.internal.EclipsePlugin
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ net.lecousin.dataorganizer,
+ net.lecousin.framework,
+ net.lecousin.framework.ui,
+ org.eclipse.core.filesystem;bundle-version="1.2.0"
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Export-Package: net.lecousin.dataorganizer.people
+Bundle-Vendor: Guillaume LE COUSIN

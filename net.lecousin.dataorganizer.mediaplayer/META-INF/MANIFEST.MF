@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: DataOrganizer - MediaPlayer
+Bundle-SymbolicName: net.lecousin.dataorganizer.mediaplayer;singleton:=true
+Bundle-Version: 0.1.0
+Bundle-Activator: net.lecousin.dataorganizer.mediaplayer.internal.EclipsePlugin
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ net.lecousin.dataorganizer,
+ net.lecousin.framework,
+ net.lecousin.framework.media,
+ net.lecousin.framework.ui,
+ org.eclipse.ui.forms;bundle-version="3.3.101"
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Export-Package: net.lecousin.dataorganizer.mediaplayer
+Bundle-Vendor: Guillaume LE COUSIN

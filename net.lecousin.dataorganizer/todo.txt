@@ -1,0 +1,75 @@
+Avant prochaine release:
+
+DataOrganizer
+ + License
+ + Refresh general avec plein d'options
+ + Final page pour Add Data => refresh options...
+ + Import all/Refresh all sur DataLink list (utiliser aussi le ListDialog qui gere les pages, filtres...)
+ + Clean not DEBUG:
+   + Ralentir le moniteur memoire, et encore plus garbage collection
+   + Enlever les logs DEBUG
+   + Log: faire une tournante de fichiers (par taille)
+ + Preferences: language
+ + Table: select columns... by type (video duration)...
+ + PreviewTaker:
+   + mettre un texte explicatif
+   + assurer que la fenetre est on top: faire une pause si nécessaire
+ + ajouter des tooltips partout
+ + Bug LCTable: ne plus utiliser ScrolledComposite a couse de MouseWhell, mais mettre la horizontal scroll bar manuellement
+ + LCTable columns: sort
+ + attribute etiquette, search non labeled: resultat pas rafraichi
+ + search: pouvoir inverser
+
+Install/Update
+ + Setup2Go bien configure
+
+Audio
+ + MP3 single
+ + UI
+ + Internet
+ + tout les TODO, icones...
+
+Video
+ + Icones sur les Action sur Video
+ + Video search: duration: accept toutes les durees=> faire la recherche sinon c lourd il faut trouver la tranche minimum
+
+---------------------------------------------------------------------
+Moins urgent:
+
+DataOrganizer
+ + scroll overview: plus rapide
+ + BUG: PreviewTaker: attendre que l'image change avant de prendre reellement... (permet d'etre sur que la video est prete)
+ + LCTable columns: optimize:layout and create on demand
+ + AdvancedList: gerer la limitation du nombre d'éléments
+ + Localisation: boutons de wizard
+ + Data opened menu: + ergonomique pour traiter plusieurs en meme temps???
+ + Menu de l'appli
+ + ReviewsDialog: filtre par note, par source
+ + About dialog
+ + Pouvoir se creer des listes (genre selection...)
+ + Gestion des prets...
+ + Add data from internet => use InfoRetriever.search...
+ + Clean names
+ 
+Install/Update
+ + Updater
+ + InstallFinalizer
+
+9Box Media Center:
+ + drag'n'drop
+ + sauvegarder la liste
+ 
+Media Player
+ + playlist : deplacer les elements par drag'n'drop
+ 
+Audio
+ + PLS
+ 
+Picture
+ + tout
+
+Video
+ + AlloCine: image DVD
+ + Wikipedia?
+ + IMDb
+ + cinemovies.fr

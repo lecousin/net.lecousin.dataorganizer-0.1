@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension
+         point="net.lecousin.dataorganizer.contenttype">
+      <type
+            class="net.lecousin.dataorganizer.video.VideoContentType"
+            id="video">
+         <version
+               loader="net.lecousin.dataorganizer.video.Loader_0_1_0"
+               maj="0"
+               min="1"
+               sub="0">
+         </version>
+      </type>
+   </extension>
+   <extension
+         point="net.lecousin.dataorganizer.contenttype_action">
+      <action
+            content_type_id="video"
+            provider="net.lecousin.dataorganizer.video.action.ActionProvider">
+      </action>
+   </extension>
+
+</plugin>

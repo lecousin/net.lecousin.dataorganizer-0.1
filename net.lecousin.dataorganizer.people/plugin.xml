@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension
+         point="net.lecousin.dataorganizer.contenttype">
+      <type
+            class="net.lecousin.dataorganizer.people.PeopleContentType"
+            id="people">
+         <version
+               loader="net.lecousin.dataorganizer.people.Loader_0_1_0"
+               maj="0"
+               min="1"
+               sub="0">
+         </version>
+      </type>
+   </extension>
+
+</plugin>

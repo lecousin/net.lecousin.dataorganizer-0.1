@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension-point id="contenttype" name="Data Content Type" schema="schema/contenttype.exsd"/>
+   <extension-point id="inforetriever" name="Data Info Retriever" schema="schema/inforetriever.exsd"/>
+   <extension-point id="contenttype_action" name="Content Type Action" schema="schema/contenttype_action.exsd"/>
+
+   <extension
+         id="application"
+         point="org.eclipse.core.runtime.applications">
+      <application>
+         <run
+               class="net.lecousin.dataorganizer.ui.application.Application">
+         </run>
+      </application>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            name="DataOrganizer"
+            class="net.lecousin.dataorganizer.ui.Perspective"
+            id="net.lecousin.dataorganizer.perspective">
+      </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            name="Search"
+            allowMultiple="false"
+            class="net.lecousin.dataorganizer.ui.search.SearchView"
+            id="net.lecousin.dataorganizer.searchView">
+      </view>
+      <view
+            allowMultiple="false"
+            class="net.lecousin.dataorganizer.ui.datalist.DataListView"
+            id="net.lecousin.dataorganizer.datalistView"
+            name="Data List">
+      </view>
+      <view
+            allowMultiple="false"
+            class="net.lecousin.dataorganizer.ui.dataoverview.DataOverviewView"
+            id="net.lecousin.dataorganizer.datadetailView"
+            name="Overview">
+      </view>
+      <view
+            class="net.lecousin.dataorganizer.ui.view.label.LabelsView"
+            id="net.lecousin.dataorganizer.view.label.LabelsView"
+            name="Labels"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         id="product"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="net.lecousin.dataorganizer.application"
+            name="DataOrganizer">
+         <property
+               name="aboutText"
+               value="DataOrganizer">
+         </property>
+         <property
+               name="windowImages"
+               value="icons/icon.gif">
+         </property>
+         <property
+               name="aboutImage"
+               value="product_lg.gif">
+         </property>
+         <property
+               name="appName"
+               value="DataOrganizer">
+         </property>
+      </product>
+   </extension>
+   <extension
+         point="org.eclipse.ui.splashHandlers">
+      <splashHandler
+            class="net.lecousin.dataorganizer.ui.application.splash.InteractiveSplashHandler"
+            id="net.lecousin.dataorganizer.ui.application.splash.interactive">
+      </splashHandler>
+      <splashHandlerProductBinding
+            productId="net.lecousin.dataorganizer.product"
+            splashId="net.lecousin.dataorganizer.ui.application.splash.interactive">
+      </splashHandlerProductBinding>
+   </extension>
+
+</plugin>

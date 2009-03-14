@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: DataOrganizer - NeufBox Media Center
+Bundle-SymbolicName: net.lecousin.dataorganizer.neufbox.mediacenter;singleton:=true
+Bundle-Version: 0.1.0
+Bundle-Activator: net.lecousin.dataorganizer.neufbox.mediacenter.internal.EclipsePlugin
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ net.lecousin.neufbox.mediacenter,
+ net.lecousin.dataorganizer,
+ net.lecousin.framework;bundle-version="0.1.0"
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-Vendor: Guillaume LE COUSIN

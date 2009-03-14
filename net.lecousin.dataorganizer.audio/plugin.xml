@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension
+         point="net.lecousin.dataorganizer.contenttype">
+      <type
+            class="net.lecousin.dataorganizer.audio.AudioContentType"
+            id="audio">
+         <version
+               loader="net.lecousin.dataorganizer.audio.Loader_0_1_0"
+               maj="0"
+               min="1"
+               sub="0">
+         </version>
+      </type>
+   </extension>
+   <extension
+         point="net.lecousin.dataorganizer.contenttype_action">
+      <action
+            content_type_id="audio"
+            provider="net.lecousin.dataorganizer.audio.action.ActionProvider">
+      </action>
+   </extension>
+
+</plugin>

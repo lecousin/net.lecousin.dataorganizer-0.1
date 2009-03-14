@@ -1,0 +1,37 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: DataOrganizer
+Bundle-SymbolicName: net.lecousin.dataorganizer; singleton:=true
+Bundle-Version: 0.1.0
+Bundle-Activator: net.lecousin.dataorganizer.internal.EclipsePlugin
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ net.lecousin.framework,
+ net.lecousin.framework.ui,
+ org.eclipse.core.filesystem;bundle-version="1.2.0",
+ org.eclipse.ui.forms;bundle-version="3.3.101",
+ net.lecousin.framework.ui.eclipse.browser,
+ org.eclipse.swt,
+ org.eclipse.jface,
+ org.eclipse.ui.workbench,
+ net.lecousin.framework.net.http;bundle-version="0.1.0",
+ net.lecousin.framework.net.mime;bundle-version="0.1.0"
+Eclipse-LazyStart: true
+Export-Package: net.lecousin.dataorganizer.core,
+ net.lecousin.dataorganizer.core.database,
+ net.lecousin.dataorganizer.core.database.content,
+ net.lecousin.dataorganizer.core.database.info,
+ net.lecousin.dataorganizer.core.database.source,
+ net.lecousin.dataorganizer.core.database.version,
+ net.lecousin.dataorganizer.ui,
+ net.lecousin.dataorganizer.ui.action,
+ net.lecousin.dataorganizer.ui.control,
+ net.lecousin.dataorganizer.ui.datalist,
+ net.lecousin.dataorganizer.ui.dataoverview,
+ net.lecousin.dataorganizer.ui.dialog,
+ net.lecousin.dataorganizer.ui.plugin,
+ net.lecousin.dataorganizer.ui.search,
+ net.lecousin.dataorganizer.ui.wizard.adddata,
+ net.lecousin.dataorganizer.util
+Bundle-Vendor: Guillaume LE COUSIN
