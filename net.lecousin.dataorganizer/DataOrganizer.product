@@ -3,17 +3,11 @@
 
 <product name="DataOrganizer" id="net.lecousin.dataorganizer.product" application="net.lecousin.dataorganizer.application" version="0.1.0" useFeatures="false">
 
-   <aboutInfo>
-      <image path="product_lg.gif"/>
-      <text>
-         DataOrganizer
-      </text>
-   </aboutInfo>
-
    <configIni use="default">
    </configIni>
 
    <launcherArgs>
+      <programArgs>-firstLaunch</programArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
    </launcherArgs>
 

@@ -32,7 +32,7 @@ public class SearchView extends ViewPart {
 
 	private MainCriteriaPanel mainCriteriaPanel;
 	private ContentTypesPanel contentTypesPanel;
-	private ExpandItem labelItem;
+	private ExpandItem labelItem, contentTypesItem;
 	private LabelTree labelTree;
 	private ExpandBar panel;
 	
@@ -104,6 +104,12 @@ public class SearchView extends ViewPart {
 				refreshLabelHeight();
 			}
 		});
+		DataOrganizer.search().searchChanged().addFireListener(new Runnable() {
+			public void run() {
+				labelTree.refresh();
+				refreshLabelHeight();
+			}
+		});
 		
 		contentTypesPanel.typeAdded().addListener(new ContentTypeAdded());
 		contentTypesPanel.typeRemoved().addListener(new ContentTypeRemoved());
@@ -127,7 +133,7 @@ public class SearchView extends ViewPart {
 	private void refreshLabelHeight() {
 		labelTree.getTree().getDisplay().asyncExec(new Runnable() {
 			public void run() {
-				labelItem.setHeight(labelTree.getTree().computeSize(SWT.DEFAULT, SWT.DEFAULT, true).y);
+				contentTypesItem.setHeight(labelTree.getTree().computeSize(SWT.DEFAULT, SWT.DEFAULT, true).y);
 			}
 		});
 	}

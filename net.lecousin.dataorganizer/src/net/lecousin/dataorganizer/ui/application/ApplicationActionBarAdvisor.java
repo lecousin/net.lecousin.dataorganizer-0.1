@@ -1,6 +1,7 @@
 package net.lecousin.dataorganizer.ui.application;
 
 import net.lecousin.dataorganizer.Local;
+import net.lecousin.dataorganizer.ui.action.AboutAction;
 import net.lecousin.dataorganizer.ui.action.AddDataAction;
 import net.lecousin.dataorganizer.ui.action.RefreshDataBaseAction;
 import net.lecousin.dataorganizer.ui.action.ShowLabelsViewAction;
@@ -20,8 +21,6 @@ import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.actions.ActionFactory;
-import org.eclipse.ui.actions.ActionFactory.IWorkbenchAction;
 import org.eclipse.ui.application.ActionBarAdvisor;
 import org.eclipse.ui.application.IActionBarConfigurer;
 
@@ -32,13 +31,11 @@ import org.eclipse.ui.application.IActionBarConfigurer;
  */
 public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 
-    private IWorkbenchAction exitAction;
-    private IWorkbenchAction aboutAction;
-    
     private AddDataAction addDataAction;
     private RefreshDataBaseAction refreshDataBaseAction;
     private ShowLabelsViewAction showLabelsViewAction;
     private UpdateAction updateAction;
+    private AboutAction aboutAction;
 //    private TestAction testAction;
     
     public ApplicationActionBarAdvisor(IActionBarConfigurer configurer) {
@@ -46,12 +43,6 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
     }
     
     protected void makeActions(final IWorkbenchWindow window) {
-        exitAction = ActionFactory.QUIT.create(window);
-        register(exitAction);
-        
-        aboutAction = ActionFactory.ABOUT.create(window);
-        register(aboutAction);
-        
         addDataAction = new AddDataAction();
         register(addDataAction);
         
@@ -66,11 +57,14 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
         
 //        testAction = new TestAction();
 //        register(testAction);
+
+        aboutAction = new AboutAction();
+        register(aboutAction);
     }
     
     protected void fillMenuBar(IMenuManager menuBar) {
-        MenuManager fileMenu = new MenuManager(Local.MENU_File.toString(), "DataOrganizer.File"/*IWorkbenchActionConstants.M_FILE*/);
-        MenuManager helpMenu = new MenuManager(Local.MENU_Help.toString(), "DataOrganizer.Help"/*IWorkbenchActionConstants.M_HELP*/);
+        MenuManager fileMenu = new MenuManager(Local.MENU_Database.toString(), "DataOrganizer.Database");
+        MenuManager helpMenu = new MenuManager(Local.MENU_Help.toString(), "DataOrganizer.Help");
         
         menuBar.add(fileMenu);
         // Add a group marker indicating where action set menus will appear.
@@ -80,8 +74,6 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
         // File
         fileMenu.add(addDataAction);
         fileMenu.add(new GroupMarker(IWorkbenchActionConstants.MB_ADDITIONS));
-        fileMenu.add(new Separator());
-        fileMenu.add(exitAction);
         
         // Help
         helpMenu.add(aboutAction);

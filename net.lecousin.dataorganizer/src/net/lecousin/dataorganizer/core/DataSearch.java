@@ -16,6 +16,7 @@ import net.lecousin.dataorganizer.core.Filter.FilterName;
 import net.lecousin.dataorganizer.core.Filter.FilterRate;
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.content.ContentType;
+import net.lecousin.framework.Pair;
 import net.lecousin.framework.event.Event;
 import net.lecousin.framework.event.Event.Listener;
 import net.lecousin.framework.math.RangeInteger;
@@ -126,21 +127,7 @@ public class DataSearch {
 		});
 		DataOrganizer.database().dataChanged().addListener(new Listener<Data>() {
 			public void fire(Data event) {
-				if (result == null) return;
-				boolean match = isMatching(event);
-				boolean added = false;
-				boolean removed = false;
-				synchronized (DataSearch.this) {
-					if (match) {
-						if (!result.contains(event)) {
-							result.add(event);
-							added = true;
-						}
-					} else if (result.remove(event))
-						removed = true;
-				}
-				if (added) dataAdded.fire(event);
-				else if (removed) dataRemoved.fire(event);
+				updateData(event);
 			}
 		});
 		DataOrganizer.database().dataRemoved().addListener(new Listener<Data>() {
@@ -153,6 +140,33 @@ public class DataSearch {
 				if (removed) dataRemoved.fire(event);
 			}
 		});
+		DataOrganizer.labels().labelAssigned().addListener(new Listener<Pair<Label,Data>>() {
+			public void fire(Pair<Label,Data> event) {
+				updateData(event.getValue2());
+			}
+		});
+		DataOrganizer.labels().labelUnassigned().addListener(new Listener<Pair<Label,Data>>() {
+			public void fire(Pair<Label,Data> event) {
+				updateData(event.getValue2());
+			}
+		});
+	}
+	private void updateData(Data data) {
+		if (result == null) return;
+		boolean match = isMatching(data);
+		boolean added = false;
+		boolean removed = false;
+		synchronized (DataSearch.this) {
+			if (match) {
+				if (!result.contains(data)) {
+					result.add(data);
+					added = true;
+				}
+			} else if (result.remove(data))
+				removed = true;
+		}
+		if (added) dataAdded.fire(data);
+		else if (removed) dataRemoved.fire(data);
 	}
 	
 	public Parameters getParameters() { return parameters; }
@@ -170,6 +184,13 @@ public class DataSearch {
 		Collection<Data> result = getResult();
 		for (Data data : result)
 			if (label.hasData(data))
+				return true;
+		return false;
+	}
+	public boolean containsContentType(ContentType type) {
+		Collection<Data> result = getResult();
+		for (Data data : result)
+			if (data.getContentType() == type)
 				return true;
 		return false;
 	}
@@ -205,6 +226,7 @@ public class DataSearch {
 			if (labels.isEmpty()) {
 				if (!parameters.notLabeled) return false;
 			} else {
+				if (parameters.labels.isEmpty() && parameters.notLabeled) return false;
 				if (!labels.containsAll(parameters.labels)) return false;
 			}
 		}

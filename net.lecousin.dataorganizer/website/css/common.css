@@ -1,0 +1,15 @@
+body {
+	background-color: #D0D0FF;
+	font-family: Tahoma,Verdana;
+	font-size: 10pt;
+	margin: 3pt 0pt 0pt 3pt;
+}
+
+.cadre {
+  background-color: #FFFFFF;
+  border-color: #000000;
+  border-style: solid;
+  border-width: 1;
+  padding: 3pt 3pt 3pt 3pt;
+  margin: 0pt 0pt 0pt 0pt;
+}

@@ -18,7 +18,31 @@ public class ContentTypesPanel extends Composite {
 		RowLayout layout = new RowLayout(SWT.HORIZONTAL);
 		layout.wrap = true;
 		setLayout(layout);
+		refresh();
+	}
+	
+//	private List<Button> buttons = new LinkedList<Button>();
+	
+	private Event<String> typeAdded = new Event<String>();
+	private Event<String> typeRemoved = new Event<String>();
+	
+	public Event<String> typeAdded() { return typeAdded; }
+	public Event<String> typeRemoved() { return typeRemoved; }
+	
+	public void refresh() {
+//		List<ContentType> done = new LinkedList<ContentType>();
+//		for (Iterator<Button> it = buttons.iterator(); it.hasNext(); ) {
+//			Button button = it.next();
+//			ContentType type = ContentType.getContentType((String)button.getData());
+//			done.add(type);
+//			if (!DataOrganizer.search().containsContentType(type)) {
+//				button.dispose();
+//				it.remove();
+//			}
+//		}
 		for (ContentType type : ContentType.getAvailableTypes()) {
+//			if (done.contains(type)) continue;
+//			if (!DataOrganizer.search().containsContentType(type)) continue;
 			Button button = new Button(this, SWT.CHECK);
 			button.setText(type.getName());
 			button.setData(type.getID());
@@ -35,10 +59,4 @@ public class ContentTypesPanel extends Composite {
 			});
 		}
 	}
-	
-	private Event<String> typeAdded = new Event<String>();
-	private Event<String> typeRemoved = new Event<String>();
-	
-	public Event<String> typeAdded() { return typeAdded; }
-	public Event<String> typeRemoved() { return typeRemoved; }
 }

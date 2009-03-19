@@ -40,8 +40,13 @@ import org.w3c.dom.Element;
 public class Updater {
 
 	private static final String update_host = "dataorganizer.webhop.net";
-	private static final String update_path = "/download/update-software/update.xml";
-	private static final String update_tracker_path = "/download/update-software/update-tracker";
+	private static final String update_path = "/update/update.xml";
+	
+	private static final String update_tracker_host = "am1.activemeter.com";
+	private static final String update_tracker_path = "/webtracker/track.html?method=track&pid=56538&java=0";
+	private static final String install_tracker_host = "am1.activemeter.com";
+	private static final String install_tracker_path = "/webtracker/track.html?method=track&pid=56539&java=0";
+	            
 	
 	public static class UpdateException extends Exception {
 		private static final long serialVersionUID = -3371309807726490506L;
@@ -58,12 +63,24 @@ public class Updater {
 		return true;
 	}
 	
+	public static boolean signalInstallation() {
+		if (isMySelf()) return true;
+		HttpClient client = new HttpClient(SocketFactory.getDefault());
+		HttpRequest req = new HttpRequest(install_tracker_host, install_tracker_path);
+		try { client.send(req, true, null, 0); return true; }
+		catch (IOException e) {
+			if (Log.warning(Updater.class))
+				Log.warning(Updater.class, "Unable to track installation", e);
+			return false;
+		}
+	}
+	
 	public static Pair<Version,String> getLatestVersionInfo() throws UpdateException {
 		HttpClient client = new HttpClient(SocketFactory.getDefault());
 		HttpRequest req;
 		HttpResponse resp;
 		if (!isMySelf()) {
-			req = new HttpRequest(update_host, update_tracker_path);
+			req = new HttpRequest(update_tracker_host, update_tracker_path);
 			try { resp = client.send(req, true, null, 0); }
 			catch (IOException e) {
 				if (Log.warning(Updater.class))

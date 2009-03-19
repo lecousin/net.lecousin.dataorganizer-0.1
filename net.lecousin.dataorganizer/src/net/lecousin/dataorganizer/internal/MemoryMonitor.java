@@ -5,10 +5,12 @@ import net.lecousin.framework.strings.StringUtil;
 
 public class MemoryMonitor implements Runnable {
 
+	private static final int GCTimer = 15*60*1000;
+	
 	private long lastGC = 0;
 	
 	public void run() {
-		if (System.currentTimeMillis() - lastGC > 5*60*1000) {
+		if (System.currentTimeMillis() - lastGC > GCTimer) {
 			Log.info(this, "Memory monitor: Garbage collection");
 			Runtime.getRuntime().gc();
 			lastGC = System.currentTimeMillis();

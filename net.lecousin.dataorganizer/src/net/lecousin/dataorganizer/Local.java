@@ -48,6 +48,7 @@ public enum Local {
 	times("times", "fois"),
 	Views("Views", "Vues"),
 	
+	About_DataOrganizer("About DataOrganizer", "A propos de DataOrganizer"),
 	Add_a_data_of_type("Add a data of type", "Ajouter une donnée de type"),
 	Add_data("Add data", "Ajouter une donnée"),
 	Add_data_from_a_folder("Add data from a folder", "Ajouter des données depuis un dossier"),
@@ -184,8 +185,9 @@ public enum Local {
 	You_must_provide_a_name("You must provide a name", "Vous devez indiquer un nom"),
 	
 	
-	MENU_File("&File", "&Fichier"),
+	MENU_Database("&Data Base", "&Base de données"),
 	MENU_Help("&Help", "&Aide"),
+	MENU_ITEM_About_DataOrganizer("&About DataOrganizer...", "&A propos de DataOrganizer..."),
 	
 	NoPluginToRetrieveInforForType("There is no plug-in to retrieve information for content type", "Il n'y a pas de plug-in pour récupérer des information du type"),
 	ERROR_Invalid_DB_Version(

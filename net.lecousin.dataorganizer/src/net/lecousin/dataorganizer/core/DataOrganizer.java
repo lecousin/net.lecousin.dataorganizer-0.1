@@ -22,7 +22,7 @@ public class DataOrganizer {
 	private DataOrganizer(WorkProgress progress, int amount) throws InitializationException {
 		instance = this;
 		Application.setName("DataOrganizer");
-		Application.getMonitor().newWork(new MemoryMonitor(), (long)30000);
+		Application.getMonitor().newWork(new MemoryMonitor(), (long)5*60*1000);
 		new AutoSaver();
 		
 		int stepLabels = amount * 10 / 100;

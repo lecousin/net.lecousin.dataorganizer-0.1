@@ -1,0 +1,4 @@
+<dataorganizer version="0.1.1">
+	<updater_file>/download/update-software/updater.jar</updater_file>
+	<application_file>/download/update-software/test.zip</application_file>
+</dataorganizer>

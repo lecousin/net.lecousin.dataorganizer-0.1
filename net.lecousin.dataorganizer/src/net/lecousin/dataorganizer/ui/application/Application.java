@@ -1,6 +1,9 @@
 package net.lecousin.dataorganizer.ui.application;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URISyntaxException;
 
 import net.lecousin.dataorganizer.core.DataOrganizer;
@@ -8,15 +11,18 @@ import net.lecousin.dataorganizer.core.DataOrganizerConfig;
 import net.lecousin.dataorganizer.ui.application.update.Updater;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.io.FileSystemUtil;
+import net.lecousin.framework.io.TextLineInputStream;
 import net.lecousin.framework.log.DualLog;
 import net.lecousin.framework.log.Log;
 import net.lecousin.framework.log.LogConsole;
 import net.lecousin.framework.log.LogFile;
+import net.lecousin.framework.ui.eclipse.dialog.ErrorDlg;
 import net.lecousin.framework.version.Version;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
+import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -32,22 +38,36 @@ public class Application implements IApplication {
 	 * @see org.eclipse.equinox.app.IApplication#start(org.eclipse.equinox.app.IApplicationContext)
 	 */
 	public Object start(IApplicationContext context) {
+		Display display = null;
+		try {
 		String[] args = Platform.getApplicationArgs();
 		String path = null;
-		for (int i = 0; i < args.length-1; ++i)
-			if (args[i].equals("-deployPath")) {
+		boolean firstlaunch = false;
+		boolean debug = false;
+		for (int i = 0; i < args.length; ++i)
+			if (args[i].equals("-deployPath") && i < args.length-1)
 				path = args[i+1];
-				break;
-			}
+			else if (args[i].equals("-firstLaunch"))
+				firstlaunch = true;
+			else if (args[i].equals("-debug"))
+				debug = true;
 		try {
 			net.lecousin.framework.application.Application.deployPath = path != null ? new File(path) : new File(Platform.getInstallLocation().getURL().toURI());
 		} catch (URISyntaxException e) {
 			// should never happen
 		}
 		
+		display = PlatformUI.createDisplay();
+
+		Location instance = Platform.getInstanceLocation();
+		if (!instance.isSet()) {
+			if (!chooseWorkspace(instance, display))
+				return IApplication.EXIT_OK;
+		}
+		
 		try {
-			File workspace = new File(Platform.getInstanceLocation().getURL().toURI());
-			Log.setDefaultLog(new DualLog(new LogConsole(Log.Severity.DEBUG), new LogFile(Log.Severity.DEBUG, new File(workspace, "dataorganizer.log").getAbsolutePath())));
+			File workspace = new File(instance.getURL().toURI());
+			Log.setDefaultLog(new DualLog(new LogConsole(debug ? Log.Severity.DEBUG : Log.Severity.WARNING), new LogFile(debug ? Log.Severity.DEBUG : Log.Severity.WARNING, new File(workspace, "dataorganizer.log").getAbsolutePath())));
 			File file = new File(workspace, ".metadata");
 			file = new File(file, ".plugins");
 			file = new File(file, "org.eclipse.core.resources");
@@ -57,7 +77,7 @@ public class Application implements IApplication {
 				FileSystemUtil.deleteDirectory(file);
 			}
 		} catch (Throwable t) {
-			Log.setDefaultLog(new LogConsole(Log.Severity.DEBUG));
+			Log.setDefaultLog(new LogConsole(debug ? Log.Severity.DEBUG : Log.Severity.WARNING));
 			Log.error(this, "Unable to initialize file log", t);
 		}
 
@@ -66,19 +86,21 @@ public class Application implements IApplication {
 		Log.debug(this, "Install: " + Platform.getInstallLocation().getURL().toString());
 		Log.debug(this, "Instance: " + Platform.getInstanceLocation().getURL().toString());
 		
-		Display display = PlatformUI.createDisplay();
-
+		if (firstlaunch)
+			handleFirstLaunch();
+		
 		if (checkUpdate(display))
 			return IApplication.EXIT_OK;
 
-		try {
-			int returnCode = PlatformUI.createAndRunWorkbench(display, new ApplicationWorkbenchAdvisor());
-			if (returnCode == PlatformUI.RETURN_RESTART) {
-				return IApplication.EXIT_RESTART;
-			}
-			return IApplication.EXIT_OK;
+		int returnCode = PlatformUI.createAndRunWorkbench(display, new ApplicationWorkbenchAdvisor());
+		if (returnCode == PlatformUI.RETURN_RESTART) {
+			return IApplication.EXIT_RESTART;
+		}
+		return IApplication.EXIT_OK;
+
 		} finally {
-			display.dispose();
+			if (display != null)
+				display.dispose();
 		}
 	}
 
@@ -121,5 +143,43 @@ public class Application implements IApplication {
 			if (shell != null)
 				shell.close();
 		}
+	}
+	
+	private void handleFirstLaunch() {
+		if (Updater.signalInstallation()) {
+			try {
+				File file = new File(net.lecousin.framework.application.Application.deployPath, "DataOrganizer.ini");
+				TextLineInputStream in = new TextLineInputStream(new FileInputStream(file));
+				StringBuilder str = new StringBuilder();
+				while (!in.isEndOfStream()) {
+					String line = in.readLine();
+					if (!line.equals("-firstLaunch"))
+						str.append(line).append("\r\n");
+				}
+				in.close();
+				FileOutputStream out = new FileOutputStream(file);
+				out.write(str.toString().getBytes());
+				out.flush();
+				out.close();
+			} catch (IOException e) {
+				if (Log.error(this))
+					Log.error(this, "Unable to remove -firstLaunch argument from DataOrganizer.ini");
+			}
+		}
+	}
+	
+	private boolean chooseWorkspace(Location loc, Display display) {
+		ChooseWorkspaceDialog dlg = new ChooseWorkspaceDialog(display);
+		if (!dlg.open()) return false;
+		try { loc.set(new File(dlg.getSelectedDir()).toURL(), true); }
+		catch (Throwable t) {
+			ErrorDlg.error("DataOrganizer", "Unable to use the specified database.", t);
+			return false;
+		}
+		switch (dlg.getSelectedLang()) {
+		case 0: net.lecousin.framework.application.Application.language = net.lecousin.framework.application.Application.Language.ENGLISH; break;
+		case 1: net.lecousin.framework.application.Application.language = net.lecousin.framework.application.Application.Language.FRENCH; break;
+		}
+		return true;
 	}
 }
