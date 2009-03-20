@@ -22,11 +22,12 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.PlatformUI;
 
 public class AboutDialog extends FlatDialog {
 
 	public AboutDialog() {
-		super(null, Local.About_DataOrganizer.toString(), false, false);
+		super(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), Local.About_DataOrganizer.toString(), false, false);
 		
 		create(null, 0);
 		openProgressive(null, OrientationY.BOTTOM);
@@ -44,7 +45,7 @@ public class AboutDialog extends FlatDialog {
 		GridData gd = UIUtil.gridDataHorizFill(label);
 		gd.horizontalIndent = 5;
 		LCMLText text = new LCMLText(container, false, false);
-		text.setText("DataOrganizer is under <a href=\"gpl\">GPL License</a><br/>It contains a copy of VLC also under GPL License<br/>It is based on the Eclipse product under <a href=\"epl\">EPL License</a>");
+		text.setText(Local.MESSAGE_About_Licenses.toString());
 		text.addLinkListener("gpl", new Runnable() {
 			public void run() {
 				FlatDialog dlg = new FlatDialog(getShell(), "License", true, true) {
@@ -76,6 +77,14 @@ public class AboutDialog extends FlatDialog {
 				}
 			}
 		});
+		text.addLinkListener("apache", new Runnable() {
+			public void run() {
+				BrowserWindow browser = new BrowserWindow("DataOrganizer", null, true, true);
+				browser.open();
+				browser.setLocation("http://www.apache.org/licenses/");
+			}
+		});
+		
 		gd = UIUtil.gridDataHoriz(1, true);
 		gd.widthHint = img.getImageData().width - 10;
 		gd.horizontalIndent = 5;

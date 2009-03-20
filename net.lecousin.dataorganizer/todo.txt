@@ -1,34 +1,29 @@
 Avant prochaine release:
 
 DataOrganizer
- + Refresh:
-   + Refresh general avec plein d'options
-   + Final page pour Add Data => refresh options...
- + Import all/Refresh all sur DataLink list (utiliser aussi le ListDialog qui gere les pages, filtres...)
- + Clean not DEBUG:
-   + Log: faire une tournante de fichiers (par taille)
- + PreviewTaker:
-   + mettre un texte explicatif
-   + assurer que la fenetre est on top: faire une pause si nécessaire
  + Bug LCTable: ne plus utiliser ScrolledComposite a cause de MouseWhell, mais mettre la horizontal scroll bar manuellement
- + search:
-   + pouvoir inverser
-   + note 0-20 = reellement ca, vide = non filtre
 
 Audio
  + MP3 single
- + UI
- + Internet
+ + UI: genres
+ + Internet: CDDB + FreeDB.org + ???
  + tout les TODO, icones...
+ + essayer avec tous mes trucs dans zik
 
 Video
+ + DVD, Video CD
  + Icones sur les Action sur Video
  + Video search: duration: accept toutes les durees=> faire la recherche sinon c lourd il faut trouver la tranche minimum
+ + essayer avec tous mes CD/DVD de films
 
 ---------------------------------------------------------------------
 Moins urgent:
 
 DataOrganizer
+ + Clean not DEBUG:
+   + Log: faire une tournante de fichiers (par taille)
+ + PreviewTaker:
+   + assurer que la fenetre est on top: faire une pause si nécessaire
  + Table: select columns... by type (video duration)...
  + Mosaic: ameliorer: sort + key down/up + ...
  + scroll overview: plus rapide
@@ -43,6 +38,7 @@ DataOrganizer
  + Gestion des prets...
  + Add data from internet => use InfoRetriever.search...
  + Clean names
+ + Import all/Refresh all sur DataLink list (utiliser aussi le ListDialog qui gere les pages, filtres... ?? ou une table ??)
  
 Install/Update
  + Updater
@@ -57,6 +53,10 @@ Media Player
  
 Audio
  + PLS
+ + Lecteur: utiliser autre que VLC?? surtout pour CDA.. ca marche pas
+   + javax.sound.{sampled,midi}
+   + JMF
+ + essayer avec tous mes CD audios
  
 Picture
  + tout

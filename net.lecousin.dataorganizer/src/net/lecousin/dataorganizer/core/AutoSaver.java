@@ -1,9 +1,17 @@
 package net.lecousin.dataorganizer.core;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
+import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.RealData;
 import net.lecousin.dataorganizer.core.database.content.DataContentType;
 import net.lecousin.framework.application.Application;
+import net.lecousin.framework.collections.CollectionUtil;
 import net.lecousin.framework.collections.SelfMapUniqueLong;
+import net.lecousin.framework.log.Log;
 
 public class AutoSaver implements Runnable {
 
@@ -16,7 +24,7 @@ public class AutoSaver implements Runnable {
 	
 	private SelfMapUniqueLong<RealData> dataToSave = new SelfMapUniqueLong<RealData>();
 	private SelfMapUniqueLong<DataContentType> contentToSave = new SelfMapUniqueLong<DataContentType>();
-	private SelfMapUniqueLong<RealData> dataRemoved = new SelfMapUniqueLong<RealData>();
+	private List<RealData> dataRemoved = new LinkedList<RealData>();
 	
 	public static void modified(RealData data) {
 		synchronized (instance.dataToSave) {
@@ -39,8 +47,7 @@ public class AutoSaver implements Runnable {
 	}
 	public static void removed(RealData data) {
 		synchronized (instance.dataRemoved) {
-			if (!instance.dataRemoved.containsKey(data.getHashObject()))
-				instance.dataRemoved.add(data);
+			instance.dataRemoved.add(data);
 		}
 		synchronized (instance.dataToSave) {
 			instance.dataToSave.remove(data);
@@ -49,10 +56,38 @@ public class AutoSaver implements Runnable {
 			instance.contentToSave.remove(data.getID());
 		}
 	}
+	public static void replaced(DataContentType content) {
+		synchronized (instance.contentToSave) {
+			instance.contentToSave.remove(content);
+		}
+	}
+	
+	public static DataContentType getContent(RealData data) {
+		synchronized (instance.contentToSave) {
+			for (DataContentType content : instance.contentToSave)
+				if (content.getData() == data)
+					return content;
+		}
+		return null;
+	}
 	
 	public void run() {
+		List<Data> removed;
+		synchronized (dataRemoved) {
+			removed = new ArrayList<Data>(dataRemoved);
+		}
 		saveData();
 		saveContent();
+		synchronized (dataRemoved) {
+			for (Data d : removed)
+				for (Iterator<RealData> it = dataRemoved.iterator(); it.hasNext(); ) {
+					RealData rd = it.next();
+					if (rd == d) {
+						it.remove();
+						break;
+					}
+				}
+		}
 	}
 	
 	public static void close() {
@@ -67,9 +102,11 @@ public class AutoSaver implements Runnable {
 			}
 			if (data == null) break;
 			synchronized (dataRemoved) {
-				if (dataRemoved.containsKey(data.getID()))
+				if (CollectionUtil.containsIdentity(dataRemoved, data))
 					continue;
 			}
+			if (Log.debug(this))
+				Log.debug(this, "AutoSaver: save data: " + data.getName());
 			data.save();
 		} while (data != null);
 	}
@@ -82,9 +119,11 @@ public class AutoSaver implements Runnable {
 			}
 			if (content == null) break;
 			synchronized (dataRemoved) {
-				if (dataRemoved.containsKey(content.getHashObject()))
+				if (CollectionUtil.containsIdentity(dataRemoved, content.getData()))
 					continue;
 			}
+			if (Log.debug(this))
+				Log.debug(this, "AutoSaver: save data content: " + content.getData().getName());
 			content.save();
 		} while (content != null);
 	}

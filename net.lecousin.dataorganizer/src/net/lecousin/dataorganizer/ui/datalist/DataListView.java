@@ -133,7 +133,9 @@ public class DataListView extends ViewPart {
 					if (data.size() > 1) return;
 					List<DataSource> sources = data.get(0).getSources();
 					if (sources.size() != 1) return;
-					URI uri = sources.get(0).ensurePresenceAndGetURI();
+					DataSource source = sources.get(0);
+					if (source == null) return;
+					URI uri = source.ensurePresenceAndGetURI();
 					try { event.data = uri.toURL(); }
 					catch (MalformedURLException e) {}
 					return;
@@ -142,8 +144,10 @@ public class DataListView extends ViewPart {
 					List<String> list = new LinkedList<String>();
 					for (Data d : data) {
 						for (DataSource s : d.getSources())
-							list.add(new File(s.ensurePresenceAndGetURI()).getAbsolutePath());
+							if (s != null)
+								list.add(new File(s.ensurePresenceAndGetURI()).getAbsolutePath());
 					}
+					if (list.isEmpty()) return;
 					event.data = list.toArray(new String[list.size()]);
 					return;
 				}

@@ -28,6 +28,7 @@ import net.lecousin.framework.media.MediaPlayer;
 import net.lecousin.framework.media.util.SnapshotTaker;
 import net.lecousin.framework.media.util.SnapshotTaker.LinkedChecker;
 import net.lecousin.framework.media.util.SnapshotTaker.SameColorChecker;
+import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.xml.XmlWriter;
 
 import org.eclipse.core.resources.IFile;
@@ -186,7 +187,7 @@ public class VideoDataType extends DataContentType {
 				Log.error(this, "Error while saving preview image", e);
 		}
 	}
-	private void takePreviewImages(Composite visual, MediaPlayer player) {
+	private void takePreviewImages(Composite visual, Media media, MediaPlayer player, WorkProgress progress, int work) {
 		List<Double> times = new LinkedList<Double>();
 		times.add((double)0);
 		int nb = MAX_PREVIEWS;
@@ -198,32 +199,44 @@ public class VideoDataType extends DataContentType {
 		for (int i = 1; i < nb; ++i)
 			times.add(step*i);
 
+		nb = times.size();
 		int index = 0;
 		for (double time : times) {
 			Image img = 
 				SnapshotTaker.take(player, visual, time,  
 						new LinkedChecker(new SameColorChecker(0,0,0,0x30,0.95), new SameColorChecker(255,255,255,0x30,0.95))
 				);
+			if (duration < 0)
+				duration = media.getDuration();
 			if (img != null) {
 				savePreviewImage(img, index++);
 			}
+			int stepWork = work/nb--;
+			work -= stepWork;
+			progress.progress(stepWork);
 		}
+		if (work > 0)
+			progress.progress(work);
 	}
 	
 	public long getDuration() { return duration; }
 	@Override
 	public boolean isContentAvailable() { return loaded; }
 	
-	void loadContent(Composite visual, MediaPlayer player) {
+	void loadContent(Composite visual, MediaPlayer player, WorkProgress progress, int work) {
 		List<DataSource> sources = getData().getSources();
-		if (sources.size() == 0) return;
+		if (sources.size() == 0) { progress.progress(work); return; }
 		DataSource src = sources.get(0);
+		if (src == null) { progress.progress(work); return; }
 		URI uri = src.ensurePresenceAndGetURI();
-		if (uri == null) return;
+		if (uri == null) { progress.progress(work); return; }
 		Media media = player.addMedia(uri);
 		player.start();
-		duration = media.getDuration();
-		takePreviewImages(visual, player);
+		if (duration < 0)
+			duration = media.getDuration();
+		takePreviewImages(visual, media, player, progress, work);
+		if (duration < 0)
+			duration = media.getDuration();
 		player.stop();
 		player.removeMedia(media);
 	}

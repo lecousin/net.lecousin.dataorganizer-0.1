@@ -1,21 +1,16 @@
 package net.lecousin.dataorganizer.ui.search;
 
-import java.util.LinkedList;
+import java.util.List;
 
 import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.core.DataOrganizer;
-import net.lecousin.dataorganizer.core.DataLabels.Label;
 import net.lecousin.dataorganizer.core.database.content.ContentType;
-import net.lecousin.dataorganizer.ui.control.LabelTree;
-import net.lecousin.framework.Pair;
+import net.lecousin.dataorganizer.core.search.DataSearch.Parameter;
 import net.lecousin.framework.event.Event.Listener;
 import net.lecousin.framework.ui.eclipse.SharedImages;
+import net.lecousin.framework.ui.eclipse.event.ControlListenerWithData;
 
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.jface.viewers.ITreeViewerListener;
-import org.eclipse.jface.viewers.TreeExpansionEvent;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
@@ -30,10 +25,6 @@ import org.eclipse.ui.part.ViewPart;
 public class SearchView extends ViewPart {
 	public static final String ID = "net.lecousin.dataorganizer.searchView";
 
-	private MainCriteriaPanel mainCriteriaPanel;
-	private ContentTypesPanel contentTypesPanel;
-	private ExpandItem labelItem, contentTypesItem;
-	private LabelTree labelTree;
 	private ExpandBar panel;
 	
 	@Override
@@ -48,71 +39,29 @@ public class SearchView extends ViewPart {
 		panel = new ExpandBar(parent, SWT.V_SCROLL);
 		ExpandItem item;
 
+		Control c = new SearchParametersPanel(panel, DataOrganizer.search().getMainParameters());
 		item = new ExpandItem(panel, SWT.NONE);
 		item.setText(Local.Main_criteria.toString());
-		item.setControl(mainCriteriaPanel = new MainCriteriaPanel(panel));
-		item.setHeight(mainCriteriaPanel.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
+		item.setControl(c);
 		item.setExpanded(true);
+		register(c, item);
 
+		ContentTypesPanel contentTypesPanel = new ContentTypesPanel(panel);
 		item = new ExpandItem(panel, SWT.NONE);
 		item.setText(Local.Content_type.toString());
-		item.setControl(contentTypesPanel = new ContentTypesPanel(panel));
+		item.setControl(contentTypesPanel);
 		item.setHeight(contentTypesPanel.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
 		item.setExpanded(true);
 
-		labelItem = new ExpandItem(panel, SWT.NONE);
-		labelItem.setText(Local.Labels.toString());
-		labelItem.setControl((labelTree = new LabelTree(panel, true, SWT.NO_SCROLL, new LinkedList<Label>())).getControl());
-		labelItem.setHeight(labelTree.getTree().computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
-		labelItem.setExpanded(true);
-		labelTree.addTreeListener(new ITreeViewerListener() {
-			public void treeCollapsed(TreeExpansionEvent event) {
-				refreshLabelHeight();
-			}
-			public void treeExpanded(TreeExpansionEvent event) {
-				refreshLabelHeight();
-			}
-		});
-		labelTree.labelSelectionChanged.addListener(new Listener<Pair<Label,Boolean>>() {
-			public void fire(Pair<Label,Boolean> event) {
-				DataOrganizer.search().getParameters().setLabel(event.getValue1(), event.getValue2());
-			}
-		});
-		labelTree.notLabeledSelectionChanged.addListener(new Listener<Boolean>() {
-			public void fire(Boolean event) {
-				DataOrganizer.search().getParameters().setNotLabeled(event);
-			}
-		});
-		labelTree.addFilter(new ViewerFilter() {
-			@Override
-			public boolean select(Viewer viewer, Object parentElement, Object element) {
-				if (!(element instanceof Label)) return true;
-				Label label = (Label)element;
-				if (label.getParent() == null) return true;
-				return DataOrganizer.search().containsLabel(label);
-			}
-		});
-		DataOrganizer.labels().labelAssigned().addFireListener(new Runnable() {
-			public void run() {
-				labelTree.refresh();
-				refreshLabelHeight();
-			}
-		});
-		DataOrganizer.labels().labelUnassigned().addFireListener(new Runnable() {
-			public void run() {
-				labelTree.refresh();
-				refreshLabelHeight();
-			}
-		});
-		DataOrganizer.search().searchChanged().addFireListener(new Runnable() {
-			public void run() {
-				labelTree.refresh();
-				refreshLabelHeight();
-			}
-		});
-		
-		contentTypesPanel.typeAdded().addListener(new ContentTypeAdded());
+		item = new ExpandItem(panel, SWT.NONE);
+		item.setText(Local.Labels.toString());
+		new SearchLabelsPanel(item);
+
+		ContentTypeAdded typeAdded = new ContentTypeAdded();
+		contentTypesPanel.typeAdded().addListener(typeAdded);
 		contentTypesPanel.typeRemoved().addListener(new ContentTypeRemoved());
+		for (String type : DataOrganizer.search().getContentTypes().getContentTypes())
+			typeAdded.fire(type);
 		
 		panel.addControlListener(new ControlListener() {
 			public void controlMoved(ControlEvent e) {
@@ -130,14 +79,6 @@ public class SearchView extends ViewPart {
 		});
 	}
 	
-	private void refreshLabelHeight() {
-		labelTree.getTree().getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				contentTypesItem.setHeight(labelTree.getTree().computeSize(SWT.DEFAULT, SWT.DEFAULT, true).y);
-			}
-		});
-	}
-	
 	@Override
 	public void setFocus() {
 	}
@@ -145,14 +86,15 @@ public class SearchView extends ViewPart {
 	private class ContentTypeAdded implements Listener<String> {
 		public void fire(String event) {
 			ContentType type = ContentType.getContentType(event);
-			Control c = type.createSearchPanel(panel);
-			if (c == null) return;
+			List<Parameter> params = DataOrganizer.search().getContentTypeParameters(type.getID());
+			if (params == null || params.isEmpty()) return;
+			Control c = new SearchParametersPanel(panel, params);
 			ExpandItem item = new ExpandItem(panel, SWT.NONE);
 			item.setText(type.getName());
 			item.setControl(c);
-			item.setHeight(c.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
 			item.setExpanded(true);
 			item.setData(type);
+			register(c, item);
 		}
 	}
 	private class ContentTypeRemoved implements Listener<String> {
@@ -166,5 +108,19 @@ public class SearchView extends ViewPart {
 				}
 			}
 		}
+	}
+	
+	private void register(Control c, ExpandItem item) {
+		item.setHeight(c.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
+		c.addControlListener(new ControlListenerWithData<ExpandItem>(item) {
+			public void controlMoved(ControlEvent e) {
+			}
+			public void controlResized(ControlEvent e) {
+				int h1 = ((Control)e.widget).getSize().y;
+				int h2 = data().getHeight();
+				if (h1 != h2)
+					data().setHeight(h1);
+			}
+		});
 	}
 }

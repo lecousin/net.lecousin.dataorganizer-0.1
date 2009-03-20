@@ -33,7 +33,7 @@ public class ActionOpenInSystemApplication implements Action {
 			ErrorDlg.error(Local.Open.toString(), Local.No_source+".");
 			return;
 		}
-		// TODO gestion pour plusieurs fichiers...
+		// TODO gestion pour plusieurs fichiers... gestion du fait qu'une source peut etre null
 		try { 
 			URI uri = data.getSources().get(0).ensurePresenceAndGetURI();
 			if (uri == null) {

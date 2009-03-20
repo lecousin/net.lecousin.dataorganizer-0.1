@@ -16,7 +16,9 @@ import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.VirtualData;
 import net.lecousin.dataorganizer.core.database.content.ContentType;
 import net.lecousin.dataorganizer.core.database.refresh.RefreshOptions;
+import net.lecousin.dataorganizer.core.database.refresh.Refresher;
 import net.lecousin.dataorganizer.internal.EclipsePlugin;
+import net.lecousin.dataorganizer.ui.dialog.RefreshDialog;
 import net.lecousin.dataorganizer.ui.wizard.adddata.AddData_Page.Result;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.io.FileSystemUtil;
@@ -143,7 +145,7 @@ public class AddDataWizard extends Wizard {
 
     		if (monitor.isCanceled()) {
     			if (!added.isEmpty()) {
-    				if (MessageDialog.openQuestion(null, Local.Operation_cancelled.toString(), "" + added.size() + " "+Local.data_have_been_added_before_cancel)) {
+    				if (MessageDialog.openQuestion(shell, Local.Operation_cancelled.toString(), "" + added.size() + " "+Local.data_have_been_added_before_cancel)) {
     					monitor.beginTask("Removing data from database", added.size());
     					for (Data data : added) {
     						monitor.subTask(data.getName());
@@ -158,7 +160,10 @@ public class AddDataWizard extends Wizard {
     		RefreshOptions options = new RefreshOptions();
     		options.cleanName = true;
     		options.getDataContentIfNotYetDone = true;
-    		DataOrganizer.database().refresh(added, options);
+    		options.retrieveInfoFromInternet = true;
+    		RefreshDialog rd = new RefreshDialog(shell, options);
+    		if (rd.open() != null)
+    			Refresher.refresh(shell, DataOrganizer.database(), added, options);
     		StringBuilder message = new StringBuilder();
     		message.append(added.size()).append(' ').append(Local.data_successfully_added).append('.');
     		Set<String> extensions = new HashSet<String>();

@@ -57,9 +57,18 @@ public abstract class Data implements SelfMap.Entry<Long> {
 	public long getID() { return id; }
 
 	public String getName() { return name; }
+	/** may contain <code>null</code> elements */
 	public List<DataSource> getSources() { return sources; }
 	public abstract DataContentType getContent();
 	public ContentType getContentType() { return contentType; }
+	
+	public void moveDataSource(int srcIndex, int dstIndex) {
+		if (srcIndex < 0) return;
+		if (srcIndex >= sources.size()) return;
+		DataSource source = sources.remove(srcIndex);
+		sources.add(dstIndex, source);
+		signalModification();
+	}
 	
 	public Event<Data> modified() { return modified; }
 	public Event<DataContentType> contentModified() { return contentModified; }
@@ -116,9 +125,12 @@ public abstract class Data implements SelfMap.Entry<Long> {
 		List<DataSource> listCurrent = new ArrayList<DataSource>(sources);
 		List<DataSource> listNew = new ArrayList<DataSource>(data.getSources());
 		boolean changeLocation = false;
-		for (DataSource n : data.getSources())
+		for (DataSource n : data.getSources()) {
+			if (n == null) { listNew.remove(null); continue; }
 			for (DataSource c : sources)
-				if (c.isExactlyTheSame(n)) {
+				if (c == null) {
+					listCurrent.remove(null);
+				} else if (c.isExactlyTheSame(n)) {
 					listCurrent.remove(c);
 					listNew.remove(n);
 					break;
@@ -128,6 +140,7 @@ public abstract class Data implements SelfMap.Entry<Long> {
 					changeLocation = true;
 					break;
 				}
+		}
 		if (listCurrent.isEmpty() && listNew.isEmpty()) 
 			return changeLocation ? DuplicateAnalysis.SAME_IN_DIFFERENT_LOCATION : DuplicateAnalysis.EXACTLY_THE_SAME;
 		return getContent().checkForDuplicateOnContent(data);

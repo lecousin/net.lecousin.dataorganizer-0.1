@@ -91,12 +91,21 @@ public class AudioInfo extends Info {
 		List<Triple<String,String,String>> images = new LinkedList<Triple<String,String,String>>();
 		
 		public String getTitle() { return title; }
-		public void setTitle(String name) { if (name.equals(title)) return; title = name; signalModification(); }
+		public void setTitle(String name) { if (name != null && name.length()==0) name = null; if ((name == null && title == null) || (name != null && name.equals(title))) return; title = name; signalModification(); }
 		public long getLength() { return length; }
 		public void setLength(long l) { if (l == length) return; length = l; signalModification(); }
 		public List<Triple<String,String,String>> getImages() { return new ArrayList<Triple<String,String,String>>(images); }
 		public void addImage(String source, String description, String path) {
 			images.add(new Triple<String,String,String>(source, description, path));
+			signalModification();
+		}
+		
+		public void move(int index) {
+			if (tracks.indexOf(this) == index) return;
+			if (index < 0) return;
+			if (index >= tracks.size()) return;
+			tracks.remove(this);
+			tracks.add(index, this);
 			signalModification();
 		}
 	}
@@ -121,6 +130,8 @@ public class AudioInfo extends Info {
 	public Track newTrack(long length) { return newTrack(null, length); }
 	public Track newTrack() { return newTrack(null, -1); }
 	public List<Track> getTracks() { return new ArrayList<Track>(tracks); }
+	public Track getTrack(int index) { return tracks.get(index); }
+	public int indexOf(Track track) { return tracks.indexOf(track); }
 	
 	public List<String> getGenres() { return new ArrayList<String>(genres); }
 	public void addGenre(String genre) { if (genres.contains(genre)) return; genres.add(genre); signalModification(); }

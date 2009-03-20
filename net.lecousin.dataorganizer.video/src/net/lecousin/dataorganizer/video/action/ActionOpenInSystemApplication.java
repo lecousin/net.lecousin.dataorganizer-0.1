@@ -3,6 +3,7 @@ package net.lecousin.dataorganizer.video.action;
 import java.net.URI;
 
 import net.lecousin.dataorganizer.core.database.Data;
+import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.dataorganizer.ui.plugin.Action;
 import net.lecousin.dataorganizer.video.Local;
 import net.lecousin.dataorganizer.video.internal.EclipsePlugin;
@@ -34,7 +35,12 @@ public class ActionOpenInSystemApplication implements Action {
 			return;
 		}
 		try { 
-			URI uri = data.getSources().get(0).ensurePresenceAndGetURI();
+			DataSource source = data.getSources().get(0);
+			if (source == null) {
+				ErrorDlg.error(Local.Open.toString(), Local.No_source+".");
+				return;
+			}
+			URI uri = source.ensurePresenceAndGetURI();
 			if (uri == null) {
 				ErrorDlg.error(Local.Open.toString(), Local.Unable_to_locate_file+".");
 				return;

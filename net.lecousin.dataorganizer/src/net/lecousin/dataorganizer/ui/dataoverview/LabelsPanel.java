@@ -101,7 +101,7 @@ public class LabelsPanel extends Composite {
 			return;
 		}
 		addMenu = new FlatPopupMenu(addButton, Local.Select_the_labels.toString(), true, true, false, true);
-		LabelTree tree = new LabelTree(addMenu.getControl(), false, SWT.NONE, DataOrganizer.labels().getLabels(data));
+		LabelTree tree = new LabelTree(addMenu.getControl(), false, SWT.NONE, DataOrganizer.labels().getLabels(data), null);
 		tree.labelSelectionChanged.addListener(new Listener<Pair<Label,Boolean>>() {
 			public void fire(Pair<Label,Boolean> event) {
 				if (event.getValue2())

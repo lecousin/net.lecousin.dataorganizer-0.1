@@ -6,6 +6,7 @@ public enum Local {
 
 	Add("Add", "Ajouter"),
 	Added("Added", "Ajouté"),
+	Always("Always", "Toujours"),
 	analyzed__s("analyzed", "analyzés"),
 	Comment("Comment", "Commentaire"),
 	Contact("Contact", "Contact"),
@@ -81,6 +82,7 @@ public enum Local {
 	Do_you_confirm_this_operation("Do you confirm this operation ?", "Confirmez-vous cette opération ?"),
 	Do_not_do_anything__skip_new_data("Do not do anything (skip the new data and do not store it in the database)", "Ne rien faire (la nouvelle donnée sera ignorée et ne figurera pas dans la base de données)"),
 	Downloading_latest_version("Downloading latest version", "Télechargement de la dernière version"),
+	Drag_data_to_a_label("Drag data to a label to attach this label to the data", "Glissez des données vers une étiquette pour attacher cette étiquette aux données"),
 	Duplicate_data("Duplicate data", "Donnée en double"),
 	Enter_the_name_of_the_label("Enter the name of the label", "Entrez le nom pour l'étiquette"),
 	Enter_the_name_of_the_new_label("Enter the name of the new label", "Entrez le nom pour la nouvelle étiquette"),
@@ -96,6 +98,7 @@ public enum Local {
 	is_exactly_the_same_as_data("is exactly the same as data", "est exactement la même que la donnée"),
 	is_not_in_your_database("is not in your database", "n'est pas dans votre base de données"),
 	Last_open("Last open", "Dernière ouverture"),
+	Load_information_from_the_data_sources("Load information from the data sources (i.e. previews on videos)", "Récupérer des information depuis les sources (par ex. prévisualisation sur les vidéos)"),
 	Loading_application("Loading DataOrganizer application", "Chargement de l'application DataOrganizer"),
 	Loading_data("Loading data", "Chargement des données"),
 	Loading_database("Loading database", "Chargement de la base de données"),
@@ -113,6 +116,7 @@ public enum Local {
 	Not_labeled("Not labeled", "Non étiquetté"),
 	Not_rated("Not rated", "Non noté"),
 	Old_database("Old database", "Ancienne base de données"),
+	Only_if_not_yet_done("Only if not yet done", "Seulement si pas encore fait"),
 	opened_on("opened on", "ouvert le"),
 	Opening_database("Opening database", "Ouverture de la base de données"),
 	Opening_labels_project("Opening labels project", "Chargement du projet contenant les étiquettes"),
@@ -140,6 +144,8 @@ public enum Local {
 	Retrieve_from_all_missing_sources("Retrieve from all missing sources", "Récupérer depuis toutes les sources manquantes"),
 	Retrieve_from_all_sources("Retrieve from all sources", "Récupérer depuis toutes les sources"),
 	Retrieve_information("Retrieve information", "Recupérer des informations"),
+	Retrieve_information_from_Internet("Retrieve information from Internet", "Récupérer les informations depuis Internet"),
+	Reverse_search("Reverse search criterion", "Inverser le critère de recherche"),
 	Search_result("Search result", "Résultat de la recherche"),
 	Searching_data("Searching data", "Recherche de données"),
 	See_reviews("See reviews", "Voir les critiques"),
@@ -159,6 +165,7 @@ public enum Local {
 	The_specified_folder_URI_is_not_valid("The specified folder URI is not valid", "Le dossier URI spécifié n'est pas valide"),
 	The_specified_folder_URI_is_malformed("The specified folder URI is malformed", "Le dossier URI spécifié est malformé"),
 	This_label_already_exists("This label already exists", "Cette étiquette existe déjà"),
+	Try_to_relocate_sources_if_necessary("Try to re-locate sources if necessary (files moved)", "Essayer de retrouver les sources si nécessaire (fichiers déplacés)"),
 	Unable_to_create_the_new_label("Unable to create the new label", "Impossible de créer la nouvelle étiquette"),
 	Unable_to_locate_file("Unable to locate file", "Impossible de localiser le fichier"),
 	Unable_to_move_label("Unable to move the label", "Impossible de déplacer l'étiquette"),
@@ -269,8 +276,8 @@ public enum Local {
 		"Entrez des mots séparés par des espaces"
 	),
 	HELP_Search_Rate(
-		"Enter a value, or two values separated by character - to specify a range.<br>i.e. <b>10-15</b> or <b>8</b>.<br>Values must be between 0 and 20, <i>0-20</i> means all data including the data that are not rated.",
-		"Entrez une valeur, ou deux valeurs séparées par le caractère - pour spécifier une gamme.<br>ex: <b>10-15</b> ou <b>8</b>.<br>Les valeurs doivent être comprises entre 0 et 20, <i>0-20</i> signifiant toutes les données y compris celles qui ne sont pas notées."
+		"Enter a value, or two values separated by character - to specify a range.<br>i.e. <b>10-15</b> or <b>8</b>.<br>Values must be between 0 and 20, empty means all data including the data that are not rated.",
+		"Entrez une valeur, ou deux valeurs séparées par le caractère - pour spécifier une gamme.<br>ex: <b>10-15</b> ou <b>8</b>.<br>Les valeurs doivent être comprises entre 0 et 20, vide signifiant toutes les données y compris celles qui ne sont pas notées."
 	),
 	HELP_Search_Added(
 		"Select a minimum and maximum date.<br>If the minimum date is empty, it means all dates until the maximum date.<br>If the maximum date is empty, it means all dates from the minimum date.<br>If both are empty, it means all dates.",
@@ -279,6 +286,10 @@ public enum Local {
 	HELP_Search_Opened(
 		"Select a minimum and maximum date.<br>If the minimum date is empty, it means all dates until the maximum date.<br>If the maximum date is empty, it means all dates from the minimum date.<br>If both are empty, it means all dates.",
 		"Sélectionnez une date minimum et maximum.<br>Si la date minimum est vide, cela signifie toutes les dates jusqu'à la date maximum.<br>Si la date maximum est vide, cela signifie toutes les dates depuis la date minimum.<br>Si les deux sont vides, cela signifie toutes les dates."
+	),
+	HELP_Search_Labels(
+		"Select all labels to include in the search.<br>If nothing is selected, it means all data.",
+		"Sélectionnez toutes les étiquettes à inclure dans la recherche.<br>Si rien n'est sélectionné, toutes les données seront inclues."
 	),
 
 
@@ -321,6 +332,17 @@ public enum Local {
 	MESSAGE_Update_Later(
 		"Later.",
 		"Plus tard"
+	),
+	
+	MESSAGE_About_Licenses(
+		"DataOrganizer is under <a href=\"gpl\">GPL License</a><br/>"+
+		"It contains a copy of VLC also under GPL License<br/>"+
+		"It is based on the Eclipse product under <a href=\"epl\">EPL License</a><br/>"+
+		"It contains Apache libraries under <a href=\"apache\">Apache license</a>",
+		"DataOrganizer est sous <a href=\"gpl\">licence GPL</a><br/>"+
+		"Il contient une copie de VLC également sous licence GPL<br/>"+
+		"Ce logiciel est basé sur un produit Eclipse sous <a href=\"epl\">licence EPL</a><br/>"+
+		"Il contient des librairies Apache sous <a href=\"apache\">licence Apache</a>"
 	),
 	
 	;

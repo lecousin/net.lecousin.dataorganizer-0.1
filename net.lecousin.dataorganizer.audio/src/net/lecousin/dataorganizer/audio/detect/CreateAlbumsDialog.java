@@ -40,7 +40,6 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorRegistry;
@@ -101,7 +100,7 @@ public class CreateAlbumsDialog extends FlatDialog {
 		}
 		if (noInfo != null)
 			tracks.addAll(noInfo);
-		notIncludedTable = new LCTableWithControls<Track>(container, Local.Tracks_not_included_into_an_album.toString(), new TrackProvider(tracks), false, false, false, true);
+		notIncludedTable = new LCTableWithControls<Track>(container, Local.Tracks_not_included_into_an_album.toString(), new TrackProvider(tracks, true), false, false, false, true);
 		UIUtil.gridDataHorizFill(notIncludedTable).heightHint = 130;
 		notIncludedTable.setButtonAddToolTip(Local.Add_selected_tracks_to_the_album_list_below.toString());
 		notIncludedTable.addRequested().addFireListener(new Runnable() {
@@ -206,21 +205,31 @@ public class CreateAlbumsDialog extends FlatDialog {
 			public int compare(Track element1, String text1, Track element2, String text2) { return 0; }
 		},
 	};
-	private static TableConfig config;
+	private static TableConfig configSortable;
 	static {
-		config = new TableConfig();
-		config.fixedRowHeight = 18;
-		config.multiSelection = true;
+		configSortable = new TableConfig();
+		configSortable.fixedRowHeight = 18;
+		configSortable.multiSelection = true;
+		configSortable.sortable = true;
+	}
+	private static TableConfig configNotSortable;
+	static {
+		configNotSortable = new TableConfig();
+		configNotSortable.fixedRowHeight = 18;
+		configNotSortable.multiSelection = true;
+		configNotSortable.sortable = false;
 	}
 	private class TrackProvider implements LCTableWithControls.Provider<Track> {
-		private TrackProvider(List<Track> tracks) {
+		private TrackProvider(List<Track> tracks, boolean sortable) {
 			contentProvider = new LCContentProvider.StaticList<Track>(tracks);
+			config = sortable ? configSortable : configNotSortable;
 		}
 		private LCContentProvider<Track> contentProvider;
+		private TableConfig config;
 		public LCContentProvider<Track> getContentProvider() { return contentProvider; }
 		public ColumnProvider<Track>[] getColumns() { return columns; }
 		public TableConfig getConfig() { return config; }
-		public Control createElementDetailsControl(Composite parent, Track element) { return null; }
+		public void createElementDetailsControl(Composite parent, Track element) {  }
 	}
 	
 	private class AlbumControl extends ScrolledComposite {
@@ -246,7 +255,7 @@ public class CreateAlbumsDialog extends FlatDialog {
 			textAlbumName.setLayoutData(UIUtil.gridDataHoriz(1, true));
 			
 			// not numbered
-			tableNotNumbered = new LCTableWithControls<Track>(panel, Local.Not_numbered_tracks+":", new TrackProvider(album.noNumber), false, true, true, true);
+			tableNotNumbered = new LCTableWithControls<Track>(panel, Local.Not_numbered_tracks+":", new TrackProvider(album.noNumber, true), false, true, true, true);
 			UIUtil.gridDataHorizFill(tableNotNumbered).heightHint = 125;
 			tableNotNumbered.setButtonRemoveToolTip(Local.Remove_selected_tracks_from_the_album.toString());
 			tableNotNumbered.setButtonAddToolTip(Local.Add_selected_tracks_to_the_album_list_below.toString());
@@ -281,7 +290,7 @@ public class CreateAlbumsDialog extends FlatDialog {
 				item.setText(Local.List+" "+(index++));
 				ArrayList<Track> tracks = new ArrayList<Track>(list.size());
 				for (Track t : list) tracks.add(t);
-				LCTableWithControls<Track> table = new LCTableWithControls<Track>(folder, Local.Tracks+":", new TrackProvider(tracks), false, true, true, false);
+				LCTableWithControls<Track> table = new LCTableWithControls<Track>(folder, Local.Tracks+":", new TrackProvider(tracks, false), false, true, true, false);
 				item.setControl(table);
 				item.setShowClose(album.sorted.size() > 1);
 				item.addDisposeListener(new DisposeListener() {

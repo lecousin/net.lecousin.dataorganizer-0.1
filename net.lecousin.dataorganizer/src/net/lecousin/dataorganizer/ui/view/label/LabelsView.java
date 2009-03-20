@@ -1,9 +1,6 @@
 package net.lecousin.dataorganizer.ui.view.label;
 
-import java.util.LinkedList;
-
 import net.lecousin.dataorganizer.Local;
-import net.lecousin.dataorganizer.core.DataLabels.Label;
 import net.lecousin.dataorganizer.internal.EclipsePlugin;
 import net.lecousin.dataorganizer.ui.control.LabelTree;
 import net.lecousin.framework.ui.eclipse.SharedImages;
@@ -41,7 +38,7 @@ public class LabelsView extends ViewPart {
 	
 	@Override
 	public void createPartControl(Composite parent) {
-		LabelTree tree = new LabelTree(parent, false, 0, null);
+		new LabelTree(parent, false).getTree().setToolTipText(Local.Drag_data_to_a_label.toString());
 	}
 	
 	@Override

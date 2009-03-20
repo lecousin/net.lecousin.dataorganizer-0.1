@@ -39,6 +39,8 @@ public class DataOverviewView extends ViewPart {
 		overviewPanel = new OverviewPanel(scroll);
 		scroll.setContent(overviewPanel);
 		scroll.setExpandHorizontal(true);
+		scroll.getVerticalBar().setIncrement(20);
+		scroll.getVerticalBar().setPageIncrement(100);
 		overviewPanel.setData(new UIControlUtil.TopLevelResize());
 		refresh(DataOrganizer.getSelectedData());
 	}

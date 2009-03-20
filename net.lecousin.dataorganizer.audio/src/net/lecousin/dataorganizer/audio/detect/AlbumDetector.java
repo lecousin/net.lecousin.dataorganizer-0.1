@@ -21,6 +21,7 @@ import net.lecousin.framework.strings.StringUtil;
 import net.lecousin.media.sound.files.audio.AudioFile;
 import net.lecousin.media.sound.files.audio.AudioFileInfo;
 import net.lecousin.media.sound.files.audio.InvalidAudioFile;
+import net.lecousin.media.sound.files.audio.cda.CDAFile;
 import net.lecousin.media.sound.files.audio.mp3.MP3File;
 import net.lecousin.media.sound.files.playlist.PlayList;
 import net.lecousin.media.sound.files.playlist.m3u.M3UPlayList;
@@ -71,6 +72,8 @@ public class AlbumDetector {
 		try {
 			if (ext.equals("mp3") || ext.equals("mpeg3") || ext.equals("mpg3"))
 				return new MP3File(file);
+			if (ext.equals("cda"))
+				return new CDAFile(file);
 		} catch (InvalidAudioFile e) {}
 		return null;
 	}

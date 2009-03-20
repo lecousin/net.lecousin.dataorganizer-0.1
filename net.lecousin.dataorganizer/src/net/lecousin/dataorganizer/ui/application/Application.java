@@ -49,7 +49,7 @@ public class Application implements IApplication {
 				path = args[i+1];
 			else if (args[i].equals("-firstLaunch"))
 				firstlaunch = true;
-			else if (args[i].equals("-debug"))
+			else if (args[i].equals("-enable_debug"))
 				debug = true;
 		try {
 			net.lecousin.framework.application.Application.deployPath = path != null ? new File(path) : new File(Platform.getInstallLocation().getURL().toURI());
@@ -58,7 +58,7 @@ public class Application implements IApplication {
 		}
 		
 		display = PlatformUI.createDisplay();
-
+		
 		Location instance = Platform.getInstanceLocation();
 		if (!instance.isSet()) {
 			if (!chooseWorkspace(instance, display))

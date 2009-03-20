@@ -3,6 +3,7 @@ package net.lecousin.dataorganizer.ui.action;
 import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.core.DataOrganizer;
 import net.lecousin.framework.ui.eclipse.SharedImages;
+import net.lecousin.framework.ui.eclipse.dialog.MyDialog;
 
 import org.eclipse.jface.action.Action;
 
@@ -17,6 +18,6 @@ public class RefreshDataBaseAction extends Action {
 
 	@Override
 	public void run() {
-		DataOrganizer.database().refresh();
+		DataOrganizer.database().refresh(MyDialog.getPlatformShell());
 	}
 }

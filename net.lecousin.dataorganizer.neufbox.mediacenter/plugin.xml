@@ -5,7 +5,11 @@
          point="net.lecousin.dataorganizer.contenttype_action">
       <action
             content_type_id="video"
-            provider="net.lecousin.dataorganizer.neufbox.mediacenter.MediaCenterActionProvider">
+            provider="net.lecousin.dataorganizer.neufbox.mediacenter.MediaCenterActionProvider_Video">
+      </action>
+      <action
+            content_type_id="audio"
+            provider="net.lecousin.dataorganizer.neufbox.mediacenter.MediaCenterActionProvider_Audio">
       </action>
    </extension>
 

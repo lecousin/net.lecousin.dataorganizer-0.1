@@ -53,7 +53,7 @@ public class LocalFileDataSource extends FileDataSource {
 	public URI ensurePresenceAndGetURI() {
 		return getLocalFile().toURI();
 	}
-
+	
 	@Override
 	public String toString() {
 		return path;

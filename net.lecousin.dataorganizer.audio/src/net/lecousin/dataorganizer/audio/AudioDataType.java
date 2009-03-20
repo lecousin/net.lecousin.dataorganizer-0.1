@@ -1,10 +1,14 @@
 package net.lecousin.dataorganizer.audio;
 
+import java.util.List;
+
+import net.lecousin.dataorganizer.audio.AudioInfo.Track;
 import net.lecousin.dataorganizer.audio.ui.OverviewPanel;
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.Data.DuplicateAnalysis;
 import net.lecousin.dataorganizer.core.database.content.DataContentType;
 import net.lecousin.dataorganizer.core.database.info.Info;
+import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
 import net.lecousin.framework.Triple;
 import net.lecousin.framework.event.ProcessListener;
@@ -33,6 +37,13 @@ public class AudioDataType extends DataContentType {
 	@Override
 	protected Info createInfo(Element elt, ContentTypeLoader loader) { return new AudioInfo(this, elt, loader); }
 	
+	@Override
+	public String getSourceName(DataSource source) {
+		int index = getData().getSources().indexOf(source);
+		List<Track> tracks = ((AudioInfo)getInfo()).getTracks();
+		if (index < 0 || index >= tracks.size()) return null;
+		return tracks.get(index).getTitle();
+	}
 
 	@Override
 	public DuplicateAnalysis checkForDuplicateOnContent(Data data) {

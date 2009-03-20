@@ -54,7 +54,13 @@ import org.eclipse.swt.widgets.TreeItem;
 
 public class LabelTree extends CheckboxTreeViewer {
 
-	public LabelTree(Composite parent, boolean showNotLabeled, int style, List<Label> selected) {
+	public LabelTree(Composite parent, boolean showNotLabeled) {
+		this(parent, showNotLabeled, 0, null, null);
+	}
+	public LabelTree(Composite parent, boolean showNotLabeled, int style) {
+		this(parent, showNotLabeled, style, null, null);
+	}
+	public LabelTree(Composite parent, boolean showNotLabeled, int style, List<Label> selected, NewItemSelectionProvider selProvider) {
 		super(new Tree(parent, (selected != null ? SWT.CHECK : 0) | style));
 		setContentProvider(new ContentProvider(showNotLabeled));
 		setLabelProvider(new LabelProvider());
@@ -187,6 +193,13 @@ public class LabelTree extends CheckboxTreeViewer {
 					event.detail = DND.DROP_LINK;
 			}
 		});
+		
+		this.selProvider = selProvider;
+	}
+	
+	private NewItemSelectionProvider selProvider;
+	public static interface NewItemSelectionProvider {
+		public boolean isSelected(Label label);
 	}
 	
 	private List<Label> getLabelsForDND() {
@@ -354,5 +367,37 @@ public class LabelTree extends CheckboxTreeViewer {
 			}
 		});
 		menu.show(getTree(), pt.x, pt.y);
+	}
+	
+	@Override
+	protected void preservingSelection(Runnable updateCode) {
+		if (selProvider == null) {
+			super.preservingSelection(updateCode);
+			return;
+		}
+		List<TreeItem> items = getAllItems();
+		super.preservingSelection(updateCode);
+		List<TreeItem> items2 = getAllItems();
+		for (TreeItem i : items2) {
+			if (items.contains(i)) continue;
+			Object data = i.getData();
+			if (data == null || !(data instanceof Label)) continue;
+			if (selProvider.isSelected((Label)data))
+				i.setChecked(true);
+		}
+	}
+	private List<TreeItem> getAllItems() {
+		List<TreeItem> list = new LinkedList<TreeItem>();
+		for (TreeItem i : getTree().getItems()) {
+			list.add(i);
+			getSubItems(i, list);
+		}
+		return list;
+	}
+	private void getSubItems(TreeItem parent, List<TreeItem> list) {
+		for (TreeItem child : parent.getItems()) {
+			list.add(child);
+			getSubItems(child, list);
+		}
 	}
 }

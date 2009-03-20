@@ -5,6 +5,7 @@ import java.io.File;
 import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.RealDataBase;
+import net.lecousin.dataorganizer.core.search.DataSearch;
 import net.lecousin.dataorganizer.internal.MemoryMonitor;
 import net.lecousin.framework.application.Application;
 import net.lecousin.framework.event.Event;

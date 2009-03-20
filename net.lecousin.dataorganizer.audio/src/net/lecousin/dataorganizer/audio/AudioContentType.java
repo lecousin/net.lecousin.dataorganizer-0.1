@@ -13,6 +13,7 @@ import net.lecousin.dataorganizer.core.database.content.DataContentType;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
 import net.lecousin.dataorganizer.ui.wizard.adddata.AddData_Page;
 import net.lecousin.framework.io.FileSystemUtil;
+import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.ui.eclipse.EclipseImages;
 import net.lecousin.framework.ui.eclipse.SharedImages;
 import net.lecousin.framework.version.Version;
@@ -63,7 +64,8 @@ public class AudioContentType extends ContentType {
 		return null;
 	}
 	@Override
-	public void loadDataContent(Data data, Object context) {
+	public void loadDataContent(Data data, Object context, WorkProgress progress, int work) {
+		progress.progress(work);
 	}
 	@Override
 	public void closeLoadDataContentContext(Object context) {

@@ -77,6 +77,7 @@ public abstract class Info {
 	public abstract Map<String,Map<String,Pair<String,Integer>>> getReviews(String type);
 	
 	protected void signalModification() {
+//		System.out.println("Info: signal: Info=" + this.toString() + " Data=" + data.toString() + " Data.Data=" + data.getData().toString() + " Data.Data.Content=" + data.getData().getContent().toString());
 		data.signalModification();
 		modified.fire(this);
 	}

@@ -36,7 +36,7 @@ public class InfoRetriever {
 	public static void retrieve(Shell shell, Data data) {
 		List<InfoRetrieverPlugin> plugins = InfoRetrieverPluginRegistry.getRetrievers(data.getContentType().getID());
 		if (plugins.isEmpty()) {
-			MessageDialog.openInformation(null, Local.Retrieve_information.toString(), Local.NoPluginToRetrieveInforForType + " " + data.getContentType().getName());
+			MessageDialog.openInformation(shell, Local.Retrieve_information.toString(), Local.NoPluginToRetrieveInforForType + " " + data.getContentType().getName());
 			return;
 		}
 		retrieve(shell, data, plugins);
@@ -46,10 +46,29 @@ public class InfoRetriever {
 	}
 	public static void retrieve(Shell shell, Data data, List<InfoRetrieverPlugin> plugins) {
 		WorkProgress progress = new WorkProgress(Local.Retrieve_information.toString(), 1+plugins.size()*100, true);
-		WorkProgressDialog dlg = new WorkProgressDialog(null, progress);
+		WorkProgressDialog dlg = new WorkProgressDialog(shell, progress);
+		retrieve(shell, data, plugins, progress, 1+plugins.size()*100);
+		dlg.close();
+	}
+
+	public static void retrieve(Shell shell, Data data, WorkProgress progress, int amount) {
+		List<InfoRetrieverPlugin> plugins = InfoRetrieverPluginRegistry.getRetrievers(data.getContentType().getID());
+		if (plugins.isEmpty()) {
+			progress.progress(amount);
+			return;
+		}
+		retrieve(shell, data, plugins, progress, amount);
+	}
+	
+	public static void retrieve(Shell shell, Data data, List<InfoRetrieverPlugin> plugins, WorkProgress progress, int amount) {
 		List<Pair<InfoRetrieverPlugin,WorkProgress>> todo = new ArrayList<Pair<InfoRetrieverPlugin,WorkProgress>>(plugins.size());
-		for (InfoRetrieverPlugin plugin : plugins)
-			todo.add(new Pair<InfoRetrieverPlugin,WorkProgress>(plugin, progress.addSubWork(plugin.getName(), 100, 1000)));
+		amount--;
+		int nb = plugins.size();
+		for (InfoRetrieverPlugin plugin : plugins) {
+			int step = amount/nb--;
+			amount -= step;
+			todo.add(new Pair<InfoRetrieverPlugin,WorkProgress>(plugin, progress.addSubWork(plugin.getName(), step, 1000)));
+		}
 		Info info = data.getContent().getInfo();
 		progress.progress(1);
 		for (Pair<InfoRetrieverPlugin,WorkProgress> p : todo) {
@@ -63,7 +82,7 @@ public class InfoRetriever {
 				SearchResult result = null;
 				String name = data.getName();
 				do {
-					UIUtil.runPendingEvents(dlg.getShell().getDisplay());
+					UIUtil.runPendingEvents(shell.getDisplay());
 					if (search.isCancelled()) break;
 					search.reset();
 					search.progress(1);
@@ -136,7 +155,6 @@ public class InfoRetriever {
 			p.getValue2().done();
 		}
 		progress.done();
-		dlg.close();
 	}
 	
 	public static Data retrieve(ContentType type, List<DataLink> links) {

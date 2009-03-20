@@ -1,8 +1,8 @@
 package net.lecousin.dataorganizer.video;
 
+import java.util.LinkedList;
 import java.util.List;
 
-import net.lecousin.dataorganizer.core.DataSearch.ContentTypeParameters;
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.VirtualData;
 import net.lecousin.dataorganizer.core.database.VirtualDataBase;
@@ -10,17 +10,21 @@ import net.lecousin.dataorganizer.core.database.content.ContentType;
 import net.lecousin.dataorganizer.core.database.content.DataContentType;
 import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
+import net.lecousin.dataorganizer.core.search.DataSearch.Parameter;
 import net.lecousin.dataorganizer.ui.wizard.adddata.AddData_Page;
 import net.lecousin.dataorganizer.video.internal.EclipsePlugin;
-import net.lecousin.dataorganizer.video.ui.SearchPanel;
+import net.lecousin.dataorganizer.video.search.Param_Casting;
+import net.lecousin.dataorganizer.video.search.Param_Duration;
 import net.lecousin.framework.collections.ArrayUtil;
 import net.lecousin.framework.collections.CollectionUtil;
 import net.lecousin.framework.io.FileSystemUtil;
 import net.lecousin.framework.log.Log;
 import net.lecousin.framework.media.MediaPlayer;
+import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.ui.eclipse.EclipseImages;
 import net.lecousin.framework.ui.eclipse.SharedImages;
 import net.lecousin.framework.ui.eclipse.UIUtil;
+import net.lecousin.framework.ui.eclipse.control.text.lcml.LCMLText;
 import net.lecousin.framework.version.Version;
 
 import org.eclipse.core.filesystem.IFileInfo;
@@ -78,7 +82,12 @@ public class VideoContentType extends ContentType {
 	@Override
 	public Object openLoadDataContentContext(Composite panel) {
 		LoadDataContentContext ctx = new LoadDataContentContext();
-		ctx.visual = new Composite(panel, SWT.EMBEDDED) {
+		Composite c = UIUtil.newGridComposite(panel, 0, 0, 2);
+		UIUtil.gridDataHorizFill(c);
+		LCMLText text = new LCMLText(c, false, false);
+		text.setLayoutData(UIUtil.gridDataHoriz(1, true));
+		text.setText(Local.MESSAGE_Take_Previews.toString());
+		ctx.visual = new Composite(c, SWT.EMBEDDED) {
 			@Override
 			public Point computeSize(int hint, int hint2, boolean changed) {
 				return new Point(128, 128);
@@ -99,22 +108,22 @@ public class VideoContentType extends ContentType {
 		ctx.player.free();
 	}
 	@Override
-	public void loadDataContent(Data data, Object context) {
+	public void loadDataContent(Data data, Object context, WorkProgress progress, int work) {
 		LoadDataContentContext ctx = (LoadDataContentContext)context;
-		((VideoDataType)data.getContent()).loadContent(ctx.visual, ctx.player);
+		((VideoDataType)data.getContent()).loadContent(ctx.visual, ctx.player, progress, work);
 	}
 
 	@Override
 	public AddData_Page createAddDataWizardPage() {
 		return new AddVideosWizardPage();
 	}
+
 	@Override
-	public Control createSearchPanel(Composite parent) {
-		return new SearchPanel(parent);
-	}
-	@Override
-	public ContentTypeParameters createSearchParameters() {
-		return new VideoParameters();
+	public List<Parameter> createSearchParameters() {
+		List<Parameter> list = new LinkedList<Parameter>();
+		list.add(new Param_Duration());
+		list.add(new Param_Casting());
+		return list;
 	}
 	
 	private static String[] extensions = new String[] {

@@ -23,6 +23,7 @@ import net.lecousin.framework.ui.eclipse.control.UIControlUtil;
 import net.lecousin.framework.ui.eclipse.control.button.MenuButton;
 import net.lecousin.framework.ui.eclipse.control.button.MenuButton.MenuProvider;
 import net.lecousin.framework.ui.eclipse.dialog.FlatPopupMenu;
+import net.lecousin.framework.ui.eclipse.dialog.MyDialog;
 import net.lecousin.framework.ui.eclipse.graphics.ColorUtil;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -194,7 +195,7 @@ public class OverviewPanel extends Composite {
 		public void fill(FlatPopupMenu menu) {
 			new FlatPopupMenu.Menu(menu, Local.Retrieve_from_all_sources.toString(), SharedImages.getImage(SharedImages.icons.x16.basic.IMPORT), false, false, new Runnable() {
 				public void run() {
-					data.retrieveInfo(null);
+					data.retrieveInfo(MyDialog.getPlatformShell());
 					refresh(data);
 				}
 			});
@@ -208,10 +209,10 @@ public class OverviewPanel extends Composite {
 							it.remove();
 					}
 					if (plugins.isEmpty()) {
-						MessageDialog.openInformation(null, Local.Retrieve_information.toString(), Local.Informtion_already_retrieved+".");
+						MessageDialog.openInformation(MyDialog.getPlatformShell(), Local.Retrieve_information.toString(), Local.Informtion_already_retrieved+".");
 						return;
 					}
-					InfoRetriever.retrieve(null, data, plugins);
+					InfoRetriever.retrieve(MyDialog.getPlatformShell(), data, plugins);
 					refresh(data);
 				}
 			});
@@ -222,10 +223,10 @@ public class OverviewPanel extends Composite {
 					for (String source : info.getSources())
 						plugins.add(InfoRetrieverPluginRegistry.getPlugin(source, data.getContentType().getID()));
 					if (plugins.isEmpty()) {
-						MessageDialog.openInformation(null, Local.Retrieve_information.toString(), Local.None_of_the_known_sources_are_already_retrieved+".");
+						MessageDialog.openInformation(MyDialog.getPlatformShell(), Local.Retrieve_information.toString(), Local.None_of_the_known_sources_are_already_retrieved+".");
 						return;
 					}
-					InfoRetriever.retrieve(null, data, plugins);
+					InfoRetriever.retrieve(MyDialog.getPlatformShell(), data, plugins);
 					refresh(data);
 				}
 			});
@@ -233,7 +234,7 @@ public class OverviewPanel extends Composite {
 			for (InfoRetrieverPlugin plugin : plugins) {
 				new FlatPopupMenu.Menu(menu, plugin.getName(), plugin.getIcon(), false, false, new RunnableWithData<InfoRetrieverPlugin>(plugin) {
 					public void run() {
-						InfoRetriever.retrieve(null, data, data());
+						InfoRetriever.retrieve(MyDialog.getPlatformShell(), data, data());
 						refresh(data);
 					}
 				});

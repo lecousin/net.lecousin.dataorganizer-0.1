@@ -48,6 +48,15 @@ public enum Local {
 		"Entrez une liste de mots.<br>Pour qu'une vidéo soit sélectionnée, au moins une personne ayant participé à cette vidéo doit contenir dans son nom tous les mots spécifiés.<br>Ces personnes sont les acteurs, les producteurs, les réalisateurs et les scénaristes.<br><b>Uniquement les vidéos ayant ces informations (récupérées depuis Internet) pourront être sélectionnées dans le résultat.</b>"
 	),
 	
+	MESSAGE_Take_Previews(
+		"The rectangle next is used to take video previews. Please do not do anything during this step.<br/>" +
+		"If you go to another application this window will be hiden and previews won't be valid !<br/>" +
+		"This step may take time, please wait...",
+		"Le rectangle à côté est utilisé pour prendre des images depuis les vidéos. Veuillez ne rien faire pendant cette étape.<br/>" +
+		"Si vous allez sur une autre application cette fenêtre sera cachée et les images ne seront pas valides !<br/>" +
+		"Cette étape peut durer un peu de temps, veuillez patienter..."
+	),
+	
 	;
 	
 	private Local(String english, String french) {

@@ -1,6 +1,7 @@
 package net.lecousin.dataorganizer.ui.control;
 
 import net.lecousin.dataorganizer.Local;
+import net.lecousin.framework.Pair;
 import net.lecousin.framework.event.Event;
 import net.lecousin.framework.event.Event.Listener;
 import net.lecousin.framework.ui.eclipse.UIUtil;
@@ -43,8 +44,8 @@ public class RateEditPanel extends Composite {
 			}
 		});
 		if (rate < 0) scaleRate.setEnabled(false);
-		noRate = UIUtil.newCheck(this, Local.Do_not_rate_this_data.toString(), new Listener<Object>() {
-			public void fire(Object event) {
+		noRate = UIUtil.newCheck(this, Local.Do_not_rate_this_data.toString(), new Listener<Pair<Boolean,Object>>() {
+			public void fire(Pair<Boolean,Object> event) {
 				scaleRate.setEnabled(!noRate.getSelection());
 				byte rate = (byte)(noRate.getSelection() ? -1 : scaleRate.getSelection());
 				labelRate.setText(rate >= 0 ? Byte.toString(rate) : Local.No.toString());

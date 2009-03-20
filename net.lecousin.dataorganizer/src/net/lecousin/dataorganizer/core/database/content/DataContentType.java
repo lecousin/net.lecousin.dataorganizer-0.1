@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.Data.DuplicateAnalysis;
 import net.lecousin.dataorganizer.core.database.info.Info;
+import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
 import net.lecousin.framework.Triple;
 import net.lecousin.framework.collections.SelfMap;
@@ -41,6 +42,10 @@ public abstract class DataContentType implements SelfMap.Entry<Long> {
 	public Info getInfo() { return info; }
 	public void setData(Data data) { this.data = data; }
 	
+	public String getSourceName(DataSource source) {
+		return null;
+	}
+	
 	public Long getHashObject() { return data.getID(); }
 	
 	public IFolder getFolder() throws CoreException { return data.getFolder(); }
@@ -55,6 +60,7 @@ public abstract class DataContentType implements SelfMap.Entry<Long> {
 	public abstract boolean isSame(Info info);
 	
 	public final void save() {
+//		System.out.println("Content: save: Info=" + info.toString() + " Data=" + this.toString() + " Data.Data=" + data.toString());
 		XmlWriter xml = new XmlWriter();
 		xml.openTag("content");
 		saveContent(xml);

@@ -1,6 +1,7 @@
 package net.lecousin.dataorganizer.audio.detect;
 
 import java.io.ByteArrayInputStream;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -78,8 +79,8 @@ public class AlbumHelper {
 		for (AudioFile file : tracks)
 			try { sources.add(DataSource.get(file.getURI())); }
 			catch (Throwable t) {
-				ErrorDlg.exception(Local.Create_Music_Album.toString(), "Unable to add DataSource", EclipsePlugin.ID, t);
-				return null;
+				ErrorDlg.exception(Local.Create_Music_Album.toString(), "Unable to add DataSource for file: " + file.getURI(), EclipsePlugin.ID, t);
+				sources.add(null);
 			}
 		Triple<String,String,Integer> t = getAlbumArtistYear(tracks, list, finalAlbumName, rootDir, shell);
 		if (t == null) return null;
@@ -104,12 +105,13 @@ public class AlbumHelper {
 		List<Picture> cover_back = new LinkedList<Picture>();
 		for (AudioFile file : tracks) {
 			AudioFileInfo ai = file.getInfo();
+			AudioInfo.Track track;
 			if (ai == null)
-				info.newTrack();
+				track = info.newTrack();
 			else {
 				String title = ai.getSongTitle();
 				long length = ai.getDuration();
-				AudioInfo.Track track = info.newTrack(title, length);
+				track = info.newTrack(title, length);
 				if (ai.getPictures() != null)
 					for (Picture pic : ai.getPictures()) {
 						switch (pic.type) {
@@ -123,6 +125,8 @@ public class AlbumHelper {
 						}
 					}
 			}
+			if (track.getTitle() == null)
+				track.setTitle(getTrackNameFromFile(file, tracks));
 		}
 //		byte[] mcdi = getMCDI(tracks, list, rootDir, shell);
 //		if (mcdi != null)
@@ -166,9 +170,14 @@ public class AlbumHelper {
 		boolean needAlbumName = false;
 		if (albumNames.size() == 1) result.setValue1(albumNames.iterator().next());
 		else {
-			albumNames.add(normalize_name(rootDir.getName()));
-			if (list != null)
-				albumNames.add(normalize_name(list.getName()));
+			String name = normalize_name(rootDir.getName());
+			if (name != null)
+				albumNames.add(name);
+			if (list != null) {
+				name = normalize_name(list.getName());
+				if (name != null)
+					albumNames.add(name);
+			}
 			needDecision = true;
 			needAlbumName = true;
 		}
@@ -454,5 +463,75 @@ public class AlbumHelper {
 		if (s.equals("unknown artist")) return null;
 		if (s.equals("various artists")) return null;
 		return str.toString();
+	}
+	
+	public static String getTrackNameFromFile(AudioFile track, List<AudioFile> allTracks) {
+		int index = allTracks.indexOf(track)+1;
+		String name = getAsSimpleName(track, index);
+		if (name.length() == 0) return null;
+		if (allTracks.size() > 1) {
+			int same = name.length();
+			int ti = 1;
+			for (AudioFile t : allTracks) {
+				if (t == track) continue;
+				String tname = getAsSimpleName(t, ti);
+				for (int i = 0; i < tname.length() && i < same; ++i) {
+					if (tname.charAt(i) != name.charAt(i)) {
+						same = i;
+						break;
+					}
+				}
+				if (same == 0) break;
+				ti++;
+			}
+			if (same != 0)
+				name = name.substring(same).trim();
+			same = name.length();
+			ti = 1;
+			for (AudioFile t : allTracks) {
+				if (t == track) continue;
+				String tname = getAsSimpleName(t, ti);
+				for (int i = 0; i < tname.length() && i < same; ++i) {
+					if (tname.charAt(tname.length()-i-1) != name.charAt(name.length()-i-1)) {
+						same = i;
+						break;
+					}
+				}
+				if (same == 0) break;
+				ti++;
+			}
+			if (same != 0)
+				name = name.substring(0, name.length()-same).trim();
+			if (name.startsWith(Integer.toString(index)))
+				name = name.substring(Integer.toString(index).length()).trim();
+		}
+		if (name.length() == 0) return null;
+		return name;
+	}
+	
+	private static String getAsSimpleName(AudioFile file, int index) {
+		String name = file.getURI();
+		int i = name.lastIndexOf('/');
+		if (i >= 0)
+			name = name.substring(i+1);
+		name = URLDecoder.decode(name).trim();
+		AudioFileInfo info = file.getInfo();
+		if (info != null && info.getTrackNumber() > 0) {
+			if (name.startsWith(Integer.toString(info.getTrackNumber())))
+				name = name.substring(Integer.toString(info.getTrackNumber()).length());
+		}
+		name = name.trim();
+		if (name.startsWith(Integer.toString(index)))
+			name = name.substring(Integer.toString(index).length());
+		name = name.trim();
+		i = 0;
+		while (i < name.length() && !StringUtil.isLetter(name.charAt(i)))
+			i++;
+		if (i > 0) name = name.substring(i).trim();
+		i = name.lastIndexOf('.');
+		if (i > 0)
+			name = name.substring(0, i).trim();
+		if (name.length() == 0) return null;
+		return name;
 	}
 }

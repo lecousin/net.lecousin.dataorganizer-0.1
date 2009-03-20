@@ -1,0 +1,27 @@
+a:link {
+	color: #000000;
+	text-decoration: none;
+	font-weight: normal;
+	line-height: 150%
+}
+
+a:visited {
+	color: #000000;
+	text-decoration: none;
+	font-weight: normal;
+	line-height: 150%
+}
+
+a:hover {
+	color: #000050;
+	text-decoration: underline;
+	font-weight: normal;
+	line-height: 150%
+}
+
+a:focus {
+	color: #000050;
+	text-decoration: underline;
+	font-weight: normal;
+	line-height: 150%
+}

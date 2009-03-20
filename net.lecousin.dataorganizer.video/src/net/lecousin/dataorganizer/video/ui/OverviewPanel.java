@@ -82,7 +82,6 @@ public class OverviewPanel {
 		if (list.isEmpty()) return;
 		Row_ExpandableList panel = new Row_ExpandableList(parent);
 		UIUtil.gridDataHorizFill(panel);
-		panel.setBackground(parent.getBackground());
 		
 		panel.setHeader(UIUtil.newLabel(panel, title, true, false));
 		boolean first = true;

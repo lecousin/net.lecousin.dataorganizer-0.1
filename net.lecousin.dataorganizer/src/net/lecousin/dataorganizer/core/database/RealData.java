@@ -43,6 +43,8 @@ public class RealData extends Data {
 		contentType = l.getContentType(root);
 		Loader<DataContentType> contentLoader = new Loader<DataContentType>() {
 			public DataContentType load() {
+				DataContentType content = AutoSaver.getContent(RealData.this);
+				if (content != null) return content;
 				try { return contentType.loadContent(RealData.this, XmlUtil.loadFile(RealData.this.db.getFolder(RealData.this.id).getFile("content.xml").getContents())); }
 				catch (Throwable t) {
 					if (Log.error(this))
@@ -66,12 +68,16 @@ public class RealData extends Data {
 	}
 	@Override
 	protected void storeContent(DataContentType c) {
-		if (this.content != null)
+		if (this.content != null) {
+			AutoSaver.replaced(this.content.get());
 			this.content.free();
+		}
 		if (autoGroup == null)
 			autoGroup = Application.getAutoFreeMemoryGroup().createGroup("RealData.content", MAX_CONTENT_IN_MEMORY);
 		this.content = autoGroup.create(c, new Loader<DataContentType>() {
 			public DataContentType load() {
+				DataContentType content = AutoSaver.getContent(RealData.this);
+				if (content != null) return content;
 				try { return contentType.loadContent(RealData.this, XmlUtil.loadFile(RealData.this.db.getFolder(RealData.this.id).getFile("content.xml").getContents())); }
 				catch (Throwable t) {
 					if (Log.error(this))
@@ -109,7 +115,8 @@ public class RealData extends Data {
 			xml.addAttribute("rate", Byte.toString(rate));
 		for (DataSource source : sources) {
 			xml.openTag("source");
-			source.save(xml);
+			if (source != null)
+				source.save(xml);
 			xml.closeTag();
 		}
 		for (Long view : views)

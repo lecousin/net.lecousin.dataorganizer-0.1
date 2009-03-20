@@ -46,6 +46,7 @@ public class ContentTypesPanel extends Composite {
 			Button button = new Button(this, SWT.CHECK);
 			button.setText(type.getName());
 			button.setData(type.getID());
+			button.setSelection(DataOrganizer.search().getContentTypes().getContentTypes().contains(type.getID()));
 			button.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -54,7 +55,7 @@ public class ContentTypesPanel extends Composite {
 						typeAdded.fire((String)b.getData());
 					else
 						typeRemoved.fire((String)b.getData());
-					DataOrganizer.search().getParameters().setContentType((String)b.getData(), b.getSelection());
+					DataOrganizer.search().getContentTypes().setContentType((String)b.getData(), b.getSelection());
 				}
 			});
 		}

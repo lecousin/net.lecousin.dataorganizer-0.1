@@ -27,9 +27,9 @@ public class UpdateAction extends Action {
 			Pair<Version,String> p = Updater.getLatestVersionInfo();
 			Version current = Updater.getCurrentVersion();
 			if (p != null && p.getValue1().compareTo(current) > 0) {
-				if (Updater.askToUpdate(null, current, p.getValue1())) {
+				if (Updater.askToUpdate(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), current, p.getValue1())) {
 					updated = true;
-					Updater.launchUpdate(null, p.getValue2());
+					Updater.launchUpdate(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), p.getValue2());
 				}
 			}
 			if (!updated)

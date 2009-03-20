@@ -12,6 +12,7 @@ import net.lecousin.dataorganizer.core.database.VirtualData;
 import net.lecousin.dataorganizer.core.database.VirtualDataBase;
 import net.lecousin.dataorganizer.core.database.content.ContentType;
 import net.lecousin.dataorganizer.internal.EclipsePlugin;
+import net.lecousin.framework.Pair;
 import net.lecousin.framework.event.Event.Listener;
 import net.lecousin.framework.io.FileSystemUtil;
 import net.lecousin.framework.progress.WorkProgress;
@@ -103,8 +104,8 @@ public class AddData_Folder extends WizardPage implements AddData_Page {
 			}
 		}, null);
 		for (ContentType type : ContentType.getAvailableTypes()) {
-			Button button = UIUtil.newCheck(group, type.getName(), new Listener<Object>() {
-				public void fire(Object event) {
+			Button button = UIUtil.newCheck(group, type.getName(), new Listener<Pair<Boolean,Object>>() {
+				public void fire(Pair<Boolean,Object> event) {
 					dialogChanged();
 				}
 			}, null);

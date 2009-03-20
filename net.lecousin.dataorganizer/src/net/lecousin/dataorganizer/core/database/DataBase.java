@@ -226,10 +226,12 @@ public abstract class DataBase {
 					QuestionDlg dlg = new QuestionDlg(shell, Local.Duplicate_data.toString(), context);
 					StringBuilder s1 = new StringBuilder();
 					for (DataSource s : newData.getSources())
-						s1.append(" - ").append(s.toString()).append("<br>");
+						if (s != null)
+							s1.append(" - ").append(s.toString()).append("<br>");
 					StringBuilder s2 = new StringBuilder();
 					for (DataSource s : data.getSources())
-						s2.append(" - ").append(s.toString()).append("<br>");
+						if (s != null)
+							s2.append(" - ").append(s.toString()).append("<br>");
 					dlg.setMessage(
 							Local.The_new_data + "<br><a href=\"new_data\">" + newData.getName() + "</a>:<br>" +
 							s1.toString() +
@@ -284,11 +286,11 @@ public abstract class DataBase {
 		}
 	}
 
-	public void refresh(RefreshOptions options) {
-		refresh(getAllData(), options);
+	public void refresh(Shell shell, RefreshOptions options) {
+		refresh(shell, getAllData(), options);
 	}
-	public void refresh(List<Data> toRefresh, RefreshOptions options) {
-		Refresher.refresh(this, toRefresh, options);
+	public void refresh(Shell shell, List<Data> toRefresh, RefreshOptions options) {
+		Refresher.refresh(shell, this, toRefresh, options);
 	}
 	
 	final IFile getFile(long id) throws CoreException {

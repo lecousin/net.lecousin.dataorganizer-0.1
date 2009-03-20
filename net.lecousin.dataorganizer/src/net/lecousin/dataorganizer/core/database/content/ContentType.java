@@ -7,23 +7,23 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.lecousin.dataorganizer.core.DataSearch.ContentTypeParameters;
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.VirtualData;
 import net.lecousin.dataorganizer.core.database.VirtualDataBase;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
+import net.lecousin.dataorganizer.core.search.DataSearch;
 import net.lecousin.dataorganizer.internal.EclipsePlugin;
 import net.lecousin.dataorganizer.ui.wizard.adddata.AddData_Page;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.eclipse.extension.EclipsePluginExtensionUtil;
 import net.lecousin.framework.log.Log;
+import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.version.Version;
 
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.w3c.dom.Element;
 
@@ -41,16 +41,15 @@ public abstract class ContentType {
 	public abstract Image getDefaultTypeImage();
 	
 	public abstract AddData_Page createAddDataWizardPage();
-	public Control createSearchPanel(Composite parent) { return null; }
 	
-	public ContentTypeParameters createSearchParameters() { return null; }
+	public List<DataSearch.Parameter> createSearchParameters() { return null; }
 	
 	public abstract DataContentType loadContent(Data data, Element elt);
 	public abstract DataContentType loadContent(Data data, Element elt, ContentTypeLoader loader);
 	
 	public abstract Object openLoadDataContentContext(Composite panel);
 	public abstract void closeLoadDataContentContext(Object context);
-	public abstract void loadDataContent(Data data, Object context);
+	public abstract void loadDataContent(Data data, Object context, WorkProgress progress, int amount);
 	
 	@Override
 	public boolean equals(Object obj) {

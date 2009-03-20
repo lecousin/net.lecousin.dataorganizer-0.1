@@ -1,70 +1,66 @@
-package net.lecousin.dataorganizer.video;
+package net.lecousin.dataorganizer.video.search;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import net.lecousin.dataorganizer.core.Filter;
-import net.lecousin.dataorganizer.core.DataSearch.ContentTypeParameters;
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.info.Info.DataLink;
+import net.lecousin.dataorganizer.core.search.Filter;
+import net.lecousin.dataorganizer.core.search.DataSearch.ReversableParameter;
+import net.lecousin.dataorganizer.video.Local;
+import net.lecousin.dataorganizer.video.VideoContentType;
+import net.lecousin.dataorganizer.video.VideoInfo;
 import net.lecousin.framework.Pair;
-import net.lecousin.framework.event.Event;
-import net.lecousin.framework.math.RangeLong;
 import net.lecousin.framework.strings.StringUtil;
+import net.lecousin.framework.ui.eclipse.UIUtil;
 
-public class VideoParameters implements ContentTypeParameters {
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Text;
 
-	private RangeLong rangeDuration = new RangeLong(0,0);
+public class Param_Casting extends ReversableParameter {
+
 	private String casting = "";
-	
-	private Event<String> changed = new Event<String>();
-	
-	public void setRangeDuration(RangeLong range) {
-		if (range.equals(rangeDuration)) return;
-		rangeDuration = range;
-		changed.fire(VideoContentType.VIDEO_TYPE);
-	}
-	public RangeLong getRangeDuration() { return new RangeLong(rangeDuration.min, rangeDuration.max); }
+
 	public void setCasting(String value) {
 		String s = StringUtil.normalizeString(value).trim();
 		if (s.equalsIgnoreCase(casting)) return;
 		casting = s;
-		changed.fire(VideoContentType.VIDEO_TYPE);
+		signalChange();
 	}
 	public String getCasting() { return casting; }
-	
-	public Event<String> contentTypeSearchChanged() { return changed; }
-	public Filter getFilter(Filter previous) {
-		Filter filter = previous;
-		if (rangeDuration.min != 0 || rangeDuration.max != 0)
-			filter = new FilterDuration(filter);
-		if (casting.length() > 0)
-			filter = new FilterCasting(filter);
-		return filter;
+
+	@Override
+	public String getParameterName() { return Local.Casting.toString(); }
+	@Override
+	public String getParameterHelp() { return Local.HELP_Search_Casting.toString(); }
+	@Override
+	public Control createControl(Composite parent) {
+		return UIUtil.newText(parent, getCasting(), new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				setCasting(((Text)e.widget).getText());
+			}
+		});
 	}
 	
-	public class FilterDuration extends Filter {
-		public FilterDuration(Filter previous) {
-			super(previous);
-		}
-		@Override
-		protected boolean _accept(Data data) {
-			if (!data.getContentType().getID().equals(VideoContentType.VIDEO_TYPE)) return true;
-			VideoDataType video = (VideoDataType)data.getContent();
-			if (rangeDuration.min > 0 && video.getDuration() < rangeDuration.min) return false;
-			if (rangeDuration.max > 0 && video.getDuration() > rangeDuration.max) return false;
-			return true;
-		}
+	@Override
+	public Filter getFilter(Filter filter) {
+		if (casting.trim().length() == 0) return filter;
+		return new FilterCasting(filter);
 	}
-	
 	public class FilterCasting extends Filter {
 		public FilterCasting(Filter previous) {
 			super(previous);
 		}
 		@Override
+		protected boolean isEnabled(Data data) {
+			return data.getContentType().getID().equals(VideoContentType.VIDEO_TYPE);
+		}
+		@Override
 		protected boolean _accept(Data data) {
-			if (!data.getContentType().getID().equals(VideoContentType.VIDEO_TYPE)) return true;
 			VideoInfo info = (VideoInfo)data.getContent().getInfo();
 			Set<String> values = new HashSet<String>();
 			addList(info.getActors(), values);
@@ -99,4 +95,5 @@ public class VideoParameters implements ContentTypeParameters {
 				}
 		}
 	}
+	
 }

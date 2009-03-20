@@ -7,8 +7,11 @@ import java.util.List;
 import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.core.InitializationException;
 import net.lecousin.dataorganizer.core.database.content.ContentType;
+import net.lecousin.dataorganizer.core.database.refresh.RefreshOptions;
+import net.lecousin.dataorganizer.core.database.refresh.Refresher;
 import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.dataorganizer.core.database.version.VersionLoader;
+import net.lecousin.dataorganizer.ui.dialog.RefreshDialog;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.Triple;
 import net.lecousin.framework.collections.CollectionUtil;
@@ -23,6 +26,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.swt.widgets.Shell;
 
 public class RealDataBase extends DataBase {
 
@@ -204,9 +208,11 @@ public class RealDataBase extends DataBase {
 		return new RealData(this, id, name, type, sources);
 	}
 	
-	public synchronized void refresh() {
-		// TODO remove not existing file (check if the same is present in the database..., try to find it in the file system)
-		// TODO handle if the file is not on a hard drive
+	public synchronized void refresh(Shell shell) {
+		RefreshDialog dlg = new RefreshDialog(shell);
+		RefreshOptions options = dlg.open();
+		if (options == null) return;
+		Refresher.refresh(shell, this, getAllData(), options);
 	}
 
 	public Event<Triple<Data,List<Long>,Boolean>> dataOpenedChanged = new Event<Triple<Data,List<Long>,Boolean>>();

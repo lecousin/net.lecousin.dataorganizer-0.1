@@ -142,11 +142,15 @@ public class DataOrganizerPlayList extends PlayList {
 		item.setImage(data.getContentType().getIcon());
 		if (data.getSources().size() > 1) {
 			for (DataSource source : data.getSources()) {
+				if (source == null) continue;
 				URI uri = source.ensurePresenceAndGetURI();
 				TreeItem subitem = new TreeItem(item, SWT.NONE);
-				String name = uri.getPath();
-				int i = name.lastIndexOf('/');
-				if (i >= 0) name = name.substring(i+1);
+				String name = data.getContent().getSourceName(source);
+				if (name == null) {
+					name = uri.getPath();
+					int i = name.lastIndexOf('/');
+					if (i >= 0) name = name.substring(i+1);
+				}
 				subitem.setText(name);
 				subitem.setImage(data.getContentType().getIcon());
 				subitem.setData(new DataSourceItem(data, source, uri));
@@ -167,7 +171,9 @@ public class DataOrganizerPlayList extends PlayList {
 	
 	private URI getURI(Data data) {
 		if (data.getSources().size() == 1) {
-			return data.getSources().get(0).ensurePresenceAndGetURI();
+			DataSource s = data.getSources().get(0);
+			if (s == null) return null;
+			return s.ensurePresenceAndGetURI();
 		}
 		return null;
 	}
