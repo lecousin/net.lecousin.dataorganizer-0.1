@@ -2,9 +2,17 @@ Avant prochaine release:
 
 DataOrganizer
  + Bug LCTable: ne plus utiliser ScrolledComposite a cause de MouseWhell, mais mettre la horizontal scroll bar manuellement
+ + info vraiment par source, merge a l'affichage + filtrage possible a l'affichage + suppression d'une source...
+ + Supprimer du filesystem: verifier s'il y a des sources utilisees par d'autres données
+ 
+Update
+ + garder les fichiers de config (recentWorkspaces.xml...)
+ + splitter: jre, extras, appli... et ne recuperer que ce dont il y a besoin
 
 Audio
  + MP3 single
+ + d'autres types supportes
+ + PLS +...
  + UI: genres
  + Internet: CDDB + FreeDB.org + ???
  + tout les TODO, icones...
@@ -15,6 +23,7 @@ Video
  + Icones sur les Action sur Video
  + Video search: duration: accept toutes les durees=> faire la recherche sinon c lourd il faut trouver la tranche minimum
  + essayer avec tous mes CD/DVD de films
+ + continuer les types, gerer width/height ... si format gere en interne..
 
 ---------------------------------------------------------------------
 Moins urgent:
@@ -52,7 +61,6 @@ Media Player
  + playlist : deplacer les elements par drag'n'drop
  
 Audio
- + PLS
  + Lecteur: utiliser autre que VLC?? surtout pour CDA.. ca marche pas
    + javax.sound.{sampled,midi}
    + JMF

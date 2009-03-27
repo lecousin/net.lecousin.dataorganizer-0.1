@@ -16,6 +16,9 @@ import net.lecousin.dataorganizer.internal.EclipsePlugin;
 import net.lecousin.dataorganizer.ui.wizard.adddata.AddData_Page;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.eclipse.extension.EclipsePluginExtensionUtil;
+import net.lecousin.framework.files.FileType;
+import net.lecousin.framework.files.TypedFile;
+import net.lecousin.framework.files.TypedFolder;
 import net.lecousin.framework.log.Log;
 import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.version.Version;
@@ -34,8 +37,11 @@ public abstract class ContentType {
 	public abstract String getID();
 	public abstract String getName();
 	public abstract DataContentType create(Data data);
-	
-	public abstract List<VirtualData> detect(VirtualDataBase db, IFileStore file, List<IFileStore> remainingFolders, List<IFileStore> remainingFiles, Shell shell);
+
+	public abstract FileType[] getEligibleFileTypesForDetection();
+	public abstract List<Pair<List<IFileStore>,VirtualData>> detectOnFolder(VirtualDataBase db, TypedFolder folder, Shell shell);
+	public abstract List<Pair<List<IFileStore>,VirtualData>> detectOnFile(VirtualDataBase db, TypedFolder folder, IFileStore file, TypedFile typedFile, Shell shell);
+	public abstract List<Pair<List<IFileStore>,VirtualData>> detectOnFile(VirtualDataBase db, TypedFolder folder, IFileStore file, Shell shell);
 	
 	public abstract Image getIcon();
 	public abstract Image getDefaultTypeImage();

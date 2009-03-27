@@ -44,6 +44,7 @@ public class OverviewPanel {
 		RowLayout l = new RowLayout(SWT.HORIZONTAL);
 		l.marginHeight = l.marginWidth = 0;
 		l.spacing = 5;
+		l.center = true;
 		line.setLayout(l);
 		UIUtil.newLabel(line, Local.Duration+":", true, false);
 		UIUtil.newLabel(line, (data.getDuration() < 0 ? "-" : DateTimeUtil.getTimeMinimalString(data.getDuration())));

@@ -5,6 +5,7 @@ import net.lecousin.dataorganizer.core.DataOrganizer;
 import net.lecousin.dataorganizer.core.DataLabels.Label;
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.ui.control.LabelTree;
+import net.lecousin.dataorganizer.ui.datalist.DataListMenu;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.event.Event.Listener;
 import net.lecousin.framework.ui.eclipse.SharedImages;
@@ -21,34 +22,32 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-public class LabelsPanel extends Composite {
+public class HeaderPanel extends Composite {
 
-	public LabelsPanel(Composite parent) {
+	public HeaderPanel(Composite parent) {
 		super(parent, SWT.NONE);
 		setBackground(parent.getBackground());
-		GridLayout l = UIUtil.gridLayout(this, 2);
-		l.marginHeight = 0;
-		l.marginWidth = 0;
-		UIUtil.newLabel(this, Local.Labels + ":", true, false);
-		panel = UIUtil.newComposite(this);
-		panel.setLayoutData(UIUtil.gridDataHoriz(1, true));
 		RowLayout layout = new RowLayout(SWT.HORIZONTAL);
 		layout.wrap = true;
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
-		panel.setLayout(layout);
-		addButton = new LabelButton(panel);
+		layout.center = true;
+		setLayout(layout);
+		labelImage = UIUtil.newImage(this, SharedImages.getImage(SharedImages.icons.x16.basic.LABEL));
+		labelTitle = UIUtil.newLabel(this, Local.Labels + ":", true, false);
+		if (data.getDataBase() == DataOrganizer.database()) {
+		addButton = new LabelButton(this);
 		addButton.setImage(SharedImages.getImage(SharedImages.icons.x16.basic.ADD));
 		addButton.addClickListener(new Listener<MouseEvent>() {
 			public void fire(MouseEvent event) {
 				addLabel();
 			}
 		});
+		}
 		DataOrganizer.labels().labelAssigned().addListener(labelChanged);
 		DataOrganizer.labels().labelUnassigned().addListener(labelChanged);
 		addDisposeListener(new DisposeListener() {
@@ -59,7 +58,7 @@ public class LabelsPanel extends Composite {
 		});
 	}
 	
-	private Composite panel;
+	private org.eclipse.swt.widgets.Label labelImage, labelTitle;
 	private LabelButton addButton;
 	private Listener<Pair<Label,Data>> labelChanged = new Listener<Pair<Label,Data>>() {
 		public void fire(Pair<Label, Data> event) {
@@ -74,22 +73,36 @@ public class LabelsPanel extends Composite {
 	
 	public void refresh(Data data) {
 		this.data = data;
-		for (Control c : panel.getChildren())
-			if (c != addButton)
+		for (Control c : getChildren())
+			if (c != addButton && c != labelImage && c != labelTitle)
 				c.dispose();
 		
+		if (data != null) {
+			DataListMenu.fillBar(this, data, true);
+			boolean iconAdded = false;
+			for (Control c : getChildren())
+				if (c != addButton && c != labelImage && c != labelTitle) {
+					c.moveAbove(labelImage);
+					iconAdded = true;
+				}
+			if (iconAdded) {
+				UIUtil.newSeparator(this, false, false).moveAbove(labelImage);
+			}
+		}
+		
+		if (data.getDataBase() == DataOrganizer.database())
 		for (Label label : DataOrganizer.labels().getLabels(data)) {
-			LabelItem item = new LabelItem(panel, label.getName(), LABEL_COLOR, new Listener<LabelItem>() {
+			LabelItem item = new LabelItem(this, label.getName(), LABEL_COLOR, new Listener<LabelItem>() {
 				public void fire(LabelItem event) {
-					((Label)event.getData()).removeData(LabelsPanel.this.data);
-					refresh(LabelsPanel.this.data);
+					((Label)event.getData()).removeData(HeaderPanel.this.data);
+					refresh(HeaderPanel.this.data);
 				}
 			}, true);
 			item.moveAbove(addButton);
 			item.setData(label);
 		}
 		
-		UIControlUtil.autoresize(panel);
+		UIControlUtil.autoresize(this);
 	}
 	
 	private FlatPopupMenu addMenu = null;

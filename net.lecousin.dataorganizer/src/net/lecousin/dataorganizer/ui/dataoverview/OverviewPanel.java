@@ -48,7 +48,7 @@ public class OverviewPanel extends Composite {
 
 		Composite tmpPanel = UIUtil.newGridComposite(this, 2, 0, 1);
 		UIUtil.gridDataHorizFill(tmpPanel);
-		labelsPanel = new LabelsPanel(tmpPanel);
+		labelsPanel = new HeaderPanel(tmpPanel);
 		labelsPanel.setLayoutData(UIUtil.gridDataHoriz(1, true));
 		
 		Composite leftPanel = UIUtil.newComposite(this);
@@ -126,7 +126,7 @@ public class OverviewPanel extends Composite {
 	
 	private Data data;
 	
-	private LabelsPanel labelsPanel;
+	private HeaderPanel labelsPanel;
 	private DataImageControl imageControl;
 	private Text textName;
 	private Composite contentTypePanel;
@@ -232,7 +232,7 @@ public class OverviewPanel extends Composite {
 			});
 			List<InfoRetrieverPlugin> plugins = InfoRetrieverPluginRegistry.getRetrievers(data.getContentType().getID());
 			for (InfoRetrieverPlugin plugin : plugins) {
-				new FlatPopupMenu.Menu(menu, plugin.getName(), plugin.getIcon(), false, false, new RunnableWithData<InfoRetrieverPlugin>(plugin) {
+				new FlatPopupMenu.Menu(menu, Local.From+" "+plugin.getName(), plugin.getIcon(), false, false, new RunnableWithData<InfoRetrieverPlugin>(plugin) {
 					public void run() {
 						InfoRetriever.retrieve(MyDialog.getPlatformShell(), data, data());
 						refresh(data);

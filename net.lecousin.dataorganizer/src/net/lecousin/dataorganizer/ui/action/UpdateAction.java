@@ -3,13 +3,14 @@ package net.lecousin.dataorganizer.ui.action;
 import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.ui.application.update.Updater;
 import net.lecousin.dataorganizer.ui.application.update.Updater.UpdateException;
-import net.lecousin.framework.Pair;
+import net.lecousin.framework.Triple;
 import net.lecousin.framework.ui.eclipse.SharedImages;
 import net.lecousin.framework.version.Version;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.PlatformUI;
+import org.w3c.dom.Element;
 
 public class UpdateAction extends Action {
 
@@ -24,12 +25,13 @@ public class UpdateAction extends Action {
 	public void run() {
 		try {
 			boolean updated = false;
-			Pair<Version,String> p = Updater.getLatestVersionInfo();
+			Triple<Version,Element,Element> p = Updater.getLatestVersionInfo();
 			Version current = Updater.getCurrentVersion();
 			if (p != null && p.getValue1().compareTo(current) > 0) {
-				if (Updater.askToUpdate(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), current, p.getValue1())) {
+				String news = Updater.getNews(p.getValue2(), current, p.getValue1());
+				if (Updater.askToUpdate(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), current, p.getValue1(), news)) {
 					updated = true;
-					Updater.launchUpdate(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), p.getValue2());
+					Updater.launchUpdate(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), p.getValue3());
 				}
 			}
 			if (!updated)

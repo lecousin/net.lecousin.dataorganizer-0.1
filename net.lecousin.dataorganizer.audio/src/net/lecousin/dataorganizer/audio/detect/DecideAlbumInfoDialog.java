@@ -8,6 +8,8 @@ import net.lecousin.dataorganizer.audio.Local;
 import net.lecousin.dataorganizer.audio.internal.EclipsePlugin;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.event.Event.Listener;
+import net.lecousin.framework.files.audio.AudioFile;
+import net.lecousin.framework.files.audio.AudioFileInfo;
 import net.lecousin.framework.ui.eclipse.EclipseImages;
 import net.lecousin.framework.ui.eclipse.EclipseWorkbenchUtil;
 import net.lecousin.framework.ui.eclipse.UIUtil;
@@ -17,8 +19,6 @@ import net.lecousin.framework.ui.eclipse.control.buttonbar.OkCancelButtonsPanel;
 import net.lecousin.framework.ui.eclipse.control.text.lcml.LCMLText;
 import net.lecousin.framework.ui.eclipse.dialog.ErrorDlg;
 import net.lecousin.framework.ui.eclipse.dialog.FlatDialog;
-import net.lecousin.media.sound.files.audio.AudioFile;
-import net.lecousin.media.sound.files.audio.AudioFileInfo;
 
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.swt.events.ModifyEvent;
@@ -99,7 +99,7 @@ public class DecideAlbumInfoDialog extends FlatDialog {
 		UIUtil.newLabel(contentPanel, Local.Artist.toString());
 		UIUtil.newLabel(contentPanel, Local.Year.toString());
 		for (AudioFile file : tracks) {
-			String s = file.getURI();
+			String s = file.getURI().toString();
 			int i = s.lastIndexOf('/');
 			if (i >= 0) s = s.substring(i+1);
 			s = URLDecoder.decode(s).trim();

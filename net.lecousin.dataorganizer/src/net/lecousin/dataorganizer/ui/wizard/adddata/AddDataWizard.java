@@ -1,14 +1,10 @@
 package net.lecousin.dataorganizer.ui.wizard.adddata;
 
 import java.lang.reflect.InvocationTargetException;
-import java.net.URLDecoder;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.core.DataOrganizer;
@@ -20,17 +16,10 @@ import net.lecousin.dataorganizer.core.database.refresh.Refresher;
 import net.lecousin.dataorganizer.internal.EclipsePlugin;
 import net.lecousin.dataorganizer.ui.dialog.RefreshDialog;
 import net.lecousin.dataorganizer.ui.wizard.adddata.AddData_Page.Result;
-import net.lecousin.framework.Pair;
-import net.lecousin.framework.io.FileSystemUtil;
 import net.lecousin.framework.progress.WorkProgress;
-import net.lecousin.framework.thread.RunnableWithData;
 import net.lecousin.framework.ui.eclipse.dialog.ErrorDlg;
-import net.lecousin.framework.ui.eclipse.dialog.FlatPagedListDialog;
-import net.lecousin.framework.ui.eclipse.dialog.LCMLMessageDialog;
 import net.lecousin.framework.ui.eclipse.dialog.QuestionDlg;
-import net.lecousin.framework.ui.eclipse.dialog.MyDialog.OrientationY;
 
-import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -99,6 +88,8 @@ public class AddDataWizard extends Wizard {
 		if (result == null) return false;
 		
         try {
+    		AddDataDialog dlg = new AddDataDialog(getShell(), result);
+    		if (!dlg.open()) return false;
             getContainer().run(false, true, new AddData(getShell(), result));
         } catch (InterruptedException e) {
             return false;
@@ -106,6 +97,9 @@ public class AddDataWizard extends Wizard {
             Throwable realException = e.getTargetException();
             ErrorDlg.exception("Error", "An internal error occured when adding data", EclipsePlugin.ID, realException);
             return false;
+        } finally {
+        	if (result.db != null)
+        		result.db.close();
         }
 		
 		return true;
@@ -164,54 +158,7 @@ public class AddDataWizard extends Wizard {
     		RefreshDialog rd = new RefreshDialog(shell, options);
     		if (rd.open() != null)
     			Refresher.refresh(shell, DataOrganizer.database(), added, options);
-    		StringBuilder message = new StringBuilder();
-    		message.append(added.size()).append(' ').append(Local.data_successfully_added).append('.');
-    		Set<String> extensions = new HashSet<String>();
-    		if (!result.noDetectedFiles.isEmpty()) {
-    			for (IFileStore file : result.noDetectedFiles)
-    				extensions.add(FileSystemUtil.getFileNameExtension(file.getName()).toLowerCase());
-    			message.append("<br> <br>");
-    			message.append(Local.process(Local.MESSAGE_Not_detected, result.noDetectedFiles.size(), extensions.size()));
-    		}
-    		LCMLMessageDialog dlg = new LCMLMessageDialog(shell, message.toString(), LCMLMessageDialog.Type.INFORMATION);
-    		dlg.addLinkListener("files", new RunnableWithData<Pair<List<IFileStore>,Set<String>>>(new Pair<List<IFileStore>,Set<String>>(result.noDetectedFiles, extensions)) {
-    			@SuppressWarnings("unchecked")
-				public void run() {
-    				FlatPagedListDialog.Filter<IFileStore>[] filters = new FlatPagedListDialog.Filter[1];
-    				filters[0] = new FlatPagedListDialog.FilterListPossibilities<IFileStore, String>(data().getValue2()) {
-						public String getName() {
-							return Local.Extensions.toString();
-						}
-						@Override
-						protected String getName(String possibility) {
-							return possibility;
-						}
-						@Override
-						protected boolean accept(IFileStore element, String possibility) {
-							return element.getName().endsWith(possibility);
-						}
-					};
-    				FlatPagedListDialog<IFileStore> dlg = new FlatPagedListDialog<IFileStore>(shell, Local.Files_not_detected.toString(), data().getValue1(), 20, new FlatPagedListDialog.TextProvider<IFileStore>() {
-    					@Override
-    					protected String getText(IFileStore element) {
-    						return URLDecoder.decode(element.toURI().toString());
-    					}
-    				}, filters);
-    				dlg.openProgressive(null, OrientationY.BOTTOM, false);
-    			}
-    		});
-    		dlg.addLinkListener("extensions", new RunnableWithData<List<String>>(new ArrayList<String>(extensions)) {
-    			public void run() {
-    				FlatPagedListDialog<String> dlg = new FlatPagedListDialog<String>(shell, Local.Extensions.toString(), data(), 25, new FlatPagedListDialog.TextProvider<String>() {
-    					@Override
-    					protected String getText(String element) {
-    						return element;
-    					}
-    				}, null);
-    				dlg.openProgressive(null, OrientationY.BOTTOM, false);
-    			}
-    		});
-    		dlg.open(Local.Data_added.toString());
+    		MessageDialog.openInformation(shell, Local.Add_data.toString(), ""+result.toAdd.size()+Local.data_successfully_added);
     	}
 	}
 }

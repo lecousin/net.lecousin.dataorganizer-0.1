@@ -11,6 +11,8 @@ import net.lecousin.dataorganizer.core.database.info.Info;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.Triple;
+import net.lecousin.framework.collections.ArrayUtil;
+import net.lecousin.framework.strings.StringUtil;
 import net.lecousin.framework.xml.XmlWriter;
 
 import org.w3c.dom.Element;
@@ -34,6 +36,7 @@ public class AudioInfo extends Info {
 		cover_front = l.getCoverFront(elt);
 		cover_back = l.getCoverBack(elt);
 		images = l.getImages(elt);
+		mcdi = l.getMCDI(elt);
 	}
 
 	@Override
@@ -63,6 +66,8 @@ public class AudioInfo extends Info {
 			xml.openTag("cover_back").addAttribute("source", t.getValue1()).addAttribute("description", t.getValue2()).addAttribute("path", t.getValue3()).closeTag();
 		for (Triple<String,String,String> t : images)
 			xml.openTag("image").addAttribute("source", t.getValue1()).addAttribute("description", t.getValue2()).addAttribute("path", t.getValue3()).closeTag();
+		if (mcdi != null)
+			xml.openTag("mcdi").addText(StringUtil.encodeHexa(mcdi)).closeTag();
 	}
 
 	@Override
@@ -80,6 +85,7 @@ public class AudioInfo extends Info {
 	private List<Track> tracks = null;
 	private List<String> genres = new LinkedList<String>();
 	private int year = -1;
+	private byte[] mcdi = null;
 	private List<Triple<String,String,String>> cover_front = new LinkedList<Triple<String,String,String>>();
 	private List<Triple<String,String,String>> cover_back = new LinkedList<Triple<String,String,String>>();
 	private List<Triple<String,String,String>> images = new LinkedList<Triple<String,String,String>>();
@@ -139,4 +145,11 @@ public class AudioInfo extends Info {
 	public int getYear() { return year; }
 	public void setYear(int y) { if (y == year) return; year = y; signalModification(); }
 
+	public byte[] getMCDI() { return mcdi; }
+	public void setMCDI(byte[] mcdi) { 
+		if (mcdi == null && this.mcdi == null) return;
+		if (mcdi != null && this.mcdi != null && ArrayUtil.equals(mcdi, this.mcdi)) return;
+		this.mcdi = mcdi;
+		signalModification();
+	}
 }

@@ -16,9 +16,13 @@ import net.lecousin.dataorganizer.ui.plugin.ActionUtil;
 import net.lecousin.dataorganizer.ui.plugin.Action.Type;
 import net.lecousin.framework.collections.CollectionUtil;
 import net.lecousin.framework.collections.SortedListTree;
+import net.lecousin.framework.event.Event.Listener;
 import net.lecousin.framework.thread.RunnableWithData;
 import net.lecousin.framework.ui.eclipse.SharedImages;
+import net.lecousin.framework.ui.eclipse.UIUtil;
 import net.lecousin.framework.ui.eclipse.dialog.FlatPopupMenu;
+
+import org.eclipse.swt.widgets.Composite;
 
 public class DataListMenu {
 
@@ -86,6 +90,39 @@ public class DataListMenu {
 					DataListActions.delete(data());
 				}
 			});
+		}
+	}
+
+	public static void fillBar(Composite bar, Data data, boolean addDataListManagementActions) {
+		SortedListTree<ActionProvider> providers = new SortedListTree<ActionProvider>(new Comparator<ActionProvider>() {
+			public int compare(ActionProvider a1, ActionProvider a2) {
+				return a1.getPriority() - a2.getPriority();
+			}
+		});
+		List<ActionProvider> listProviders = ActionProviderManager.getProviders(data.getContentType().getID());
+		if (listProviders != null)
+			providers.addAll(listProviders);
+		boolean menuAdded = false;
+		for (ActionProvider provider : providers)
+			for (Action action : provider.getActions(CollectionUtil.single_element_list(data))) {
+				if (action.getType().equals(Type.LIST_MANAGEMENT) && !addDataListManagementActions)
+					continue;
+				UIUtil.newImageButton(bar, action.getIcon(), new Listener<Action>() {
+					public void fire(Action event) {
+						event.run();
+					}
+				}, action).setToolTipText(action.getText());
+				menuAdded = true;
+			}
+		if (menuAdded)
+			UIUtil.newSeparator(bar, false, false);
+		if (addDataListManagementActions) {
+			String str = Local.Delete.toString();
+			UIUtil.newImageButton(bar, SharedImages.getImage(SharedImages.icons.x16.basic.DEL), new Listener<Data>() {
+				public void fire(Data event) {
+					DataListActions.delete(CollectionUtil.single_element_list(event));
+				}
+			}, data).setToolTipText(str);
 		}
 	}
 	

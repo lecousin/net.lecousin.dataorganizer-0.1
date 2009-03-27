@@ -18,5 +18,6 @@ public interface Loader extends ContentTypeLoader {
 	public List<Triple<String,String,String>> getCoverFront(Element root);
 	public List<Triple<String,String,String>> getCoverBack(Element root);
 	public List<Triple<String,String,String>> getImages(Element root);
+	public byte[] getMCDI(Element root);
 	
 }

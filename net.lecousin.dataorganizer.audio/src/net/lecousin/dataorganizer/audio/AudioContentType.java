@@ -3,7 +3,6 @@ package net.lecousin.dataorganizer.audio;
 import java.util.List;
 
 import net.lecousin.dataorganizer.audio.detect.AlbumDetector;
-import net.lecousin.dataorganizer.audio.detect.MP3Detector;
 import net.lecousin.dataorganizer.audio.internal.EclipsePlugin;
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.VirtualData;
@@ -12,13 +11,17 @@ import net.lecousin.dataorganizer.core.database.content.ContentType;
 import net.lecousin.dataorganizer.core.database.content.DataContentType;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
 import net.lecousin.dataorganizer.ui.wizard.adddata.AddData_Page;
-import net.lecousin.framework.io.FileSystemUtil;
+import net.lecousin.framework.Pair;
+import net.lecousin.framework.files.FileType;
+import net.lecousin.framework.files.TypedFile;
+import net.lecousin.framework.files.TypedFolder;
+import net.lecousin.framework.files.audio.AudioFile;
+import net.lecousin.framework.files.playlist.PlayList;
 import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.ui.eclipse.EclipseImages;
 import net.lecousin.framework.ui.eclipse.SharedImages;
 import net.lecousin.framework.version.Version;
 
-import org.eclipse.core.filesystem.IFileInfo;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
@@ -71,15 +74,24 @@ public class AudioContentType extends ContentType {
 	public void closeLoadDataContentContext(Object context) {
 	}
 
+	private static final FileType[] filetypes = new FileType[] {
+		AudioFile.FILE_TYPE, PlayList.FILE_TYPE,
+	};
 	@Override
-	public List<VirtualData> detect(VirtualDataBase db, IFileStore file, List<IFileStore> remainingFolders, List<IFileStore> remainingFiles, Shell shell) {
-		IFileInfo info = file.fetchInfo();
-		if (info.isDirectory())
-			return AlbumDetector.detect(db, file, info, remainingFolders, remainingFiles, shell);
-		
-		String ext = FileSystemUtil.getFileNameExtension(file.getName()).toLowerCase();
-		if (ext.equals("mp3") || ext.equals("mpeg3") || ext.equals("mpg3"))
-			return MP3Detector.detect(db, file, info, remainingFolders, remainingFiles);
+	public FileType[] getEligibleFileTypesForDetection() {
+		return filetypes;
+	}
+	@Override
+	public List<Pair<List<IFileStore>, VirtualData>> detectOnFolder(VirtualDataBase db, TypedFolder folder, Shell shell) {
+		return AlbumDetector.detect(db, folder, shell);
+	}
+	@Override
+	public List<Pair<List<IFileStore>, VirtualData>> detectOnFile(VirtualDataBase db, TypedFolder folder, IFileStore file, Shell shell) {
 		return null;
 	}
+	@Override
+	public List<Pair<List<IFileStore>, VirtualData>> detectOnFile(VirtualDataBase db, TypedFolder folder, IFileStore file, TypedFile typedFile, Shell shell) {
+		return null; // TODO
+	}
+
 }

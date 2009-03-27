@@ -1,5 +1,6 @@
 package net.lecousin.dataorganizer.ui.dataoverview;
 
+import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.info.InfoRetriever;
 import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPlugin;
@@ -32,8 +33,8 @@ public class SourceControl extends Composite {
 		layout.horizontalSpacing = 1;
 		if (icon != null)
 			UIUtil.newImage(this, icon);
-		UIUtil.newLinkSoftNetStyle(this, name, new GoToSource());
-		UIUtil.newImageButton(this, SharedImages.getImage(SharedImages.icons.x16.basic.REFRESH), new Refresh(), null);
+		UIUtil.newLinkSoftNetStyle(this, name, new GoToSource()).setToolTipText(Local.process(Local.Go_to__page_of__, name, data.getName()));
+		UIUtil.newImageButton(this, SharedImages.getImage(SharedImages.icons.x16.basic.REFRESH), new Refresh(), null).setToolTipText(Local.process(Local.Refresh_information_from__, name));
 	}
 	
 	private Data data;

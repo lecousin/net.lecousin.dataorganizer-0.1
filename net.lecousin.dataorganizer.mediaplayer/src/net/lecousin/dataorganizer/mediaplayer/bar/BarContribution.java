@@ -2,7 +2,7 @@ package net.lecousin.dataorganizer.mediaplayer.bar;
 
 import net.lecousin.dataorganizer.mediaplayer.DataOrganizerMediaPlayer;
 import net.lecousin.dataorganizer.mediaplayer.Local;
-import net.lecousin.framework.ui.eclipse.SharedImages;
+import net.lecousin.framework.media.Icons;
 
 import org.eclipse.jface.action.ContributionItem;
 import org.eclipse.swt.SWT;
@@ -26,7 +26,7 @@ public class BarContribution extends ContributionItem {
 	@Override
 	public void fill(ToolBar parent, int index) {
 		ToolItem item = new ToolItem(parent, SWT.PUSH);
-		item.setImage(SharedImages.getImage(SharedImages.icons.x16.filetypes.MOVIE));
+		item.setImage(Icons.getIcon());
 		item.setToolTipText(Local.Open_Media_Player.toString());
 		item.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {

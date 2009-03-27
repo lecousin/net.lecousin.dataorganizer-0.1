@@ -7,6 +7,7 @@ import net.lecousin.dataorganizer.mediaplayer.DataOrganizerMediaPlayer;
 import net.lecousin.dataorganizer.ui.plugin.Action;
 import net.lecousin.dataorganizer.video.Local;
 import net.lecousin.framework.collections.CollectionUtil;
+import net.lecousin.framework.media.Icons;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -21,7 +22,7 @@ public class ActionAddInMediaPlayer implements Action {
 	
 	private List<Data> data;
 	
-	public Image getIcon() { return null; } // TODO 
+	public Image getIcon() { return Icons.getIconAdd(); } 
 
 	public String getText() { return Local.Add_to_Media_Player_List.toString(); }
 

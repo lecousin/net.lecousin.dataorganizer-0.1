@@ -45,6 +45,7 @@ public abstract class Data implements SelfMap.Entry<Long> {
 	protected String comment = null;
 	protected long dateAdded = System.currentTimeMillis();
 	
+	public DataBase getDataBase() { return db; }
 	public List<Long> getViews() { return new ArrayList<Long>(views); }
 	public byte getRate() { return rate; }
 	public String getComment() { return comment; }

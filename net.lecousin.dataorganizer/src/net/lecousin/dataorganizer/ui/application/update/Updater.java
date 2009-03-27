@@ -25,15 +25,18 @@ import net.lecousin.framework.net.http.client.HttpResponse;
 import net.lecousin.framework.net.mime.Mime;
 import net.lecousin.framework.net.mime.content.MimeContent;
 import net.lecousin.framework.progress.WorkProgress;
+import net.lecousin.framework.thread.RunnableWithData;
+import net.lecousin.framework.ui.eclipse.UIUtil;
+import net.lecousin.framework.ui.eclipse.control.text.lcml.LCMLText;
+import net.lecousin.framework.ui.eclipse.dialog.FlatDialog;
 import net.lecousin.framework.ui.eclipse.dialog.QuestionDlg;
 import net.lecousin.framework.ui.eclipse.dialog.QuestionDlg.Answer;
 import net.lecousin.framework.ui.eclipse.progress.WorkProgressDialog;
 import net.lecousin.framework.version.Version;
-import net.lecousin.framework.xml.XmlParsingUtil;
 import net.lecousin.framework.xml.XmlUtil;
-import net.lecousin.framework.xml.XmlParsingUtil.Node;
 
 import org.apache.http.HttpStatus;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.w3c.dom.Element;
 
@@ -75,7 +78,7 @@ public class Updater {
 		}
 	}
 	
-	public static Pair<Version,String> getLatestVersionInfo() throws UpdateException {
+	public static Triple<Version,Element,Element> getLatestVersionInfo() throws UpdateException {
 		HttpClient client = new HttpClient(SocketFactory.getDefault());
 		HttpRequest req;
 		HttpResponse resp;
@@ -118,26 +121,47 @@ public class Updater {
 				Log.error(Updater.class, "Unable to get update.xml file content", e);
 			throw new UpdateException(Local.ERROR_UPDATE_WEB_SITE.toString());
 		}
-		Triple<Node,Boolean,Integer> t = XmlParsingUtil.parseOpenNode(xml, 0);
-		Node node = t.getValue1();
-		if (!node.name.equals("dataorganizer")) {
-			if (Log.error(Updater.class))
-				Log.error(Updater.class, "Invalid update.xml file: expected node is <dataorganizer...");
-			throw new UpdateException(Local.ERROR_UPDATE_WEB_SITE.toString());
-		}			
-			
-		String version = node.attributes.get("version");
 		
-		if (version == null || version.length() == 0) {
+		Element root;
+		try { root = XmlUtil.loadFile(new ByteArrayInputStream(xml.getBytes())); }
+		catch (Throwable t) {
 			if (Log.error(Updater.class))
-				Log.error(Updater.class, "Invalid update.xml file: missing version attribute.");
+				Log.error(Updater.class, "Unable to parse update.xml", t);
+			throw new UpdateException(Local.ERROR_UPDATE_WEB_SITE.toString());
+		}
+		
+		if (!root.getNodeName().equals("dataorganizer")) {
+			if (Log.error(Updater.class))
+				Log.error(Updater.class, "Invalid update.xml file: expected root node is <dataorganizer>");
+			throw new UpdateException(Local.ERROR_UPDATE_WEB_SITE.toString());
+		}
+		
+		Version latest = null;
+		Element updateNode = null;
+		for (Element e : XmlUtil.get_childs_element(root, "update")) {
+			String version = e.getAttribute("version");
+			if (version.equals("DEBUG")) {
+				if (!Application.isDebugEnabled)
+					continue;
+				version = e.getAttribute("simulated");
+			}
+			Version v = new Version(version);
+			if (latest == null || v.compareTo(latest) > 0) {
+				latest = v;
+				updateNode = e;
+			}
+		}
+			
+		if (latest == null) {
+			if (Log.error(Updater.class))
+				Log.error(Updater.class, "Invalid update.xml file: no valid update node.");
 			throw new UpdateException(Local.ERROR_UPDATE_WEB_SITE.toString());
 		}
 		
 		if (Log.debug(Updater.class))
-			Log.debug(Updater.class, "update.xml found: version=" + version);
+			Log.debug(Updater.class, "update.xml found: version=" + latest.toString());
 		
-		return new Pair<Version,String>(new Version(version), xml);
+		return new Triple<Version,Element,Element>(latest, root, updateNode);
 	}
 	
 	public static Version getCurrentVersion() throws UpdateException {
@@ -150,9 +174,50 @@ public class Updater {
 		return new Version(current);
 	}
 	
-	public static boolean askToUpdate(Shell shell, Version currentVersion, Version newVersion) {
+	public static String getNews(Element root, Version currentVersion, Version newVersion) {
+		StringBuilder str = new StringBuilder();
+		HttpClient client = new HttpClient(SocketFactory.getDefault());
+		for (Element e : XmlUtil.get_childs_element(root, "news")) {
+			Version v = new Version(e.getAttribute("version"));
+			if (currentVersion.compareTo(v) >= 0) continue;
+			String url = null;
+			for (Element e2 : XmlUtil.get_childs_element(e, "content")) {
+				if (e2.getAttribute("language").equals(Application.language.name())) {
+					url = e2.getAttribute("url");
+					break;
+				}
+			}
+			if (url == null) continue;
+			HttpRequest req = new HttpRequest(update_host, url);
+			HttpResponse resp;
+			try { resp = client.send(req, true, null, 0); }
+			catch (IOException ex) { continue; }
+			Mime mime = resp.getContent();
+			if (mime == null) continue;
+			MimeContent content = mime.getContent();
+			if (content == null) continue;
+			try { str.append(content.getAsString()); }
+			catch (IOException ex) { continue; }
+		}
+		return str.toString();
+	}
+	
+	public static boolean askToUpdate(Shell shell, Version currentVersion, Version newVersion, String whatsnew) {
 		QuestionDlg dlg = new QuestionDlg(shell, "DataOrganizer update", null);
 		dlg.setMessage(Local.process(Local.MESSAGE_Update_Available, currentVersion.toString(), newVersion.toString()));
+		dlg.handleHyperlinkMessage("news", new RunnableWithData<Pair<Shell,String>>(new Pair<Shell,String>(dlg.getShell(), whatsnew)) {
+			public void run() {
+				FlatDialog dlg = new FlatDialog(data().getValue1(), Local.Update_application.toString(), true, true) {
+					@Override
+					protected void createContent(Composite container) {
+						LCMLText text = new LCMLText(container, false, false);
+						text.setText(data().getValue2());
+						text.setLayoutData(UIUtil.gridData(1, true, 1, false));
+					}
+				};
+				dlg.open(true);
+			}
+		});
 		dlg.setAnswers(new Answer[] {
 			new QuestionDlg.AnswerSimple("update", Local.MESSAGE_Update_Now.toString()),
 			new QuestionDlg.AnswerSimple("later", Local.MESSAGE_Update_Later.toString())
@@ -164,24 +229,16 @@ public class Updater {
 		return true;
 	}
 	
-	public static void launchUpdate(Shell shell, String xml) throws UpdateException {
+	public static void launchUpdate(Shell shell, Element updateNode) throws UpdateException {
 		WorkProgress progress = new WorkProgress(Local.Downloading_latest_version.toString(), 10000, true);
 		WorkProgressDialog dlg = new WorkProgressDialog(shell, progress);
-		Element root;
-		try { root = XmlUtil.loadFile(new ByteArrayInputStream(xml.getBytes())); }
-		catch (Throwable t) {
-			if (Log.error(Updater.class))
-				Log.error(Updater.class, "Unable to parse update.xml", t);
-			throw new UpdateException(Local.ERROR_UPDATE_WEB_SITE.toString());
-		}
-		progress.progress(50);
 		File updateTmp = new File(Application.deployPath, "update-tmp");
 		FileSystemUtil.deleteDirectory(updateTmp);
 		updateTmp.mkdirs();
-		progress.progress(50);
+		progress.progress(20);
 
 		List<String> urls = new LinkedList<String>();
-		for (Element e : XmlUtil.get_childs_element(root, "updater_file"))
+		for (Element e : XmlUtil.get_childs_element(updateNode, "updater_file"))
 			urls.add(XmlUtil.get_inner_text(e));
 		if (urls.isEmpty()) {
 			if (Log.error(Updater.class))
@@ -191,7 +248,7 @@ public class Updater {
 		downloadFile(urls, updateTmp, "updater.jar", progress, 500);
 
 		urls.clear();
-		for (Element e : XmlUtil.get_childs_element(root, "application_file"))
+		for (Element e : XmlUtil.get_childs_element(updateNode, "application_file"))
 			urls.add(XmlUtil.get_inner_text(e));
 		if (urls.isEmpty()) {
 			if (Log.error(Updater.class))
@@ -203,7 +260,7 @@ public class Updater {
 		try {
 			FileSystemUtil.copyDirectory(new File(Application.deployPath, "jre"), new File(updateTmp, "jre"), progress, 300);
 			Runtime.getRuntime().exec(updateTmp.getAbsolutePath()+"\\jre\\bin\\java.exe -cp \"" + updateTmp.getAbsolutePath() + "\" -jar \"" + updateTmp.getAbsolutePath() + "\\updater.jar\" -deployPath \"" + Application.deployPath.getAbsolutePath() + "\"");
-			progress.progress(100);
+			progress.progress(180);
 			progress.done();
 			dlg.close();
 		} catch (IOException e) {

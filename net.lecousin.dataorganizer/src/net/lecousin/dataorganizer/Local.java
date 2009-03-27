@@ -20,6 +20,7 @@ public enum Local {
 	extensions("extensions", "extensions"),
 	Extensions("Extensions", "Extensions"),
 	_for("for", "pour"),
+	From("From", "De"),
 	including("including", "incluant"),
 	into("into", "vers"),
 	Labels("Labels", "Etiquettes"),
@@ -58,7 +59,6 @@ public enum Local {
 	Amovible_media("Amovible media", "Média amovible"),
 	Analyze_sub_folders_recursively("Analyze sub-folders recursively", "Parcourir les sous-dossiers recursivement"),
 	Analyzing_file_system("Analyzing file system", "Analyze du système de fichiers"),
-	Analyzing_selected_files_and_folders("Analyzing selected files and folders", "Analyze des fichiers et dossiers sélectionnés"),
 	analyzed_folders("folders analyzed", "dossiers analysés"),
 	analyzed_files("files analyzed", "fichiers analysés"),
 	Application_update("DataOrganizer update", "Mise à jour de DataOrganizer"),
@@ -77,6 +77,8 @@ public enum Local {
 	data__s_to_database("data to database", "donnée(s) à la base de données"),
 	data_successfully_added("data have been successfully added to the database", "donnée(s) ont été ajoutée(s) à la base de données avec succès"),
 	Deselect_all("Deselect all", "Désélectionner tout"),
+	Detecting_data_from_analyzed_files("Detecting data from analyzed files and folders", "Détection de données à partir des fichiers et dossiers annalysés"),
+	Detecting_data_for_type("Detecting data of type", "Détection des données de type"),
 	Do_action_for_same_situation("Do this action for all data in the same situation", "Effectuer cette action pour toutes les données dans la même situation"),
 	Do_not_rate_this_data("Do not rate this data", "Ne pas noter cette donnée"),
 	Do_you_confirm_this_operation("Do you confirm this operation ?", "Confirmez-vous cette opération ?"),
@@ -91,6 +93,7 @@ public enum Local {
 	Files_not_detected("Files not detected", "Fichiers non détectés"),
 	Folders_found("Folders found", "Dossiers trouvés"),
 	Folder_URI("Folder URI", "Dossier URI"),
+	Go_to__page_of__("Go to %#1% page of %#2%", "Voir la page %#1% de %#2%"),
 	Ignore_all("Ignore all", "Ignorer tout"),
 	Informtion_already_retrieved("Information have been already retrieved from all known sources", "Les informations ont déjà été récupérées depuis toutes les sources connues"),
 	Initializing_application("Initializing application", "Initialisation de l'application"),
@@ -130,6 +133,7 @@ public enum Local {
 	Refresh_database("Refresh database", "Rafraîchir la base de données"),
 	Refreshing_database_content("Refreshing database content", "Rafraîchissement du contenu de la base de données"),
 	Refreshing_labels("Refreshing labels", "Rafraîchissement des étiquettes"),
+	Refresh_information_from__("Refresh information from %#1%", "Rafraîchir les informations de %#1%"),
 	Remove_data__s("Remove data", "Supprimer des données"),
 	Remove_from_database_and_filesystem("Remove from database and filesystem", "Supprimer de la base de données et de l'ordinateur"),
 	Remove_label("Remove label", "Supprimer une étiquette"),
@@ -302,28 +306,13 @@ public enum Local {
 		"Cette fenêtre est également l'occasion pour vous de donner une note à cette donnée, et d'y déposer un commentaire."
 	),
 	
-	MESSAGE_Not_detected(
-		"<b>Note :</b> Some files have not been included into an added data:<br>" +
-		" - <a href=\"files\">%#1% files</a><br>" +
-		" - including <a href=\"extensions\">%#2% extensions</a><br>"+
-		"This may come from several causes:<br>" +
-		" - the types of content of those files are effectivly not supported types,<br>" +
-		" - you didn't select those types so they are not added,<br>" +
-		" - this version of DataOrganizer was not able to detect those files as data; in this case, check you have the latest version of DataOrganizer, if yes you can signal it to the author.",
-		"<b>Note :</b> Certains fichiers n'ont pas été inclus dans les données ajoutées:<br>" +
-		" - <a href=\"files\">%#1% fichiers</a><br>" +
-		" - parmis lesquels <a href=\"extensions\">%#2% extensions</a> de fichier<br>"+
-		"Cela peut avoir plusieurs raisons:<br>" +
-		" - le type de contenu de ces fichiers ne sont effectivement des types supportés,<br>" +
-		" - vous n'avez pas sélectionné ces types, ils n'ont donc pas été ajoutés,<br>" +
-		" - cette version de DataOrganizer n'a pas été capable de détecter ces fichiers comme des données; dans ce cas, vérifez que vous avez la dernière version de DataOrganizer, si tel est le cas vous pouvez le signaler à l'auteur."
-	),
-	
 	MESSAGE_Update_Available(
 		"<b>A new version of DataOrganizer is available !</b><br/>" +
-		"Your current version is %#1% and version %#2% is available.",
+		"Your current version is %#1% and version %#2% is available.<br/>" +
+		"<a href=\"news\">Check what's new</a>",
 		"<b>Une nouvelle version de DataOrganizer est disponible !</b><br/>" +
-		"Votre version actuelle est %#1% et la version %#2% est disponible."
+		"Votre version actuelle est %#1% et la version %#2% est disponible.<br/>" +
+		"<a href=\"news\">Voir ce qu'il y a de nouveau</a>"
 	),
 	MESSAGE_Update_Now(
 		"Update now to the new version (need to close and restart the application).",
@@ -344,6 +333,41 @@ public enum Local {
 		"Ce logiciel est basé sur un produit Eclipse sous <a href=\"epl\">licence EPL</a><br/>"+
 		"Il contient des librairies Apache sous <a href=\"apache\">licence Apache</a>"
 	),
+	
+	MESSAGE_Add_Data(
+		"%#1% data are ready to be added to your database.<br/>" +
+		"<p marginTop=3>" +
+		"They are listed in the table below, and you are free to remove some of them." +
+		"</p>",
+		"%#1% donnée(s) sont prêtes à être ajoutées à votre base de données.<br/>" +
+		"<p marginTop=3>" +
+		"Elles sont listées dans la table ci-dessous, et vous êtes libre d'en supprimer certaines." +
+		"</p>"
+	),
+	
+	MESSAGE_Not_Detected_Header(
+		"Some files have not been included into a data:",
+		"Certains fichiers n'ont pas été inclus dans une données:"
+	),
+	MESSAGE_Not_Detected_Typed_Files(
+		"<a href=\"typed\">%#1% files</a> which have been a reconized type, but not added:<br/>" +
+		" - you choose to do not add those files<br/>" +
+		" - or even they have been reconized, it was not possible to include them into a data",
+		"<a href=\"typed\">%#1% fichiers</a> ont un type reconnu, mais n'ont pas été ajoutés:<br/>" +
+		" - vous avez choisi de ne pas ajouter ces fichiers<br/>" +
+		" - ou malgré que leur type ait pu être reconnu, il n'a pas été possible de les inclure dans une donnée"
+	),
+	MESSAGE_Not_Detected_Not_Typed_Files(
+		"<a href=\"not_typed\">%#1% files</a> which have not been reconized:<br/>" +
+		" - the types of content of those files are effectivly not supported types,<br>" +
+		" - you didn't select those types so they are not added,<br>" +
+		" - this version of DataOrganizer was not able to detect those files as data; in this case, check you have the latest version of DataOrganizer, if yes you can signal it to the author.",
+		"<a href=\"not_typed\">%#1% fichiers</a> n'ont pas été reconnus:<br/>" +
+		" - le type de contenu de ces fichiers ne sont effectivement pas des types supportés,<br>" +
+		" - vous n'avez pas sélectionné ces types, ils n'ont donc pas été ajoutés,<br>" +
+		" - cette version de DataOrganizer n'a pas été capable de détecter ces fichiers comme des données; dans ce cas, vérifez que vous avez la dernière version de DataOrganizer, si tel est le cas vous pouvez le signaler à l'auteur."
+	),
+		
 	
 	;
 	private Local(String english, String french) {

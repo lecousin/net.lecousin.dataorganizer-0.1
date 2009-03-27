@@ -10,6 +10,10 @@ import net.lecousin.dataorganizer.core.database.content.DataContentType;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
 import net.lecousin.dataorganizer.people.internal.EclipsePlugin;
 import net.lecousin.dataorganizer.ui.wizard.adddata.AddData_Page;
+import net.lecousin.framework.Pair;
+import net.lecousin.framework.files.FileType;
+import net.lecousin.framework.files.TypedFile;
+import net.lecousin.framework.files.TypedFolder;
 import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.ui.eclipse.EclipseImages;
 import net.lecousin.framework.version.Version;
@@ -74,7 +78,19 @@ public class PeopleContentType extends ContentType {
 	}
 
 	@Override
-	public List<VirtualData> detect(VirtualDataBase db, IFileStore file, List<IFileStore> remainingFolders, List<IFileStore> remainingFiles, Shell shell) {
+	public FileType[] getEligibleFileTypesForDetection() {
+		return null;
+	}
+	@Override
+	public List<Pair<List<IFileStore>,VirtualData>> detectOnFolder(VirtualDataBase db, TypedFolder folder, Shell shell) {
+		return null;
+	}
+	@Override
+	public List<Pair<List<IFileStore>,VirtualData>> detectOnFile(VirtualDataBase db, TypedFolder folder, IFileStore file, Shell shell) {
+		return null;
+	}
+	@Override
+	public List<Pair<List<IFileStore>,VirtualData>> detectOnFile(VirtualDataBase db, TypedFolder folder, IFileStore file, TypedFile typedFile, Shell shell) {
 		return null;
 	}
 }

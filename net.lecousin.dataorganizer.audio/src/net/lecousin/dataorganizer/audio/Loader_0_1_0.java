@@ -5,6 +5,7 @@ import java.util.List;
 import net.lecousin.dataorganizer.audio.AudioInfo.Track;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader_0_1_0;
 import net.lecousin.framework.Triple;
+import net.lecousin.framework.strings.StringUtil;
 import net.lecousin.framework.version.Version;
 import net.lecousin.framework.xml.XmlUtil;
 
@@ -61,4 +62,9 @@ public class Loader_0_1_0 extends ContentTypeLoader_0_1_0 implements Loader {
 		return readImages(root, "image");
 	}
 	
+	public byte[] getMCDI(Element root) {
+		Element elt = XmlUtil.get_child_element(root, "mcdi");
+		if (elt == null) return null;
+		return StringUtil.decodeHexa(XmlUtil.get_inner_text(elt));
+	}
 }

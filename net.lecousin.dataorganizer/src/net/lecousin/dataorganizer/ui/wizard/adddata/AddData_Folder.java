@@ -3,8 +3,11 @@ package net.lecousin.dataorganizer.ui.wizard.adddata;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.core.InitializationException;
@@ -13,8 +16,11 @@ import net.lecousin.dataorganizer.core.database.VirtualDataBase;
 import net.lecousin.dataorganizer.core.database.content.ContentType;
 import net.lecousin.dataorganizer.internal.EclipsePlugin;
 import net.lecousin.framework.Pair;
+import net.lecousin.framework.collections.ArrayUtil;
 import net.lecousin.framework.event.Event.Listener;
-import net.lecousin.framework.io.FileSystemUtil;
+import net.lecousin.framework.files.FileType;
+import net.lecousin.framework.files.TypedFile;
+import net.lecousin.framework.files.TypedFolder;
 import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.ui.eclipse.UIUtil;
 import net.lecousin.framework.ui.eclipse.dialog.ErrorDlg;
@@ -186,7 +192,7 @@ public class AddData_Folder extends WizardPage implements AddData_Page {
 			return null;
 		}
 		boolean recurse = checkSubFolders.getSelection();
-
+		
 		Search search = new Search(textFolder.getShell());
 		return search.run(rootURI, recurse, types);
 	}
@@ -195,36 +201,86 @@ public class AddData_Folder extends WizardPage implements AddData_Page {
 		Search(Shell shell) { this.shell = shell; }
 		Shell shell;
 		
-		LinkedList<IFileStore> files;
-		LinkedList<IFileStore> folders;
-		WorkProgress mainProgress;
-		Result result = new Result();
-		
 		Result run(URI rootURI, boolean recurse, List<ContentType> types) {
-			mainProgress = new WorkProgress(Local.Searching_data.toString(), 10000, true);
+			WorkProgress mainProgress = new WorkProgress(Local.Searching_data.toString(), 10000, true);
 			WorkProgressDialog dlg = new WorkProgressDialog(shell, mainProgress);
 			
-			WorkProgress fileSystemProgress = mainProgress.addSubWork(Local.Analyzing_file_system.toString(), 500, 10000);
-			WorkProgress analyzeProgress = mainProgress.addSubWork(Local.Analyzing_selected_files_and_folders.toString(), 9500, 10000);
+			WorkProgress fileSystemProgress = mainProgress.addSubWork(Local.Analyzing_file_system.toString(), 9500, 100000);
+			WorkProgress detectProgress = mainProgress.addSubWork(Local.Detecting_data_from_analyzed_files.toString(), 500, 10000);
 
-			files = new LinkedList<IFileStore>();
-			folders = new LinkedList<IFileStore>();
-			IFileStore root;
-			try { root = EFS.getStore(rootURI); }
+			IFileStore rootFolder;
+			try { rootFolder = EFS.getStore(rootURI); }
 			catch (CoreException e) {
 				// should not happen
 				dlg.close();
 				return null;
 			}
-			browseFolder(root, recurse, fileSystemProgress, fileSystemProgress, rootURI);
-			analyze(analyzeProgress, rootURI, types);
+
+			// sort content types and retrieve eligible file types
+			List<ContentType> sortedTypes = new LinkedList<ContentType>();
+			Set<FileType> filetypes = new HashSet<FileType>();
+			for (ContentType type : types) {
+				FileType[] eligible = type.getEligibleFileTypesForDetection();
+				for (FileType ft : eligible)
+					filetypes.add(ft);
+				int index = 0;
+				for (ContentType type2 : sortedTypes) {
+					FileType[] eligible2 = type2.getEligibleFileTypesForDetection();
+					List<FileType> union = ArrayUtil.unionIdentity(eligible, eligible2);
+					if (!union.isEmpty()) {
+						if (eligible.length < eligible2.length) {
+							index++;
+							continue;
+						}
+					}
+					sortedTypes.add(index, type);
+					break;
+				}
+				if (index >= sortedTypes.size())
+					sortedTypes.add(type);
+			}
+			
+			// analyze file system
+			TypedFolder root = new TypedFolder(rootURI, rootFolder, recurse, filetypes, fileSystemProgress, 100000);
 
 			if (mainProgress.isCancelled()) {
-				if (result.db != null)
-					result.db.close();
 				dlg.close();
 				return null;
 			}
+			
+			Result result = new Result();
+			try { result.db = new VirtualDataBase(detectProgress, 5); }
+			catch (InitializationException e) {
+				ErrorDlg.exception("Create virtual database", "Unable to create a virtual database to store temporary data", EclipsePlugin.ID, e);
+				mainProgress.cancel();
+				dlg.close();
+				return null;
+			}
+			
+			// detect
+			int nb = types.size();
+			ArrayList<WorkProgress> progresses = new ArrayList<WorkProgress>(nb);
+			int amount = 10000-5;
+			for (ContentType type : sortedTypes) {
+				int step = amount/nb--;
+				amount -= step;
+				progresses.add(detectProgress.addSubWork(Local.Detecting_data_for_type+": "+type.getName(), step, 100000));
+			}
+			for (int i = 0; i < sortedTypes.size(); ++i) {
+				ContentType type = sortedTypes.get(i);
+				WorkProgress progress = progresses.get(i);
+				detect(rootURI, root, type, result, new LinkedList<IFileStore>(), progress, 100000);
+				if (mainProgress.isCancelled())
+					break;
+			}
+			
+			if (mainProgress.isCancelled()) {
+				result.db.close();
+				dlg.close();
+				return null;
+			}
+			
+			addNotDetected(root, result);
 			
 			dlg.close();
 			if (mainProgress.isCancelled()) { 
@@ -235,106 +291,75 @@ public class AddData_Folder extends WizardPage implements AddData_Page {
 			return result;
 		}
 
-		
-		private void browseFolder(IFileStore folder, boolean recurse, WorkProgress progress, WorkProgress mainProgress, URI rootURI) {
-			if (progress.isCancelled()) return;
-			mainProgress.setSubDescription(rootURI.relativize(folder.toURI()).toString());
-			addFolder(folder);
-			IFileStore[] children;
-			try { children = folder.childStores(EFS.NONE, null); }
-			catch (CoreException e) {
-				progress.progress(progress.getAmount());
-				return;
-			}
-			List<IFileStore> subfolders = new LinkedList<IFileStore>();
-			if (children != null) // prevent from access denied
-			for (IFileStore f : children) {
-				IFileInfo info = f.fetchInfo();
-				if (!info.isDirectory())
-					addFile(f);
-				else
-					subfolders.add(f);
-			}
-			if (subfolders.isEmpty()) {
-				progress.progress(progress.getAmount());
-				return;
-			}
-			int work = progress.getAmount();
-			int step = work * 5 / 100;
-			work -= step;
-			int nb = subfolders.size();
-			progress.progress(step);
-			for (IFileStore f : subfolders) {
-				if (progress.isCancelled()) return;
-				step = work / nb;
-				work -= step;
-				nb--;
-				if (recurse) {
-					browseFolder(f, true, progress.addSubWork(null, step, 100000), mainProgress, rootURI);
-				} else {
-					addFolder(f);
-					progress.progress(step);
-				}
-			}
-		}
-		private void addFile(IFileStore f) {
-			files.add(f);
-			mainProgress.setSubDescription(Local.Folders_found+": " + folders.size()+", "+Local.Files_found+": " + files.size());
-		}
-		private void addFolder(IFileStore f) {
-			folders.add(f);
-			mainProgress.setSubDescription(Local.Folders_found+": " + folders.size()+", "+Local.Files_found+": " + files.size());
-		}
-		
-		private void analyze(WorkProgress progress, URI rootURI, List<ContentType> types) {
-			int totalFiles = files.size();
-			int totalFolders = folders.size();
-			progress.setAmount(totalFiles + totalFolders + 5);
-			try { result.db = new VirtualDataBase(progress, 5); }
-			catch (InitializationException e) {
-				ErrorDlg.exception("Create virtual database", "Unable to create a virtual database to store temporary data", EclipsePlugin.ID, e);
-				mainProgress.cancel();
-				return;
-			}
-			String rootStr = rootURI.toString();
-			while (!folders.isEmpty()) {
-				IFileStore f = folders.removeFirst();
-				if (progress.isCancelled()) break;
-				progress.setSubDescription(FileSystemUtil.makePathRelative(rootStr, f.toURI().toString()));
-				analyze(f, types, result.db, progress);
-				mainProgress.setSubDescription(Local.Folders_found+": " + totalFolders +", "+Local.Files_found+": " + totalFiles + ", "+Local.analyzed_folders+": " + (totalFolders - folders.size()+", "+Local.analyzed_files+": " + (totalFiles - files.size())));
-			}
-			while (!files.isEmpty()) {
-				IFileStore f = files.removeFirst();
-				if (progress.isCancelled()) break;
-				progress.setSubDescription(FileSystemUtil.makePathRelative(rootStr, f.toURI().toString()));
-				analyze(f, types, result.db, progress);
-				mainProgress.setSubDescription(Local.Folders_found+": " + totalFolders +", "+Local.Files_found+": " + totalFiles + ", "+Local.analyzed_folders+": " + (totalFolders - folders.size()+", "+Local.analyzed_files+": " + (totalFiles - files.size())));
-			}
-		}
-		
-		private void analyze(IFileStore file, List<ContentType> types, VirtualDataBase db, WorkProgress progress) {
-			boolean det = false;
-			for (ContentType type : types) {
-				if (progress.isCancelled()) return;
-				int nbFolders = folders.size();
-				int nbFiles = files.size();
-				try {
-					List<VirtualData> detected = type.detect(db, file, folders, files, shell);
-					if (detected != null && !detected.isEmpty()) {
-						result.toAdd.addAll(detected);
-						det = true;
+		private void detect(URI rootURI, TypedFolder folder, ContentType type, Result result, List<IFileStore> used, WorkProgress progress, int amount) {
+			progress.setSubDescription(rootURI.relativize(folder.folder.toURI()).toString());
+			List<Pair<List<IFileStore>,VirtualData>> data;
+			if (!used.contains(folder.folder)) {
+				data = type.detectOnFolder(result.db, folder, shell);
+				if (data != null) {
+					for (Pair<List<IFileStore>,VirtualData> p : data) {
+						result.toAdd.add(p.getValue2());
+						result.usedFiles.addAll(p.getValue1());
+						used.addAll(p.getValue1());
 					}
-				} catch (Throwable t) {
-					ErrorDlg.exception(Local.Add_data.toString(), "Internal error", EclipsePlugin.ID, t);
 				}
-				progress.progress((nbFolders - folders.size()) + (nbFiles - files.size()));
 			}
-			progress.progress(1);
-			if (!det) {
-				if (!file.fetchInfo().isDirectory())
-					result.noDetectedFiles.add(file);
+			if (progress.isCancelled())
+				return;
+			int nb = folder.typedFiles.size() + folder.notTypedFiles.size() + folder.subFolders.size()*5;
+			for (Pair<IFileStore,TypedFile> p : folder.typedFiles) {
+				int step = amount/nb--;
+				amount -= step;
+				if (!used.contains(p.getValue1())) {
+					data = type.detectOnFile(result.db, folder, p.getValue1(), p.getValue2(), shell);
+					if (data != null) {
+						for (Pair<List<IFileStore>,VirtualData> p2 : data) {
+							result.toAdd.add(p2.getValue2());
+							result.usedFiles.addAll(p2.getValue1());
+							used.addAll(p2.getValue1());
+						}
+					}
+				}
+				progress.progress(step);
+				if (progress.isCancelled())
+					return;
 			}
+			for (IFileStore file : folder.notTypedFiles) {
+				int step = amount/nb--;
+				amount -= step;
+				if (!used.contains(file)) {
+					data = type.detectOnFile(result.db, folder, file, shell);
+					if (data != null) {
+						for (Pair<List<IFileStore>,VirtualData> p : data) {
+							result.toAdd.add(p.getValue2());
+							result.usedFiles.addAll(p.getValue1());
+							used.addAll(p.getValue1());
+						}
+					}
+				}
+				progress.progress(step);
+				if (progress.isCancelled())
+					return;
+			}
+			nb /= 5;
+			for (TypedFolder f : folder.subFolders) {
+				int step = amount/nb--;
+				amount -= step;
+				detect(rootURI, f, type, result, used, progress, step);
+				if (progress.isCancelled())
+					return;
+			}
+		}
+		
+		private void addNotDetected(TypedFolder folder, Result result) {
+			for (IFileStore file : folder.notTypedFiles)
+				if (!result.usedFiles.contains(file))
+					result.notDetectedNotTypesFiles.add(file);
+			for (Pair<IFileStore,TypedFile> p : folder.typedFiles)
+				if (!result.usedFiles.contains(p.getValue1()))
+					result.notDetectedTypesFiles.add(p);
+			for (TypedFolder child : folder.subFolders)
+				addNotDetected(child, result);
 		}
 		
 	}

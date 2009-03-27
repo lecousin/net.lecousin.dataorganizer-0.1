@@ -9,7 +9,7 @@ import java.net.URISyntaxException;
 import net.lecousin.dataorganizer.core.DataOrganizer;
 import net.lecousin.dataorganizer.core.DataOrganizerConfig;
 import net.lecousin.dataorganizer.ui.application.update.Updater;
-import net.lecousin.framework.Pair;
+import net.lecousin.framework.Triple;
 import net.lecousin.framework.io.FileSystemUtil;
 import net.lecousin.framework.io.TextLineInputStream;
 import net.lecousin.framework.log.DualLog;
@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
+import org.w3c.dom.Element;
 
 /**
  * This class controls all aspects of the application's execution
@@ -56,6 +57,7 @@ public class Application implements IApplication {
 		} catch (URISyntaxException e) {
 			// should never happen
 		}
+		net.lecousin.framework.application.Application.isDebugEnabled = debug;
 		
 		display = PlatformUI.createDisplay();
 		
@@ -128,12 +130,13 @@ public class Application implements IApplication {
 		config.save();
 		Shell shell = null;
 		try {
-			Pair<Version,String> p = Updater.getLatestVersionInfo();
+			Triple<Version,Element,Element> p = Updater.getLatestVersionInfo();
 			Version current = Updater.getCurrentVersion();
 			if (p.getValue1().compareTo(current) <= 0) return false;
 			shell = new Shell(display, SWT.PRIMARY_MODAL/*SWT.APPLICATION_MODAL*/);
-			if (!Updater.askToUpdate(shell, current, p.getValue1())) return false;
-			Updater.launchUpdate(shell, p.getValue2());
+			String news = Updater.getNews(p.getValue2(), current, p.getValue1());
+			if (!Updater.askToUpdate(shell, current, p.getValue1(), news)) return false;
+			Updater.launchUpdate(shell, p.getValue3());
 			return true;
 		} catch (Throwable t) {
 			if (Log.warning(this))

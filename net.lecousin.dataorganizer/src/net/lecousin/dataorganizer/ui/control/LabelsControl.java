@@ -3,7 +3,7 @@ package net.lecousin.dataorganizer.ui.control;
 import net.lecousin.dataorganizer.core.DataOrganizer;
 import net.lecousin.dataorganizer.core.DataLabels.Label;
 import net.lecousin.dataorganizer.core.database.Data;
-import net.lecousin.dataorganizer.ui.dataoverview.LabelsPanel;
+import net.lecousin.dataorganizer.ui.dataoverview.HeaderPanel;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.event.Event.Listener;
 import net.lecousin.framework.event.Event.ListenerData;
@@ -25,7 +25,7 @@ public class LabelsControl extends Composite {
 		layout.marginHeight = 1;
 		setLayout(layout);
 		for (Label label : DataOrganizer.labels().getLabels(data)) {
-			LabelItem item = new LabelItem(LabelsControl.this, label.getName(), LabelsPanel.LABEL_COLOR, new ListenerData<LabelItem,Data>(data) {
+			LabelItem item = new LabelItem(LabelsControl.this, label.getName(), HeaderPanel.LABEL_COLOR, new ListenerData<LabelItem,Data>(data) {
 				public void fire(LabelItem event) {
 					((Label)event.getData()).removeData(data());
 				}
@@ -46,7 +46,7 @@ public class LabelsControl extends Composite {
 			}
 			if (event.getValue2() != data) return;
 			Label label = event.getValue1();
-			LabelItem item = new LabelItem(LabelsControl.this, label.getName(), LabelsPanel.LABEL_COLOR, new ListenerData<LabelItem,Data>(data) {
+			LabelItem item = new LabelItem(LabelsControl.this, label.getName(), HeaderPanel.LABEL_COLOR, new ListenerData<LabelItem,Data>(data) {
 				public void fire(LabelItem event) {
 					((Label)event.getData()).removeData(data());
 				}

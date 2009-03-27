@@ -7,6 +7,7 @@ import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.dataorganizer.ui.plugin.Action;
 import net.lecousin.dataorganizer.video.Local;
 import net.lecousin.dataorganizer.video.internal.EclipsePlugin;
+import net.lecousin.framework.media.Icons;
 import net.lecousin.framework.ui.eclipse.EclipseWorkbenchUtil;
 import net.lecousin.framework.ui.eclipse.dialog.ErrorDlg;
 
@@ -25,7 +26,7 @@ public class ActionOpenInSystemApplication implements Action {
 	
 	private Data data;
 	
-	public Image getIcon() { return null; } // TODO 
+	public Image getIcon() { return Icons.getIconApplication(); } 
 
 	public String getText() { return Local.Open_with_system_application.toString(); }
 

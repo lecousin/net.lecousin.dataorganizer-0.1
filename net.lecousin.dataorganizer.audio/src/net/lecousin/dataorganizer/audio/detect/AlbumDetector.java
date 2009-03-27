@@ -14,87 +14,50 @@ import net.lecousin.dataorganizer.audio.detect.AlbumHelper.Track;
 import net.lecousin.dataorganizer.audio.detect.AlbumHelper.TrackComparator;
 import net.lecousin.dataorganizer.core.database.VirtualData;
 import net.lecousin.dataorganizer.core.database.VirtualDataBase;
+import net.lecousin.framework.Pair;
 import net.lecousin.framework.collections.CollectionUtil;
 import net.lecousin.framework.collections.SortedListTree;
-import net.lecousin.framework.io.FileSystemUtil;
+import net.lecousin.framework.files.TypedFile;
+import net.lecousin.framework.files.TypedFolder;
+import net.lecousin.framework.files.audio.AudioFile;
+import net.lecousin.framework.files.audio.AudioFileInfo;
+import net.lecousin.framework.files.playlist.PlayList;
 import net.lecousin.framework.strings.StringUtil;
-import net.lecousin.media.sound.files.audio.AudioFile;
-import net.lecousin.media.sound.files.audio.AudioFileInfo;
-import net.lecousin.media.sound.files.audio.InvalidAudioFile;
-import net.lecousin.media.sound.files.audio.cda.CDAFile;
-import net.lecousin.media.sound.files.audio.mp3.MP3File;
-import net.lecousin.media.sound.files.playlist.PlayList;
-import net.lecousin.media.sound.files.playlist.m3u.M3UPlayList;
 
-import org.eclipse.core.filesystem.EFS;
-import org.eclipse.core.filesystem.IFileInfo;
 import org.eclipse.core.filesystem.IFileStore;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.widgets.Shell;
 
 public class AlbumDetector {
 
-	public static List<VirtualData> detect(VirtualDataBase db, IFileStore dir, IFileInfo info, List<IFileStore> remainingFolders, List<IFileStore> remainingFiles, Shell shell) {
-		IFileStore[] files;
-		try { files = dir.childStores(EFS.NONE, null); }
-		catch (CoreException e) { return null; }
-		
+	public static List<Pair<List<IFileStore>,VirtualData>> detect(VirtualDataBase db, TypedFolder dir, Shell shell) {
 		List<Track> tracks = new LinkedList<Track>();
 		List<PlayListFile> playlists = new LinkedList<PlayListFile>();
-		for (IFileStore file : files) {
-			if (file.fetchInfo().isDirectory()) continue;
-			String ext = FileSystemUtil.getExtension(file.getName());
-			AudioFile audio = detectAudioFile(file, ext);
-			if (audio != null)
-				tracks.add(new Track(file, audio));
-			else {
-				PlayList list = detectPlayList(file, ext);
-				if (list != null)
-					playlists.add(new PlayListFile(file, list));
-			}
+		for (Pair<IFileStore,TypedFile> p : dir.typedFiles) {
+			if (p.getValue2() instanceof AudioFile)
+				tracks.add(new Track(p.getValue1(), (AudioFile)p.getValue2()));
+			else if (p.getValue2() instanceof PlayList)
+				playlists.add(new PlayListFile(p.getValue1(), (PlayList)p.getValue2()));
 		}
 		
 		if (tracks.isEmpty()) return null;
 		
-		List<VirtualData> result;
+		List<Pair<List<IFileStore>,VirtualData>> result;
 		
-		// ignore the playlists in future detection
-		for (PlayListFile pl : playlists)
-			remainingFiles.remove(pl.file);
-
-		result = handlePlayLists(db, tracks, playlists, remainingFiles, remainingFolders, dir, shell);
+		result = handlePlayLists(db, tracks, playlists, dir.folder, shell);
 		if (result != null) return result;
-		result = handleTracks(db, tracks, remainingFiles, remainingFolders, dir, shell);
+		result = handleTracks(db, tracks, dir.folder, shell);
 		return result;
 	}
 	
-	public static AudioFile detectAudioFile(IFileStore file, String ext) {
-		try {
-			if (ext.equals("mp3") || ext.equals("mpeg3") || ext.equals("mpg3"))
-				return new MP3File(file);
-			if (ext.equals("cda"))
-				return new CDAFile(file);
-		} catch (InvalidAudioFile e) {}
-		return null;
-	}
-	
-	public static PlayList detectPlayList(IFileStore file, String ext) {
-		try {
-			if (ext.equals("m3u"))
-				return M3UPlayList.load(FileSystemUtil.getFileNameWithoutExtension(file.getName()), file.openInputStream(EFS.NONE, null));
-		} catch (CoreException e) {}
-		return null;
-	}
-	
-	private static List<VirtualData> handlePlayLists(VirtualDataBase db, List<Track> tracks, List<PlayListFile> playlists, List<IFileStore> remainingFiles, List<IFileStore> remainingFolders, IFileStore rootDir, Shell shell) {
+	private static List<Pair<List<IFileStore>,VirtualData>> handlePlayLists(VirtualDataBase db, List<Track> tracks, List<PlayListFile> playlists, IFileStore rootDir, Shell shell) {
 		if (playlists.isEmpty()) return null;
 		if (playlists.size() == 1)
-			return handleSinglePlayList(db, tracks, playlists.get(0), remainingFiles, remainingFolders, rootDir, shell);
-		return handleSeveralPlayLists(db, tracks, playlists, remainingFiles, remainingFolders, rootDir, shell);
+			return handleSinglePlayList(db, tracks, playlists.get(0), rootDir, shell);
+		return handleSeveralPlayLists(db, tracks, playlists, rootDir, shell);
 	}
 
-	private static List<VirtualData> handleSinglePlayList(VirtualDataBase db, List<Track> tracks, PlayListFile playlist, List<IFileStore> remainingFiles, List<IFileStore> remainingFolders, IFileStore rootDir, Shell shell) {
-		List<String> list = playlist.list.getPlayListFiles();
+	private static List<Pair<List<IFileStore>,VirtualData>> handleSinglePlayList(VirtualDataBase db, List<Track> tracks, PlayListFile playlist, IFileStore rootDir, Shell shell) {
+		List<String> list = playlist.list.getInfo().getFileList();
 		List<Track> files = new ArrayList<Track>(tracks);
 		List<Track> orderedFiles = new ArrayList<Track>(tracks.size());
 		boolean ok = true;
@@ -113,12 +76,12 @@ public class AlbumDetector {
 			if (!files.isEmpty())
 				return null; // TODO
 			// the playlist contains exactly all the tracks
-			return AlbumHelper.createAlbumFromOrderedList(db, orderedFiles, playlist, null, remainingFiles, rootDir, shell);
+			return AlbumHelper.createAlbumFromOrderedList(db, orderedFiles, playlist, null, rootDir, shell);
 		}
 		return null;
 	}
 
-	private static List<VirtualData> handleSeveralPlayLists(VirtualDataBase db, List<Track> tracks, List<PlayListFile> playlists, List<IFileStore> remainingFiles, List<IFileStore> remainingFolders, IFileStore rootDir, Shell shell) {
+	private static List<Pair<List<IFileStore>,VirtualData>> handleSeveralPlayLists(VirtualDataBase db, List<Track> tracks, List<PlayListFile> playlists, IFileStore rootDir, Shell shell) {
 		return null; // TODO
 	}
 	
@@ -130,7 +93,7 @@ public class AlbumDetector {
 		boolean nameIsFromUser = false;
 	}
 	// TODO improvment? use the number of tracks to better detect... ???
-	private static List<VirtualData> handleTracks(VirtualDataBase db, List<Track> tracks, List<IFileStore> remainingFiles, List<IFileStore> remainingFolders, IFileStore rootDir, Shell shell) {
+	private static List<Pair<List<IFileStore>,VirtualData>> handleTracks(VirtualDataBase db, List<Track> tracks, IFileStore rootDir, Shell shell) {
 		// noInfo: pas de AudioFileInfo, Integer=numero de track detecte sur le nom du fichier ou null
 		List<Track> noInfo = new LinkedList<Track>();
 		Map<String,Album> albums = new HashMap<String,Album>();
@@ -195,7 +158,7 @@ public class AlbumDetector {
 					needUser = true;
 				} else {
 					// 1 seul album, ok => create
-					return AlbumHelper.createAlbumFromOrderedList(db, album.sorted.get(0), null, album.nameIsFromUser ? album.name : null, remainingFiles, rootDir, shell);
+					return AlbumHelper.createAlbumFromOrderedList(db, album.sorted.get(0), null, album.nameIsFromUser ? album.name : null, rootDir, shell);
 				}
 			} else {
 				// no album
@@ -242,7 +205,7 @@ public class AlbumDetector {
 								}
 							if (!needUser) {
 								// victoire, on a une série continue démarrant à 1
-								return AlbumHelper.createAlbumFromOrderedList(db, list, null, null, remainingFiles, rootDir, shell);
+								return AlbumHelper.createAlbumFromOrderedList(db, list, null, null, rootDir, shell);
 							}
 						}
 					}
@@ -254,12 +217,12 @@ public class AlbumDetector {
 			List<Album> list = new LinkedList<Album>();
 			list.addAll(albumsReadyToBeCreated);
 			list.addAll(albums.values());
-			return userBuildsAlbums(list, noName, noInfo, remainingFiles, db, rootDir, shell);
+			return userBuildsAlbums(list, noName, noInfo, db, rootDir, shell);
 		}
 		
-		List<VirtualData> result = new LinkedList<VirtualData>();
+		List<Pair<List<IFileStore>,VirtualData>> result = new LinkedList<Pair<List<IFileStore>,VirtualData>>();
 		for (Album album : albumsReadyToBeCreated) {
-			List<VirtualData> list = AlbumHelper.createAlbumFromOrderedList(db, album.sorted.get(0), null, album.name, remainingFiles, rootDir, shell);
+			List<Pair<List<IFileStore>,VirtualData>> list = AlbumHelper.createAlbumFromOrderedList(db, album.sorted.get(0), null, album.name, rootDir, shell);
 			if (list != null)
 				result.addAll(list);
 		}
@@ -356,7 +319,7 @@ public class AlbumDetector {
 		}
 	}
 	
-	private static List<VirtualData> userBuildsAlbums(Collection<Album> albums, Album noName, List<Track> noInfo, List<IFileStore> remainingFiles, VirtualDataBase db, IFileStore rootDir, Shell shell) {
+	private static List<Pair<List<IFileStore>,VirtualData>> userBuildsAlbums(Collection<Album> albums, Album noName, List<Track> noInfo, VirtualDataBase db, IFileStore rootDir, Shell shell) {
 		List<Album> list = new LinkedList<Album>();
 		list.addAll(albums);
 		StringBuilder message = new StringBuilder();
@@ -364,9 +327,9 @@ public class AlbumDetector {
 		message.append(Local.process(Local.MESSAGE_Create_Album, URLDecoder.decode(rootDir.toURI().toString())));
 		CreateAlbumsDialog dlg = new CreateAlbumsDialog(shell, message.toString(), list, noName, noInfo, rootDir);
 		if (!dlg.open()) return null;
-		List<VirtualData> result = new LinkedList<VirtualData>();
+		List<Pair<List<IFileStore>,VirtualData>> result = new LinkedList<Pair<List<IFileStore>,VirtualData>>();
 		for (Album album : list) {
-			List<VirtualData> data = AlbumHelper.createAlbumFromOrderedList(db, album.sorted.get(0), null, album.name, remainingFiles, rootDir, shell);
+			List<Pair<List<IFileStore>,VirtualData>> data = AlbumHelper.createAlbumFromOrderedList(db, album.sorted.get(0), null, album.name, rootDir, shell);
 			if (data != null)
 				result.addAll(data);
 		}

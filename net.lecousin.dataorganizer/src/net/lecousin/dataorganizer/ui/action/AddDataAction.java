@@ -19,7 +19,7 @@ public class AddDataAction extends Action {
 
 	@Override
 	public void run() {
-		WizardDialog dlg = new WizardDialog(MyDialog.getModalShell(), new AddDataWizard());
+		WizardDialog dlg = new WizardDialog(MyDialog.getPlatformShell(), new AddDataWizard());
 		dlg.open();
 	}
 }

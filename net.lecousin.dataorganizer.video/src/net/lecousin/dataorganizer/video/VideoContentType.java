@@ -15,8 +15,12 @@ import net.lecousin.dataorganizer.ui.wizard.adddata.AddData_Page;
 import net.lecousin.dataorganizer.video.internal.EclipsePlugin;
 import net.lecousin.dataorganizer.video.search.Param_Casting;
 import net.lecousin.dataorganizer.video.search.Param_Duration;
-import net.lecousin.framework.collections.ArrayUtil;
+import net.lecousin.framework.Pair;
 import net.lecousin.framework.collections.CollectionUtil;
+import net.lecousin.framework.files.FileType;
+import net.lecousin.framework.files.TypedFile;
+import net.lecousin.framework.files.TypedFolder;
+import net.lecousin.framework.files.video.VideoFile;
 import net.lecousin.framework.io.FileSystemUtil;
 import net.lecousin.framework.log.Log;
 import net.lecousin.framework.media.MediaPlayer;
@@ -27,7 +31,6 @@ import net.lecousin.framework.ui.eclipse.UIUtil;
 import net.lecousin.framework.ui.eclipse.control.text.lcml.LCMLText;
 import net.lecousin.framework.version.Version;
 
-import org.eclipse.core.filesystem.IFileInfo;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -126,23 +129,28 @@ public class VideoContentType extends ContentType {
 		return list;
 	}
 	
-	private static String[] extensions = new String[] {
-		"avi", "mpg", "mpeg", "asf", "divx", "dv", "flv", "gfx", "m1v", "m2v", "m2ts", "m4v", "mkv",
-		"mov", "mp2", "mp4", "mpeg1", "mpeg2", "mpeg4", "mts", "mxf", "ogm", "ts", "vob", "wmv"
-	};
+	private static final FileType[] filetypes = new FileType[] { VideoFile.FILE_TYPE };
+	public FileType[] getEligibleFileTypesForDetection() {
+		return filetypes;
+	}
 	@Override
-	public List<VirtualData> detect(VirtualDataBase db, IFileStore file, List<IFileStore> remainingFolders, List<IFileStore> remainingFiles, Shell shell) {
-		String ext = FileSystemUtil.getFileNameExtension(file.getName()).toLowerCase();
-		if (ArrayUtil.contains(extensions, ext)) {
-			IFileInfo info = file.fetchInfo();
-			if (!info.exists() || info.isDirectory()) return null;
-			try {
-				return CollectionUtil.single_element_list((VirtualData)db.addData(FileSystemUtil.removeFileNameExtension(file.getName()), this, CollectionUtil.single_element_list(DataSource.get(file))));
-			} catch (Exception e) {
-				if (Log.warning(this))
-					Log.warning(this, "Unable to add virtual data during detection", e);
-			}
-		}
+	public List<Pair<List<IFileStore>,VirtualData>> detectOnFolder(VirtualDataBase db, TypedFolder folder, Shell shell) {
 		return null;
+	}
+	@Override
+	public List<Pair<List<IFileStore>,VirtualData>> detectOnFile(VirtualDataBase db, TypedFolder folder, IFileStore file, Shell shell) {
+		return null;
+	}
+	@Override
+	public List<Pair<List<IFileStore>,VirtualData>> detectOnFile(VirtualDataBase db, TypedFolder folder, IFileStore file, TypedFile typedFile,	Shell shell) {
+		if (!(typedFile instanceof VideoFile)) return null;
+		try {
+			VirtualData data = (VirtualData)db.addData(FileSystemUtil.removeFileNameExtension(file.getName()), this, CollectionUtil.single_element_list(DataSource.get(file)));
+			return CollectionUtil.single_element_list(new Pair<List<IFileStore>,VirtualData>(CollectionUtil.single_element_list(file), data));
+		} catch (Exception e) {
+			if (Log.warning(this))
+				Log.warning(this, "Unable to add virtual data during detection", e);
+			return null;
+		}
 	}
 }

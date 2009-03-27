@@ -1,4 +1,21 @@
-<dataorganizer version="0.1.1">
-	<updater_file>/download/update-software/updater.jar</updater_file>
-	<application_file>/download/update-software/test.zip</application_file>
+<dataorganizer>
+	<update version="DEBUG" simulated="0.1.2">
+		<updater_file>/update/updater.jar</updater_file>
+		<application_file>/update/test.zip</application_file>
+	</update>
+	<update version="0.1.0">
+	</update>
+	
+	<news version="0.1.0">
+		<content language="FRENCH" url="/update/news-0.1.0-fr.html"/>
+		<content language="ENGLISH" url="/update/news-0.1.0-en.html"/>
+	</news>
+	<news version="0.1.1">
+		<content language="FRENCH" url="/update/news-0.1.1-fr.html"/>
+		<content language="ENGLISH" url="/update/news-0.1.1-en.html"/>
+	</news>
+	<news version="0.1.2">
+		<content language="FRENCH" url="/update/news-0.1.2-fr.html"/>
+		<content language="ENGLISH" url="/update/news-0.1.2-en.html"/>
+	</news>
 </dataorganizer>

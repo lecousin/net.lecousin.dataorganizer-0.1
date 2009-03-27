@@ -5,6 +5,8 @@ import java.util.List;
 
 import net.lecousin.dataorganizer.core.database.VirtualData;
 import net.lecousin.dataorganizer.core.database.VirtualDataBase;
+import net.lecousin.framework.Pair;
+import net.lecousin.framework.files.TypedFile;
 
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -17,6 +19,8 @@ public interface AddData_Page extends IWizardPage {
 	public static class Result {
 		public VirtualDataBase db;
 		public List<VirtualData> toAdd = new LinkedList<VirtualData>();
-		public List<IFileStore> noDetectedFiles = new LinkedList<IFileStore>();
+		public List<IFileStore> usedFiles = new LinkedList<IFileStore>();
+		public List<IFileStore> notDetectedNotTypesFiles = new LinkedList<IFileStore>();
+		public List<Pair<IFileStore,TypedFile>> notDetectedTypesFiles = new LinkedList<Pair<IFileStore,TypedFile>>();
 	}
 }

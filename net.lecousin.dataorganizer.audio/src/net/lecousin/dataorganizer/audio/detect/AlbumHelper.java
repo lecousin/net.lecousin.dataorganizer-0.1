@@ -19,15 +19,16 @@ import net.lecousin.dataorganizer.core.database.VirtualData;
 import net.lecousin.dataorganizer.core.database.VirtualDataBase;
 import net.lecousin.dataorganizer.core.database.content.ContentType;
 import net.lecousin.dataorganizer.core.database.source.DataSource;
+import net.lecousin.framework.Pair;
 import net.lecousin.framework.Triple;
 import net.lecousin.framework.collections.CollectionUtil;
+import net.lecousin.framework.files.audio.AudioFile;
+import net.lecousin.framework.files.audio.AudioFileInfo;
+import net.lecousin.framework.files.audio.AudioFileInfo.Picture;
+import net.lecousin.framework.files.playlist.PlayList;
 import net.lecousin.framework.log.Log;
 import net.lecousin.framework.strings.StringUtil;
 import net.lecousin.framework.ui.eclipse.dialog.ErrorDlg;
-import net.lecousin.media.sound.files.audio.AudioFile;
-import net.lecousin.media.sound.files.audio.AudioFileInfo;
-import net.lecousin.media.sound.files.audio.AudioFileInfo.Picture;
-import net.lecousin.media.sound.files.playlist.PlayList;
 
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFolder;
@@ -57,21 +58,23 @@ public class AlbumHelper {
 		}
 	}
 	
-	static List<VirtualData> createAlbumFromOrderedList(VirtualDataBase db, Iterable<Track> orderedTracks, PlayListFile playlist, String finalAlbumName, List<IFileStore> remainingFiles, IFileStore rootDir, Shell shell) {
+	static List<Pair<List<IFileStore>,VirtualData>> createAlbumFromOrderedList(VirtualDataBase db, Iterable<Track> orderedTracks, PlayListFile playlist, String finalAlbumName, IFileStore rootDir, Shell shell) {
 		LinkedList<Track> tracks = new LinkedList<Track>();
 		for (Track t : orderedTracks)
 			tracks.add(t);
-		return createAlbumFromOrderedList(db, tracks, playlist, finalAlbumName, remainingFiles, rootDir, shell);
+		return createAlbumFromOrderedList(db, tracks, playlist, finalAlbumName, rootDir, shell);
 	}
-	static List<VirtualData> createAlbumFromOrderedList(VirtualDataBase db, List<Track> orderedTracks, PlayListFile playlist, String finalAlbumName, List<IFileStore> remainingFiles, IFileStore rootDir, Shell shell) {
+	static List<Pair<List<IFileStore>,VirtualData>> createAlbumFromOrderedList(VirtualDataBase db, List<Track> orderedTracks, PlayListFile playlist, String finalAlbumName, IFileStore rootDir, Shell shell) {
+		List<IFileStore> files = new LinkedList<IFileStore>();
 		List<AudioFile> list = new ArrayList<AudioFile>(orderedTracks.size());
 		for (Track p : orderedTracks) {
-			remainingFiles.remove(p.file);
+			files.add(p.file);
 			list.add(p.audio);
 		}
+		if (playlist != null) files.add(playlist.file);
 		VirtualData data = createAlbum(db, list, finalAlbumName, rootDir, playlist != null ? playlist.list : null, shell);
-		if (data != null) return CollectionUtil.single_element_list(data);
-		return null;
+		if (data == null) return null;
+		return CollectionUtil.single_element_list(new Pair<List<IFileStore>,VirtualData>(files, data));
 	}
 	
 	static VirtualData createAlbum(VirtualDataBase db, List<AudioFile> tracks, String finalAlbumName, IFileStore rootDir, PlayList list, Shell shell) {
@@ -128,9 +131,9 @@ public class AlbumHelper {
 			if (track.getTitle() == null)
 				track.setTitle(getTrackNameFromFile(file, tracks));
 		}
-//		byte[] mcdi = getMCDI(tracks, list, rootDir, shell);
-//		if (mcdi != null)
-//			info.setMCDI(mcdi);
+		byte[] mcdi = getMCDI(tracks, list, rootDir, shell);
+		if (mcdi != null)
+			info.setMCDI(mcdi);
 		return data;
 	}
 	
@@ -174,7 +177,7 @@ public class AlbumHelper {
 			if (name != null)
 				albumNames.add(name);
 			if (list != null) {
-				name = normalize_name(list.getName());
+				name = normalize_name(list.getInfo().getName());
 				if (name != null)
 					albumNames.add(name);
 			}
@@ -510,7 +513,7 @@ public class AlbumHelper {
 	}
 	
 	private static String getAsSimpleName(AudioFile file, int index) {
-		String name = file.getURI();
+		String name = file.getURI().toString();
 		int i = name.lastIndexOf('/');
 		if (i >= 0)
 			name = name.substring(i+1);

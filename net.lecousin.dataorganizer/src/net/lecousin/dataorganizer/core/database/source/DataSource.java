@@ -67,7 +67,10 @@ public abstract class DataSource {
 		return new LocalFileDataSource(f.getAbsolutePath(), stream, size);
 	}
 	public static DataSource get(String uri) throws URISyntaxException, CoreException, IOException {
-		return get(EFS.getStore(new URI(uri)));
+		return get(new URI(uri));
+	}
+	public static DataSource get(URI uri) throws URISyntaxException, CoreException, IOException {
+		return get(EFS.getStore(uri));
 	}
 	private static Pair<String,String> getAmovibleSubPaths(File f) {
 		File a = getAmovibleFile(f);
