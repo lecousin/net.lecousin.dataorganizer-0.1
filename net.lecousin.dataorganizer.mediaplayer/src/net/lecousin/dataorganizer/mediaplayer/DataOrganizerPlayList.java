@@ -178,6 +178,22 @@ public class DataOrganizerPlayList extends PlayList {
 		return null;
 	}
 	
+	@Override
+	protected String getPlugin(Object media) {
+		if (media instanceof Data)
+			return getPlugin((Data)media);
+		else if (media instanceof DataSourceItem)
+			return getPlugin(((DataSourceItem)media).data);
+		return super.getPlugin(media);
+	}
+	private String getPlugin(Data data) {
+		if (data.getContentType().getID().equals("video"))
+			return "net.lecousin.media.jvlc";
+		if (data.getContentType().getID().equals("audio"))
+			return "net.lecousin.media.jsound";
+		return super.getPlugin(data);
+	}
+	
 	private SelfMapUniqueLong<Data> openedData = new SelfMapUniqueLong<Data>(5);
 	@Override
 	protected void startMedia(Object media, TreeItem item) {

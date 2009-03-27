@@ -39,7 +39,6 @@ public class HeaderPanel extends Composite {
 		setLayout(layout);
 		labelImage = UIUtil.newImage(this, SharedImages.getImage(SharedImages.icons.x16.basic.LABEL));
 		labelTitle = UIUtil.newLabel(this, Local.Labels + ":", true, false);
-		if (data.getDataBase() == DataOrganizer.database()) {
 		addButton = new LabelButton(this);
 		addButton.setImage(SharedImages.getImage(SharedImages.icons.x16.basic.ADD));
 		addButton.addClickListener(new Listener<MouseEvent>() {
@@ -47,7 +46,6 @@ public class HeaderPanel extends Composite {
 				addLabel();
 			}
 		});
-		}
 		DataOrganizer.labels().labelAssigned().addListener(labelChanged);
 		DataOrganizer.labels().labelUnassigned().addListener(labelChanged);
 		addDisposeListener(new DisposeListener() {
@@ -77,6 +75,11 @@ public class HeaderPanel extends Composite {
 			if (c != addButton && c != labelImage && c != labelTitle)
 				c.dispose();
 		
+		boolean isInDB = (data.getDataBase() == DataOrganizer.database());
+		labelImage.setVisible(isInDB);
+		labelTitle.setVisible(isInDB);
+		addButton.setVisible(isInDB);
+		
 		if (data != null) {
 			DataListMenu.fillBar(this, data, true);
 			boolean iconAdded = false;
@@ -90,17 +93,17 @@ public class HeaderPanel extends Composite {
 			}
 		}
 		
-		if (data.getDataBase() == DataOrganizer.database())
-		for (Label label : DataOrganizer.labels().getLabels(data)) {
-			LabelItem item = new LabelItem(this, label.getName(), LABEL_COLOR, new Listener<LabelItem>() {
-				public void fire(LabelItem event) {
-					((Label)event.getData()).removeData(HeaderPanel.this.data);
-					refresh(HeaderPanel.this.data);
-				}
-			}, true);
-			item.moveAbove(addButton);
-			item.setData(label);
-		}
+		if (isInDB)
+			for (Label label : DataOrganizer.labels().getLabels(data)) {
+				LabelItem item = new LabelItem(this, label.getName(), LABEL_COLOR, new Listener<LabelItem>() {
+					public void fire(LabelItem event) {
+						((Label)event.getData()).removeData(HeaderPanel.this.data);
+						refresh(HeaderPanel.this.data);
+					}
+				}, true);
+				item.moveAbove(addButton);
+				item.setData(label);
+			}
 		
 		UIControlUtil.autoresize(this);
 	}
