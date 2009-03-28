@@ -16,6 +16,7 @@ import net.lecousin.framework.files.FileType;
 import net.lecousin.framework.files.TypedFile;
 import net.lecousin.framework.files.TypedFolder;
 import net.lecousin.framework.files.audio.AudioFile;
+import net.lecousin.framework.files.image.ImageFile;
 import net.lecousin.framework.files.playlist.PlayList;
 import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.ui.eclipse.EclipseImages;
@@ -75,7 +76,7 @@ public class AudioContentType extends ContentType {
 	}
 
 	private static final FileType[] filetypes = new FileType[] {
-		AudioFile.FILE_TYPE, PlayList.FILE_TYPE,
+		AudioFile.FILE_TYPE, PlayList.FILE_TYPE, ImageFile.FILE_TYPE,
 	};
 	@Override
 	public FileType[] getEligibleFileTypesForDetection() {

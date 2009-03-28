@@ -13,8 +13,11 @@ public enum Local {
 	Another_year("Another year", "Une autre année"),
 	Artist("Artist", "Artiste"),
 	Audio("Audio", "Audio"),
+	Cover_back_picture("Album cover back", "Dessous de couverture de l'album"),
+	Cover_front_picture("Album cover front", "Dessus de couverture de l'album"),
 	Create_Music_Album("Create Music Album", "Création d'un album musical"),
 	Create_new_album("Create a new album", "Créer un nouvel album"),
+	Do_not_attach_picture("Do not attach this picture", "Ne pas attacher cette image"),
 	doesnt_exist("doesn't exist", "n'existe pas"),
 	Duration("Duration", "Durée"),
 	File("File", "Fichier"),
@@ -30,11 +33,13 @@ public enum Local {
 	Open("Open", "Ouvrir"),
 	Open_in_Media_Player("Open in Media Player", "Ouvrir avec le Media Player"),
 	Open_with_system_application("Open with default system application", "Ouvrir avec l'application système par défaut"),
+	Other_album_picture("Other album picture", "Autre image de l'album"),
 	Please_select_an_album_name("Please select an album name", "Veuillez sélectionner un nom pour l'album"),
 	Please_select_an_artist_name("Please select an artist name", "Veuillez sélectionner un nom pour l'artiste"),
 	Please_select_a_year("Please select a year", "Veuillez sélectionner une année pour l'album"),
 	Remaining_files("Remaining files", "Fichiers restants"),
 	Remove_selected_tracks_from_the_album("Remove selected tracks from the album", "Supprimer les pistes sélectionnées de l'album"),
+	size("size", "taille"),
 	The_album_cannot_be_empty("The album cannot be empty. Please add at least one track.", "L'album ne peut pas être vide. Veuillez ajouter au moins une piste."),
 	the_album_name("the album name", "le nom de l'album"),
 	the_artist_name("the artist name", "le nom de l'artiste"),
@@ -90,6 +95,13 @@ public enum Local {
 		"Certaines pistes peuvent également n'avoir été inclues dans aucun album car aucune information n'était disponible, ces pistes sont listées dans la table ci-dessous.<br>" +
 		"Cette fenêtre vous permet d'éditer les albums créés, d'en supprimer, d'en créer de nouveaux, et d'attribuer des pistes audios aux albums.<br>" +
 		"Chaque album sera créé en tant que donnée unique (comportant plusieurs fichiers) dans la base de données, et chaque piste audio restante sans album sera créée en tant que donnée seule dans la base de données."
+	),
+	
+	MESSAGE_Pictures(
+		"Pictures have been found with the album <b>%#1%</b>.<br/>" +
+		"Please choose, for each of them, its type or to do not attach it to the album.",
+		"Des images ont été trouvées avec l'album <b>%#1%</b>.<br/>" +
+		"Veuillez choisir, pour chacune d'entre elle, son type ou de ne pas l'attacher à l'album."
 	),
 	
 //	MESSAGE_Create_Album__Only_Not_Numbered(

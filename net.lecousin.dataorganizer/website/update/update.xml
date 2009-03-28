@@ -1,21 +1,31 @@
 <dataorganizer>
-	<update version="DEBUG" simulated="0.1.2">
-		<updater_file>/update/updater.jar</updater_file>
-		<application_file>/update/test.zip</application_file>
+	<update version="0.1.0" jre="1.5.10" extras="0.1.0">
 	</update>
-	<update version="0.1.0">
-	</update>
-	
 	<news version="0.1.0">
 		<content language="FRENCH" url="/update/news-0.1.0-fr.html"/>
 		<content language="ENGLISH" url="/update/news-0.1.0-en.html"/>
 	</news>
-	<news version="0.1.1">
-		<content language="FRENCH" url="/update/news-0.1.1-fr.html"/>
-		<content language="ENGLISH" url="/update/news-0.1.1-en.html"/>
+	
+	<update version="DEBUG" simulated="99.99.99" jre="99.99.99" extras="99.99.99">
+		<updater>
+			<file>/update/updater.jar</file>
+		</updater>
+		<application>
+			<file>/update/app-test.zip</file>
+		</application>
+	</update>
+	<jre version="99.99.99">
+		<file>/update/jre-test.zip</file>
+	</jre>
+	<extras version="99.99.99">
+		<file>/update/extras-test.zip</file>
+	</extras>
+	<news version="99.99.98">
+		<content language="FRENCH" url="/update/news-test1-fr.html"/>
+		<content language="ENGLISH" url="/update/news-test1-en.html"/>
 	</news>
-	<news version="0.1.2">
-		<content language="FRENCH" url="/update/news-0.1.2-fr.html"/>
-		<content language="ENGLISH" url="/update/news-0.1.2-en.html"/>
+	<news version="99.99.99">
+		<content language="FRENCH" url="/update/news-test2-fr.html"/>
+		<content language="ENGLISH" url="/update/news-test2-en.html"/>
 	</news>
 </dataorganizer>

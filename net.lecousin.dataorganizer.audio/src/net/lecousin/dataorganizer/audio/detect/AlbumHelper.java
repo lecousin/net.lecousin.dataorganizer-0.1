@@ -25,6 +25,7 @@ import net.lecousin.framework.collections.CollectionUtil;
 import net.lecousin.framework.files.audio.AudioFile;
 import net.lecousin.framework.files.audio.AudioFileInfo;
 import net.lecousin.framework.files.audio.AudioFileInfo.Picture;
+import net.lecousin.framework.files.image.ImageFile;
 import net.lecousin.framework.files.playlist.PlayList;
 import net.lecousin.framework.log.Log;
 import net.lecousin.framework.strings.StringUtil;
@@ -52,19 +53,25 @@ public class AlbumHelper {
 		IFileStore file;
 		PlayList list;
 	}
+	static class PictureFile {
+		PictureFile(IFileStore file, ImageFile image)
+		{ this.file = file; this.image = image; }
+		IFileStore file;
+		ImageFile image;
+	}
 	static class TrackComparator implements Comparator<Track> {
 		public int compare(Track o1, Track o2) {
 			return o1.trackNumber - o2.trackNumber;
 		}
 	}
 	
-	static List<Pair<List<IFileStore>,VirtualData>> createAlbumFromOrderedList(VirtualDataBase db, Iterable<Track> orderedTracks, PlayListFile playlist, String finalAlbumName, IFileStore rootDir, Shell shell) {
+	static List<Pair<List<IFileStore>,VirtualData>> createAlbumFromOrderedList(VirtualDataBase db, Iterable<Track> orderedTracks, PlayListFile playlist, String finalAlbumName, List<PictureFile> images, IFileStore rootDir, Shell shell) {
 		LinkedList<Track> tracks = new LinkedList<Track>();
 		for (Track t : orderedTracks)
 			tracks.add(t);
-		return createAlbumFromOrderedList(db, tracks, playlist, finalAlbumName, rootDir, shell);
+		return createAlbumFromOrderedList(db, tracks, playlist, finalAlbumName, images, rootDir, shell);
 	}
-	static List<Pair<List<IFileStore>,VirtualData>> createAlbumFromOrderedList(VirtualDataBase db, List<Track> orderedTracks, PlayListFile playlist, String finalAlbumName, IFileStore rootDir, Shell shell) {
+	static List<Pair<List<IFileStore>,VirtualData>> createAlbumFromOrderedList(VirtualDataBase db, List<Track> orderedTracks, PlayListFile playlist, String finalAlbumName, List<PictureFile> images, IFileStore rootDir, Shell shell) {
 		List<IFileStore> files = new LinkedList<IFileStore>();
 		List<AudioFile> list = new ArrayList<AudioFile>(orderedTracks.size());
 		for (Track p : orderedTracks) {
@@ -72,12 +79,31 @@ public class AlbumHelper {
 			list.add(p.audio);
 		}
 		if (playlist != null) files.add(playlist.file);
-		VirtualData data = createAlbum(db, list, finalAlbumName, rootDir, playlist != null ? playlist.list : null, shell);
+		VirtualData data = createAlbum(db, list, finalAlbumName, rootDir, playlist != null ? playlist.list : null, images, shell);
 		if (data == null) return null;
+		if (!images.isEmpty()) {
+			Triple<List<PictureFile>,List<PictureFile>,List<PictureFile>> pictures = getPictures(data, images, shell);
+			if (pictures != null) {
+				AudioDataType audio = (AudioDataType)data.getContent();
+				for (PictureFile p : pictures.getValue1()) {
+					files.add(p.file);
+					audio.saveCoverFront(p.image.getInfo().getData());
+				}
+				for (PictureFile p : pictures.getValue2()) {
+					files.add(p.file);
+					audio.saveCoverBack(p.image.getInfo().getData());
+				}
+				for (PictureFile p : pictures.getValue3()) {
+					files.add(p.file);
+					audio.saveImage(p.image.getInfo().getData());
+				}
+			}
+		}
+
 		return CollectionUtil.single_element_list(new Pair<List<IFileStore>,VirtualData>(files, data));
 	}
 	
-	static VirtualData createAlbum(VirtualDataBase db, List<AudioFile> tracks, String finalAlbumName, IFileStore rootDir, PlayList list, Shell shell) {
+	static VirtualData createAlbum(VirtualDataBase db, List<AudioFile> tracks, String finalAlbumName, IFileStore rootDir, PlayList list, List<PictureFile> images, Shell shell) {
 		List<DataSource> sources = new ArrayList<DataSource>(tracks.size());
 		for (AudioFile file : tracks)
 			try { sources.add(DataSource.get(file.getURI())); }
@@ -134,6 +160,7 @@ public class AlbumHelper {
 		byte[] mcdi = getMCDI(tracks, list, rootDir, shell);
 		if (mcdi != null)
 			info.setMCDI(mcdi);
+		
 		return data;
 	}
 	
@@ -536,5 +563,12 @@ public class AlbumHelper {
 			name = name.substring(0, i).trim();
 		if (name.length() == 0) return null;
 		return name;
+	}
+	
+	private static Triple<List<PictureFile>,List<PictureFile>,List<PictureFile>> getPictures(VirtualData data, List<PictureFile> images, Shell shell) {
+		DecidePicturesDialog dlg = new DecidePicturesDialog(shell, data, images);
+		if (!dlg.open())
+			return null;
+		return new Triple<List<PictureFile>,List<PictureFile>,List<PictureFile>>(dlg.getCoverFront(), dlg.getCoverBack(), dlg.getOthers());
 	}
 }

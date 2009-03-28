@@ -53,7 +53,7 @@ public class AutoSaver implements Runnable {
 			instance.dataToSave.remove(data);
 		}
 		synchronized (instance.contentToSave) {
-			instance.contentToSave.remove(data.getID());
+			instance.contentToSave.removeKey(data.getID());
 		}
 	}
 	public static void replaced(DataContentType content) {

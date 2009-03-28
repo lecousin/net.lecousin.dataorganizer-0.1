@@ -18,6 +18,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.resources;bundle-version="3.4.1",
  org.eclipse.ui.ide;bundle-version="3.4.1",
  net.lecousin.framework.files;bundle-version="0.1.0",
- net.lecousin.framework.files.playlist;bundle-version="0.1.0"
+ net.lecousin.framework.files.playlist;bundle-version="0.1.0",
+ net.lecousin.framework.files.image;bundle-version="0.1.0"
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy

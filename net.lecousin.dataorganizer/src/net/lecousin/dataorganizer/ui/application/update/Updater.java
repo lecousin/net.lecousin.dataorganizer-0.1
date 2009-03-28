@@ -13,10 +13,10 @@ import javax.net.SocketFactory;
 import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.internal.EclipsePlugin;
 import net.lecousin.framework.Pair;
-import net.lecousin.framework.Triple;
 import net.lecousin.framework.application.Application;
 import net.lecousin.framework.io.FileSystemUtil;
 import net.lecousin.framework.io.IOUtil;
+import net.lecousin.framework.io.ZipUtil;
 import net.lecousin.framework.log.Log;
 import net.lecousin.framework.net.http.HttpUtil;
 import net.lecousin.framework.net.http.client.HttpClient;
@@ -78,7 +78,42 @@ public class Updater {
 		}
 	}
 	
-	public static Triple<Version,Element,Element> getLatestVersionInfo() throws UpdateException {
+	public static class Update {
+		private Update(
+				Element currentNode, Version currentVersion, Version currentJRE, Version currentExtras,
+				Element newNode, Version newVersion, Version newJRE, Version newExtras, 
+				Element root) {
+			this.newVersion = newVersion;
+			this.currentVersion = currentVersion;
+			news = getNews(root, currentVersion, newVersion);
+			if (currentJRE == null || newJRE.compareTo(currentJRE)>0)
+				jreFiles = getFiles(getNode(root, "jre", newJRE));
+			if (currentExtras == null || newExtras.compareTo(currentExtras)>0)
+				extrasFiles = getFiles(getNode(root, "extras", newExtras));
+			updaterFiles = getFiles(XmlUtil.get_child_element(newNode, "updater"));
+			applicationFiles = getFiles(XmlUtil.get_child_element(newNode, "application"));
+		}
+		private Version currentVersion;
+		private Version newVersion;
+		private String news;
+		private List<String> updaterFiles;
+		private List<String> applicationFiles;
+		private List<String> jreFiles;
+		private List<String> extrasFiles;
+		
+		private Element getNode(Element root, String name, Version version) {
+			return XmlUtil.get_child_with_attr(root, name, "version", version.toString());
+		}
+		private List<String> getFiles(Element node) {
+			if (node == null) return null;
+			List<String> list = new LinkedList<String>();
+			for (Element e : XmlUtil.get_childs_element(node, "file"))
+				list.add(XmlUtil.get_inner_text(e));
+			return list;
+		}
+	}
+	
+	public static Update getLatestVersionInfo() throws UpdateException {
 		HttpClient client = new HttpClient(SocketFactory.getDefault());
 		HttpRequest req;
 		HttpResponse resp;
@@ -138,17 +173,47 @@ public class Updater {
 		
 		Version latest = null;
 		Element updateNode = null;
+		Version latestJRE = null;
+		Version latestExtras = null;
+		Element currentNode = null;
+		Version currentJRE = null;
+		Version currentExtras = null;
+		Version current = getCurrentVersion();
 		for (Element e : XmlUtil.get_childs_element(root, "update")) {
+			if (!e.hasAttribute("version")) {
+				if (Log.error(Updater.class))
+					Log.error(Updater.class, "update.xml contains an invalid update node: missing attribute 'version'.");
+				continue;
+			}
 			String version = e.getAttribute("version");
 			if (version.equals("DEBUG")) {
-				if (!Application.isDebugEnabled)
+				if (!Application.isDebugEnabled || !isMySelf())
 					continue;
 				version = e.getAttribute("simulated");
 			}
 			Version v = new Version(version);
+			if (!e.hasAttribute("jre")) {
+				if (Log.error(Updater.class))
+					Log.error(Updater.class, "update.xml contains an invalid update node: missing attribute 'jre'.");
+				continue;
+			}
+			Version jre = new Version(e.getAttribute("jre"));
+			if (!e.hasAttribute("extras")) {
+				if (Log.error(Updater.class))
+					Log.error(Updater.class, "update.xml contains an invalid update node: missing attribute 'extras'.");
+				continue;
+			}
+			Version extras = new Version(e.getAttribute("extras"));
 			if (latest == null || v.compareTo(latest) > 0) {
 				latest = v;
 				updateNode = e;
+				latestJRE = jre;
+				latestExtras = extras;
+			}
+			if (v.compareTo(current)==0) {
+				currentNode = e;
+				currentJRE = jre;
+				currentExtras = extras;
 			}
 		}
 			
@@ -161,7 +226,8 @@ public class Updater {
 		if (Log.debug(Updater.class))
 			Log.debug(Updater.class, "update.xml found: version=" + latest.toString());
 		
-		return new Triple<Version,Element,Element>(latest, root, updateNode);
+		if (latest.compareTo(current)<=0) return null;
+		return new Update(currentNode, current, currentJRE, currentExtras, updateNode, latest, latestJRE, latestExtras, root);
 	}
 	
 	public static Version getCurrentVersion() throws UpdateException {
@@ -174,7 +240,7 @@ public class Updater {
 		return new Version(current);
 	}
 	
-	public static String getNews(Element root, Version currentVersion, Version newVersion) {
+	private static String getNews(Element root, Version currentVersion, Version newVersion) {
 		StringBuilder str = new StringBuilder();
 		HttpClient client = new HttpClient(SocketFactory.getDefault());
 		for (Element e : XmlUtil.get_childs_element(root, "news")) {
@@ -202,10 +268,10 @@ public class Updater {
 		return str.toString();
 	}
 	
-	public static boolean askToUpdate(Shell shell, Version currentVersion, Version newVersion, String whatsnew) {
+	public static boolean askToUpdate(Shell shell, Update update) {
 		QuestionDlg dlg = new QuestionDlg(shell, "DataOrganizer update", null);
-		dlg.setMessage(Local.process(Local.MESSAGE_Update_Available, currentVersion.toString(), newVersion.toString()));
-		dlg.handleHyperlinkMessage("news", new RunnableWithData<Pair<Shell,String>>(new Pair<Shell,String>(dlg.getShell(), whatsnew)) {
+		dlg.setMessage(Local.process(Local.MESSAGE_Update_Available, update.currentVersion.toString(), update.newVersion.toString()));
+		dlg.handleHyperlinkMessage("news", new RunnableWithData<Pair<Shell,String>>(new Pair<Shell,String>(dlg.getShell(), update.news)) {
 			public void run() {
 				FlatDialog dlg = new FlatDialog(data().getValue1(), Local.Update_application.toString(), true, true) {
 					@Override
@@ -229,38 +295,64 @@ public class Updater {
 		return true;
 	}
 	
-	public static void launchUpdate(Shell shell, Element updateNode) throws UpdateException {
+	public static void launchUpdate(Shell shell, Update update) throws UpdateException {
 		WorkProgress progress = new WorkProgress(Local.Downloading_latest_version.toString(), 10000, true);
 		WorkProgressDialog dlg = new WorkProgressDialog(shell, progress);
+		
+		int amount = 10000;
+		int stepInit = 20;
+		int stepFinalize = 480;
+		int stepDownload = amount - stepInit - stepFinalize;
+		
 		File updateTmp = new File(Application.deployPath, "update-tmp");
 		FileSystemUtil.deleteDirectory(updateTmp);
 		updateTmp.mkdirs();
 		progress.progress(20);
-
-		List<String> urls = new LinkedList<String>();
-		for (Element e : XmlUtil.get_childs_element(updateNode, "updater_file"))
-			urls.add(XmlUtil.get_inner_text(e));
-		if (urls.isEmpty()) {
-			if (Log.error(Updater.class))
-				Log.error(Updater.class, "No update_file node in the update.xml file.");
-			throw new UpdateException(Local.ERROR_UPDATE_WEB_SITE.toString());
-		}
-		downloadFile(urls, updateTmp, "updater.jar", progress, 500);
-
-		urls.clear();
-		for (Element e : XmlUtil.get_childs_element(updateNode, "application_file"))
-			urls.add(XmlUtil.get_inner_text(e));
-		if (urls.isEmpty()) {
-			if (Log.error(Updater.class))
-				Log.error(Updater.class, "No application_file node in the update.xml file.");
-			throw new UpdateException(Local.ERROR_UPDATE_WEB_SITE.toString());
-		}
-		downloadFile(urls, updateTmp, "update.zip", progress, 9000);
 		
+		if (update.updaterFiles == null || update.updaterFiles.isEmpty())
+			throw new UpdateException(Local.ERROR_UPDATE_INTERNAL.toString());
+		if (update.applicationFiles == null || update.applicationFiles.isEmpty())
+			throw new UpdateException(Local.ERROR_UPDATE_INTERNAL.toString());
+		if (update.jreFiles != null && update.jreFiles.isEmpty())
+			throw new UpdateException(Local.ERROR_UPDATE_INTERNAL.toString());
+		if (update.extrasFiles != null && update.extrasFiles.isEmpty())
+			throw new UpdateException(Local.ERROR_UPDATE_INTERNAL.toString());
+		
+		int nb = update.updaterFiles.size() + update.applicationFiles.size();
+		if (update.jreFiles != null)
+			nb += update.jreFiles.size();
+		if (update.extrasFiles != null)
+			nb += update.extrasFiles.size();
+		
+		int step;
+		
+		step = stepDownload*update.updaterFiles.size()/nb;
+		stepDownload -= step; nb -= update.updaterFiles.size();
+		downloadFile(update.updaterFiles, updateTmp, "update.jar", progress, step);
+		if (update.jreFiles != null) {
+			step = stepDownload*update.jreFiles.size()/nb;
+			stepDownload -= step; nb -= update.jreFiles.size();
+			downloadFile(update.jreFiles, updateTmp, "jre.zip", progress, step);
+		}
+		if (update.extrasFiles != null) {
+			step = stepDownload*update.extrasFiles.size()/nb;
+			stepDownload -= step; nb -= update.extrasFiles.size();
+			downloadFile(update.extrasFiles, updateTmp, "extras.zip", progress, step);
+		}
+		step = stepDownload;
+		stepDownload -= step; nb -= update.applicationFiles.size();
+		downloadFile(update.applicationFiles, updateTmp, "application.zip", progress, step);
+
+		int stepJRE = stepFinalize*80/100;
+		int stepRun = stepFinalize - stepJRE;
 		try {
-			FileSystemUtil.copyDirectory(new File(Application.deployPath, "jre"), new File(updateTmp, "jre"), progress, 300);
+			if (update.jreFiles != null)
+				ZipUtil.unzip(new File(updateTmp, "jre.zip"), new File(updateTmp, "jre"), progress, stepJRE);
+			else
+				FileSystemUtil.copyDirectory(new File(Application.deployPath, "jre"), new File(updateTmp, "jre"), progress, stepJRE);
+
 			Runtime.getRuntime().exec(updateTmp.getAbsolutePath()+"\\jre\\bin\\java.exe -cp \"" + updateTmp.getAbsolutePath() + "\" -jar \"" + updateTmp.getAbsolutePath() + "\\updater.jar\" -deployPath \"" + Application.deployPath.getAbsolutePath() + "\"");
-			progress.progress(180);
+			progress.progress(stepRun);
 			progress.done();
 			dlg.close();
 		} catch (IOException e) {

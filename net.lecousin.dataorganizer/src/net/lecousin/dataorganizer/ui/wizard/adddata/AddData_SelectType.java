@@ -33,7 +33,8 @@ public class AddData_SelectType extends WizardPage {
 		comboSingleType = new Combo(radioAddType, SWT.BORDER);
 		radioAddType.addOption("single", new Control[] { UIUtil.newLabel(radioAddType, Local.Add_a_data_of_type.toString()), comboSingleType });
 		for (ContentType type : ContentType.getAvailableTypes())
-			comboSingleType.add(type.getName());
+			if (((AddDataWizard)getWizard()).getTypePage(type.getID()) != null)
+				comboSingleType.add(type.getName());
 		radioAddType.addOption("folder", Local.Add_data_from_a_folder+" ("+Local.or_any_URI+")");
 		setControl(panel);
 		

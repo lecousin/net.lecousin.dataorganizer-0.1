@@ -9,7 +9,6 @@ import java.net.URISyntaxException;
 import net.lecousin.dataorganizer.core.DataOrganizer;
 import net.lecousin.dataorganizer.core.DataOrganizerConfig;
 import net.lecousin.dataorganizer.ui.application.update.Updater;
-import net.lecousin.framework.Triple;
 import net.lecousin.framework.io.FileSystemUtil;
 import net.lecousin.framework.io.TextLineInputStream;
 import net.lecousin.framework.log.DualLog;
@@ -17,7 +16,6 @@ import net.lecousin.framework.log.Log;
 import net.lecousin.framework.log.LogConsole;
 import net.lecousin.framework.log.LogFile;
 import net.lecousin.framework.ui.eclipse.dialog.ErrorDlg;
-import net.lecousin.framework.version.Version;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.equinox.app.IApplication;
@@ -28,7 +26,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
-import org.w3c.dom.Element;
 
 /**
  * This class controls all aspects of the application's execution
@@ -130,13 +127,11 @@ public class Application implements IApplication {
 		config.save();
 		Shell shell = null;
 		try {
-			Triple<Version,Element,Element> p = Updater.getLatestVersionInfo();
-			Version current = Updater.getCurrentVersion();
-			if (p.getValue1().compareTo(current) <= 0) return false;
+			Updater.Update update = Updater.getLatestVersionInfo();
+			if (update == null) return false;
 			shell = new Shell(display, SWT.PRIMARY_MODAL/*SWT.APPLICATION_MODAL*/);
-			String news = Updater.getNews(p.getValue2(), current, p.getValue1());
-			if (!Updater.askToUpdate(shell, current, p.getValue1(), news)) return false;
-			Updater.launchUpdate(shell, p.getValue3());
+			if (!Updater.askToUpdate(shell, update)) return false;
+			Updater.launchUpdate(shell, update);
 			return true;
 		} catch (Throwable t) {
 			if (Log.warning(this))
@@ -154,8 +149,8 @@ public class Application implements IApplication {
 				File file = new File(net.lecousin.framework.application.Application.deployPath, "DataOrganizer.ini");
 				TextLineInputStream in = new TextLineInputStream(new FileInputStream(file));
 				StringBuilder str = new StringBuilder();
-				while (!in.isEndOfStream()) {
-					String line = in.readLine();
+				String line;
+				while ((line = in.readLine()) != null) {
 					if (!line.equals("-firstLaunch"))
 						str.append(line).append("\r\n");
 				}

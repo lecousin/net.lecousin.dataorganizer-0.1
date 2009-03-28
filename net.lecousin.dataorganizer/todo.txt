@@ -7,7 +7,7 @@ DataOrganizer
  
 Update
  + garder les fichiers de config (recentWorkspaces.xml...)
- + splitter: jre, extras, appli... et ne recuperer que ce dont il y a besoin
+ + tester: jre, extras, unzip...
 
 Audio
  + MP3 single
