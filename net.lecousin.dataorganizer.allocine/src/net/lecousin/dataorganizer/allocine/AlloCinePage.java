@@ -6,7 +6,7 @@ import java.util.List;
 
 import javax.net.SocketFactory;
 
-import net.lecousin.dataorganizer.core.database.info.Info;
+import net.lecousin.dataorganizer.core.database.info.SourceInfo;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.Triple;
 import net.lecousin.framework.net.http.client.HttpClient;
@@ -17,7 +17,7 @@ import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.xml.XmlParsingUtil;
 import net.lecousin.framework.xml.XmlParsingUtil.Node;
 
-public abstract class AlloCinePage<T extends Info> {
+public abstract class AlloCinePage<T extends SourceInfo> {
 
 	public final boolean retrieve(String id, T info, WorkProgress progress, int work) {
 		boolean success = false;

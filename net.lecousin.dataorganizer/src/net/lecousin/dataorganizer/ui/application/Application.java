@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Map;
 
 import net.lecousin.dataorganizer.core.DataOrganizer;
 import net.lecousin.dataorganizer.core.DataOrganizerConfig;
@@ -42,13 +43,14 @@ public class Application implements IApplication {
 		String path = null;
 		boolean firstlaunch = false;
 		boolean debug = false;
-		for (int i = 0; i < args.length; ++i)
+		for (int i = 0; i < args.length; ++i) {
 			if (args[i].equals("-deployPath") && i < args.length-1)
-				path = args[i+1];
+				path = args[++i];
 			else if (args[i].equals("-firstLaunch"))
 				firstlaunch = true;
 			else if (args[i].equals("-enable_debug"))
 				debug = true;
+		}
 		try {
 			net.lecousin.framework.application.Application.deployPath = path != null ? new File(path) : new File(Platform.getInstallLocation().getURL().toURI());
 		} catch (URISyntaxException e) {
@@ -62,6 +64,8 @@ public class Application implements IApplication {
 		if (!instance.isSet()) {
 			if (!chooseWorkspace(instance, display))
 				return IApplication.EXIT_OK;
+		} else {
+			net.lecousin.framework.application.Application.language = net.lecousin.framework.application.Application.Language.FRENCH;
 		}
 		
 		try {
@@ -80,10 +84,17 @@ public class Application implements IApplication {
 			Log.error(this, "Unable to initialize file log", t);
 		}
 
-		net.lecousin.framework.application.Application.language = net.lecousin.framework.application.Application.Language.FRENCH;
+		if (Log.debug(this)) {
+			Log.debug(this, "Install: " + Platform.getInstallLocation().getURL().toString());
+			Log.debug(this, "Instance: " + Platform.getInstanceLocation().getURL().toString());
+			Log.debug(this, "Environment:");
+			for (Map.Entry<String,String> e : System.getenv().entrySet())
+				Log.debug(this, "  "+e.getKey()+"="+e.getValue());
+			Log.debug(this, "Properties:");
+			for (Map.Entry<Object, Object> e : System.getProperties().entrySet())
+				Log.debug(this, "  "+e.getKey().toString()+"="+e.getValue().toString());
+		}
 		
-		Log.debug(this, "Install: " + Platform.getInstallLocation().getURL().toString());
-		Log.debug(this, "Instance: " + Platform.getInstanceLocation().getURL().toString());
 		
 		if (firstlaunch)
 			handleFirstLaunch();
@@ -127,9 +138,9 @@ public class Application implements IApplication {
 		config.save();
 		Shell shell = null;
 		try {
-			Updater.Update update = Updater.getLatestVersionInfo();
-			if (update == null) return false;
 			shell = new Shell(display, SWT.PRIMARY_MODAL/*SWT.APPLICATION_MODAL*/);
+			Updater.Update update = Updater.getLatestVersionInfo(shell);
+			if (update == null) return false;
 			if (!Updater.askToUpdate(shell, update)) return false;
 			Updater.launchUpdate(shell, update);
 			return true;

@@ -2,8 +2,9 @@ package net.lecousin.dataorganizer.audio.ui;
 
 import net.lecousin.dataorganizer.audio.AudioDataType;
 import net.lecousin.dataorganizer.audio.AudioInfo;
+import net.lecousin.dataorganizer.audio.AudioSourceInfo;
 import net.lecousin.dataorganizer.audio.Local;
-import net.lecousin.dataorganizer.audio.AudioInfo.Track;
+import net.lecousin.dataorganizer.audio.AudioSourceInfo.Track;
 import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.event.Event.Listener;
@@ -28,7 +29,7 @@ import org.eclipse.swt.widgets.Text;
 
 public class OverviewPanel {
 
-	public OverviewPanel(Composite panel, AudioDataType data) {
+	public OverviewPanel(Composite panel, AudioDataType data, AudioSourceInfo source) {
 		GridLayout layout = UIUtil.gridLayout(panel, 1);
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
@@ -76,19 +77,24 @@ public class OverviewPanel {
 //		for (String s : info.getGenres())
 //			UIUtil.newLabel(line, s);
 		
-		table = new LCTableWithControls<Track>(panel, Local.Tracks.toString(), new TrackProvider(), false, true, false, false);
-		UIUtil.gridDataHorizFill(table);
-		table.moved().addListener(new Listener<Pair<Track,Integer>>() {
-			public void fire(Pair<Track, Integer> event) {
-				int srcIndex = info.indexOf(event.getValue1());
-				event.getValue1().move(event.getValue2());
-				info.getData().moveDataSource(srcIndex, event.getValue2());
-				table.refresh(false);
-			}
-		});
+		//TODO si fileInfo ou pas, si info d'Internet ou pas... a propos des tracks: merger...
+		fileInfo = info.getSourceInfo(AudioInfo.FILE_SOURCE);
+		if (fileInfo != null) {
+			table = new LCTableWithControls<Track>(panel, Local.Tracks.toString(), new TrackProvider(), false, true, false, false);
+			UIUtil.gridDataHorizFill(table);
+			table.moved().addListener(new Listener<Pair<Track,Integer>>() {
+				public void fire(Pair<Track, Integer> event) {
+					int srcIndex = fileInfo.indexOf(event.getValue1());
+					event.getValue1().move(event.getValue2());
+					info.getData().moveDataSource(srcIndex, event.getValue2());
+					table.refresh(false);
+				}
+			});
+		}
 	}
 	
 	private AudioInfo info;
+	private AudioSourceInfo fileInfo;
 	private LCTableWithControls<Track> table;
 	
 	private class TrackProvider implements LCTableWithControls.Provider<Track> {
@@ -100,7 +106,7 @@ public class OverviewPanel {
 			config.sortable = false;
 			columns = new ColumnProvider[] { new ColumnIndex(), new ColumnTitle(), new ColumnLength() };
 			contentProvider = new LCContentProvider<Track>() {
-				public Iterable<Track> getElements() { return info.getTracks(); }
+				public Iterable<Track> getElements() { return fileInfo.getTracks(); }
 			};
 		}
 		TableConfig config;
@@ -110,7 +116,7 @@ public class OverviewPanel {
 			public String getTitle() { return "N°"; }
 			public int getAlignment() { return SWT.RIGHT; }
 			public int getDefaultWidth() { return 30; }
-			public String getText(Track element) { return Integer.toString(info.indexOf(element)+1)+'.'; }
+			public String getText(Track element) { return Integer.toString(fileInfo.indexOf(element)+1)+'.'; }
 			public Image getImage(Track element) { return null; }
 			public Font getFont(Track element) { return null; }
 			public int compare(Track element1, String text1, Track element2, String text2) { return 0; }
@@ -147,7 +153,7 @@ public class OverviewPanel {
 			});
 			text.setLayoutData(UIUtil.gridDataHoriz(1, true));
 			UIUtil.newLabel(parent, Local.File+":", true, false);
-			DataSource source = info.getData().getSources().get(info.indexOf(element));
+			DataSource source = info.getData().getSources().get(fileInfo.indexOf(element));
 			UIUtil.newLabel(parent, source == null ? Local.No_source.toString() : source.toString());
 		}
 	}

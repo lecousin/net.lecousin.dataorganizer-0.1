@@ -5,7 +5,7 @@ import java.util.List;
 import net.lecousin.dataorganizer.core.database.info.Info.DataLink;
 import net.lecousin.dataorganizer.people.Local;
 import net.lecousin.dataorganizer.people.PeopleDataType;
-import net.lecousin.dataorganizer.people.PeopleInfo;
+import net.lecousin.dataorganizer.people.PeopleSourceInfo;
 import net.lecousin.dataorganizer.ui.control.DataLinkListPanel;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.time.DateTimeUtil;
@@ -19,7 +19,7 @@ import org.eclipse.swt.widgets.TabItem;
 
 public class OverviewPanel extends Composite {
 
-	public OverviewPanel(Composite parent, PeopleDataType people) {
+	public OverviewPanel(Composite parent, PeopleDataType people, PeopleSourceInfo source) {
 		super(parent, SWT.NONE);
 		setBackground(parent.getBackground());
 		GridLayout layout = UIUtil.gridLayout(parent, 1);
@@ -29,24 +29,22 @@ public class OverviewPanel extends Composite {
 		UIUtil.gridLayout(this, 1);
 		UIUtil.gridDataHorizFill(this);
 		
-		PeopleInfo info = (PeopleInfo)people.getInfo();
-		
 		StringBuilder str = new StringBuilder();
-		if (info.getBirthDay() != 0)
-			str.append("Né le ").append(DateTimeUtil.getDateString(info.getBirthDay()));
-		if (info.getBirthPlace() != null) {
+		if (source.getBirthDay() != 0)
+			str.append("Né le ").append(DateTimeUtil.getDateString(source.getBirthDay()));
+		if (source.getBirthPlace() != null) {
 			if (str.length() == 0) str.append(Local.Born_at).append(' '); else str.append(' ').append(Local.at).append(' ');
-			str.append(info.getBirthPlace());
+			str.append(source.getBirthPlace());
 		}
 		UIUtil.newLabel(this, str.toString());
 		
 		TabFolder folder = new TabFolder(this, SWT.NONE);
 		folder.setBackground(parent.getBackground());
 		UIUtil.gridDataHorizFill(folder);
-		for (String name : info.getActivities().keySet()) {
+		for (String name : source.getActivities().keySet()) {
 			TabItem item = new TabItem(folder, SWT.NONE);
 			item.setText(name);
-			DataLinkListPanel panel = new DataLinkListPanel(folder, new Provider(info.getActivities().get(name)));
+			DataLinkListPanel panel = new DataLinkListPanel(folder, new Provider(source.getActivities().get(name)));
 			item.setControl(panel);
 		}
 	}

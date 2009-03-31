@@ -81,10 +81,13 @@ public class AddData_SelectType extends WizardPage {
 		if (option.equals("single")) {
 			int i = comboSingleType.getSelectionIndex();
 			if (i < 0) return null;
+			String typeName = comboSingleType.getItem(i);
 			ContentType type = null;
 			for (ContentType t : ContentType.getAvailableTypes()) {
-				if (i == 0) { type = t; break; }
-				i--;
+				if (t.getName().equals(typeName)) {
+					type = t;
+					break;
+				}
 			}
 			if (type == null) return null;
 			return ((AddDataWizard)getWizard()).getTypePage(type.getID());

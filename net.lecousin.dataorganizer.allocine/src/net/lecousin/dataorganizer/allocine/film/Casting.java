@@ -7,11 +7,11 @@ import net.lecousin.dataorganizer.allocine.AlloCinePage;
 import net.lecousin.dataorganizer.allocine.AlloCineUtil;
 import net.lecousin.dataorganizer.core.database.info.Info;
 import net.lecousin.dataorganizer.people.PeopleContentType;
-import net.lecousin.dataorganizer.video.VideoInfo;
+import net.lecousin.dataorganizer.video.VideoSourceInfo;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.progress.WorkProgress;
 
-public class Casting extends AlloCinePage<VideoInfo> {
+public class Casting extends AlloCinePage<VideoSourceInfo> {
 
 	@Override
 	protected String getCategory() {
@@ -32,7 +32,7 @@ public class Casting extends AlloCinePage<VideoInfo> {
 		return null;
 	}
 	@Override
-	protected Pair<String,Boolean> parse(String page, String pageURL, VideoInfo info, WorkProgress progress, int work) {
+	protected Pair<String,Boolean> parse(String page, String pageURL, VideoSourceInfo info, WorkProgress progress, int work) {
 		int nb = 4;
 		int step;
 		List<Pair<String,Info.DataLink>> list;

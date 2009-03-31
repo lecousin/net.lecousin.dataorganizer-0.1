@@ -2,27 +2,21 @@ Avant prochaine release:
 
 DataOrganizer
  + Bug LCTable: ne plus utiliser ScrolledComposite a cause de MouseWhell, mais mettre la horizontal scroll bar manuellement
- + info vraiment par source, merge a l'affichage + filtrage possible a l'affichage + suppression d'une source...
- + Supprimer du filesystem: verifier s'il y a des sources utilisees par d'autres données
+ + DataOverview: name: take from sources.. able to merge..
  
-Update
- + garder les fichiers de config (recentWorkspaces.xml...)
- + tester: jre, extras, unzip...
+A tester:
+ + MediaPlayer dans tous les sens (audio+video)
+ + ajouter toutes mes donnees... 
 
 Audio
  + MP3 single
- + d'autres types supportes
- + PLS +...
  + UI: genres
- + Internet: CDDB + FreeDB.org + ???
  + tout les TODO, icones...
- + essayer avec tous mes trucs dans zik
+ + DataOrverview: gerer les sources, source FILE... tracks order...
 
 Video
  + DVD, Video CD
- + Icones sur les Action sur Video
  + Video search: duration: accept toutes les durees=> faire la recherche sinon c lourd il faut trouver la tranche minimum
- + essayer avec tous mes CD/DVD de films
  + continuer les types, gerer width/height ... si format gere en interne..
 
 ---------------------------------------------------------------------
@@ -52,6 +46,8 @@ DataOrganizer
 Install/Update
  + Updater
  + InstallFinalizer
+ + jre, extras, application...
+ + penser a garder les fichiers de config (recentWorkspaces.xml...)
 
 9Box Media Center:
  + drag'n'drop
@@ -61,10 +57,11 @@ Media Player
  + playlist : deplacer les elements par drag'n'drop
  
 Audio
- + Lecteur: utiliser autre que VLC?? surtout pour CDA.. ca marche pas
-   + javax.sound.{sampled,midi}
-   + JMF
+ + Lecteur: CDA???
  + essayer avec tous mes CD audios
+ + d'autres types supportes
+ + PLS +...
+ + Internet: CDDB + FreeDB.org + ???
  
 Picture
  + tout

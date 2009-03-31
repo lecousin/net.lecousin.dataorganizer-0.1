@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.Data.DuplicateAnalysis;
 import net.lecousin.dataorganizer.core.database.info.Info;
+import net.lecousin.dataorganizer.core.database.info.SourceInfo;
 import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
 import net.lecousin.framework.Triple;
@@ -53,7 +54,7 @@ public abstract class DataContentType implements SelfMap.Entry<Long> {
 	public abstract boolean isContentAvailable();
 	
 	public abstract void getImages(ProcessListener<Triple<String,Image,Integer>> listener);
-	public abstract void createOverviewPanel(Composite panel);
+	public abstract void createOverviewPanel(Composite panel, SourceInfo sourceInfo);
 	public abstract void createDescriptionPanel(Composite panel);
 	
 	public abstract DuplicateAnalysis checkForDuplicateOnContent(Data data);

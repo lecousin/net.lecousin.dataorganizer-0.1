@@ -10,8 +10,8 @@ import net.lecousin.dataorganizer.ui.control.DataLinkListPanel;
 import net.lecousin.dataorganizer.ui.dialog.DataLinkPopup;
 import net.lecousin.dataorganizer.video.Local;
 import net.lecousin.dataorganizer.video.VideoDataType;
-import net.lecousin.dataorganizer.video.VideoInfo;
-import net.lecousin.dataorganizer.video.VideoInfo.Genre;
+import net.lecousin.dataorganizer.video.VideoSourceInfo;
+import net.lecousin.dataorganizer.video.VideoSourceInfo.Genre;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.collections.CollectionUtil;
 import net.lecousin.framework.event.Event.ListenerData;
@@ -31,36 +31,34 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 
 public class OverviewPanel {
 
-	public OverviewPanel(Composite panel, VideoDataType data) {
+	public OverviewPanel(Composite panel, VideoDataType data, VideoSourceInfo source) {
 		GridLayout layout = UIUtil.gridLayout(panel, 1);
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
 		layout.verticalSpacing = 0;
 		
-		VideoInfo i = (VideoInfo)data.getInfo();
-		
 		Composite line = UIUtil.newComposite(panel);
 		UIUtil.gridDataHorizFill(line);
 		RowLayout l = new RowLayout(SWT.HORIZONTAL);
-		l.marginHeight = l.marginWidth = 0;
+		l.marginHeight = l.marginWidth = l.marginBottom = l.marginTop = 0;
 		l.spacing = 5;
 		l.center = true;
 		line.setLayout(l);
 		UIUtil.newLabel(line, Local.Duration+":", true, false);
 		UIUtil.newLabel(line, (data.getDuration() < 0 ? "-" : DateTimeUtil.getTimeMinimalString(data.getDuration())));
-		if (i != null) {
-			if (i.getReleaseDate() > 0) {
+		if (source != null) {
+			if (source.getReleaseDate() > 0) {
 				UIUtil.newSeparator(line, false, true);
 				UIUtil.newLabel(line, Local.Release+":", true, false);
-				UIUtil.newLabel(line, new SimpleDateFormat("dd MMMM yyyy").format(new Date(i.getReleaseDate())));
+				UIUtil.newLabel(line, new SimpleDateFormat("dd MMMM yyyy").format(new Date(source.getReleaseDate())));
 			}
 			
-			List<Genre> genres = i.getGenres();
+			List<Genre> genres = source.getGenres();
 			if (genres != null && !genres.isEmpty()) {
 				line = UIUtil.newComposite(panel);
 				UIUtil.gridDataHorizFill(line);
 				l = new RowLayout(SWT.HORIZONTAL);
-				l.marginHeight = l.marginWidth = 0;
+				l.marginHeight = l.marginWidth = l.marginBottom = l.marginTop = 0;
 				l.spacing = 0;
 				line.setLayout(l);
 				UIUtil.newLabel(line, Local.Genre+": ", true, false);
@@ -72,10 +70,10 @@ public class OverviewPanel {
 				}
 			}
 			
-			createPeopleList(panel, i.getDirectors(), Local.Directed_by.toString(), Local.Direction.toString());
-			createPeopleList(panel, i.getActors(), Local.Actors.toString(), Local.Casting.toString());
-			createPeopleList(panel, i.getProductors(), Local.Producted_by.toString(), Local.Production.toString());
-			createPeopleList(panel, i.getScenaristes(), Local.Writen_by.toString(), Local.Write.toString());
+			createPeopleList(panel, source.getDirectors(), Local.Directed_by.toString(), Local.Direction.toString());
+			createPeopleList(panel, source.getActors(), Local.Actors.toString(), Local.Casting.toString());
+			createPeopleList(panel, source.getProductors(), Local.Producted_by.toString(), Local.Production.toString());
+			createPeopleList(panel, source.getScenaristes(), Local.Writen_by.toString(), Local.Write.toString());
 		}
 	}
 	

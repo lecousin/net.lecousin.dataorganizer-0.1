@@ -14,7 +14,7 @@ public class UpdateAction extends Action {
 	public static final String ID = "net.lecousin.dataorganizer.action.UpdateAction";
 	
 	public UpdateAction() {
-		super(Local.Update_application.toString(), SharedImages.getImageDescriptor(SharedImages.icons.x16.basic.INTERNET));
+		super(Local.Update_application.toString(), SharedImages.getImageDescriptor(SharedImages.icons.x16.basic.CONNECTED_GREEN_GREEN));
 		setId(ID);
 	}
 
@@ -22,7 +22,7 @@ public class UpdateAction extends Action {
 	public void run() {
 		try {
 			boolean updated = false;
-			Updater.Update update = Updater.getLatestVersionInfo();
+			Updater.Update update = Updater.getLatestVersionInfo(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
 			if (update != null) {
 				if (Updater.askToUpdate(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), update)) {
 					updated = true;

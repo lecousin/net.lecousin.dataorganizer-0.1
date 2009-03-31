@@ -4,10 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.filechooser.FileSystemView;
 
 import net.lecousin.dataorganizer.Local;
+import net.lecousin.framework.collections.CollectionUtil;
 import net.lecousin.framework.xml.XmlWriter;
 
 import org.eclipse.core.runtime.CoreException;
@@ -53,12 +57,26 @@ public class AmovibleFileDataSource extends FileDataSource {
 	}
 	
 	@Override
-	public void removeFromFileSystem() throws Exception {
+	public List<File> removeFromFileSystem() throws Exception {
 		ensurePresence();
 		File f = findFile();
 		if (f == null)
 			throw new Exception(Local.Unable_to_locate_file.toString());
 		f.delete();
+		return CollectionUtil.single_element_list(f);
+	}
+	@Override
+	public List<File> getLinkedFiles() {
+		File file = findFile();
+		if (file == null) return new LinkedList<File>();
+		return CollectionUtil.single_element_list(file);
+	}
+	@Override
+	public boolean unlink(Collection<File> files) {
+		File file = findFile();
+		if (file == null) return false;
+		if (!files.contains(file)) return false;
+		return true;
 	}
 	
 	@Override

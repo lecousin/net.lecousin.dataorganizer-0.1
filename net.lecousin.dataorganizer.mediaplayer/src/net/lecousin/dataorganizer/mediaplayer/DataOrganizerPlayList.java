@@ -57,8 +57,7 @@ public class DataOrganizerPlayList extends PlayList {
 		infoPanel = UIUtil.newComposite(parent);
 		UIUtil.gridLayout(infoPanel, 2, 0, 0, 1, 0).marginBottom = 1;
 		infoPanel.setLayoutData(UIUtil.gridData(1, true, 1, false));
-		Separator sep = new Separator(parent, true, Separator.Style.SIMPLE_LINE, 0);
-		sep.setForeground(getPlayer().getControlSeparatorColor());
+		Separator sep = new Separator(parent, true, new Separator.SimpleLine(getPlayer().getControlSeparatorColor()), 0);
 		UIUtil.gridDataHorizFill(sep);
 		openedPanel = UIUtil.newGridComposite(parent, 0, 0, 1, 0, 0);
 		GridData gd = UIUtil.gridData(1, true, 1, false);
@@ -70,8 +69,7 @@ public class DataOrganizerPlayList extends PlayList {
 		label.setForeground(ColorUtil.getWhite());
 		label.setBackground(ColorUtil.get(40, 40, 100));
 		label.setLayoutData(UIUtil.gridDataHoriz(1, true));
-		sep = new Separator(parent, true, Separator.Style.SIMPLE_LINE, 0);
-		sep.setForeground(getPlayer().getControlSeparatorColor());
+		sep = new Separator(parent, true, new Separator.SimpleLine(getPlayer().getControlSeparatorColor()), 0);
 		UIUtil.gridDataHorizFill(sep);
 		
 		listenerOpened = new Listener<Triple<Data,List<Long>,Boolean>>() {

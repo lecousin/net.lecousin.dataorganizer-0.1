@@ -14,9 +14,10 @@ public enum Local {
 	data("data", "donnée"),
 	data__s("data", "donnée(s)"),
 	datas("data", "données"),
+	days("days", "jours"),
 	Delete("Delete", "Supprimer"),
 	Description("Description", "Description"),
-	Details("Details", "Details"),
+	Details("Details", "Détails"),
 	extensions("extensions", "extensions"),
 	Extensions("Extensions", "Extensions"),
 	_for("for", "pour"),
@@ -48,17 +49,20 @@ public enum Local {
 	Sources("Sources", "Sources"),
 	Table("Table", "Table"),
 	times("times", "fois"),
+	Update("Update", "Mise à jour"),
 	Views("Views", "Vues"),
 	
+	A_new_version_has_been_found__Retrieving_information_about_this_version("A new version has been found. Retrieving information about this version", "Une mise à jour a été trouvée. Récupération des informations sur cette version"),
 	About_DataOrganizer("About DataOrganizer", "A propos de DataOrganizer"),
 	Add_a_data_of_type("Add a data of type", "Ajouter une donnée de type"),
-	Add_data("Add data", "Ajouter une donnée"),
+	Add_data("Add data", "Ajouter des données"),
 	Add_data_from_a_folder("Add data from a folder", "Ajouter des données depuis un dossier"),
 	Add_data_from_a_folder__description("Specify from which folder to add data and how the folder should be analyzed.", "Spécifiez depuis quel dossier vous souhaitez ajouter des données et comment ce dossier doit être analysé."),
 	Add_the_new_data_anyway("Add the new data anyway", "Quand même ajouter la nouvelle donnée"),
 	Amovible_media("Amovible media", "Média amovible"),
 	Analyze_sub_folders_recursively("Analyze sub-folders recursively", "Parcourir les sous-dossiers recursivement"),
-	Analyzing_file_system("Analyzing file system", "Analyze du système de fichiers"),
+	Analyzing_database("Analyzing DataBase", "Analyse de la base de données"),
+	Analyzing_file_system("Analyzing file system", "Analyse du système de fichiers"),
 	analyzed_folders("folders analyzed", "dossiers analysés"),
 	analyzed_files("files analyzed", "fichiers analysés"),
 	Application_update("DataOrganizer update", "Mise à jour de DataOrganizer"),
@@ -67,6 +71,7 @@ public enum Local {
 	Cannot_found("Cannot found", "Impossible de trouver"),
 	Content_type("Content type", "Type de contenu"),
 	Content_types_to_detect("Content types to detect", "Types de contenu à détecter"),
+	Copying_files("Copying files", "Copie des fichiers"),
 	Create_and_retrieve_information("Create data and retrieve information", "Créer la donnée et récupérer les informations"),
 	Create_label("Create a label", "Créer une étiquette"),
 	Creating_labels_project("Creating lables project", "Création du project pour les étiquettes"),
@@ -88,6 +93,7 @@ public enum Local {
 	Duplicate_data("Duplicate data", "Donnée en double"),
 	Enter_the_name_of_the_label("Enter the name of the label", "Entrez le nom pour l'étiquette"),
 	Enter_the_name_of_the_new_label("Enter the name of the new label", "Entrez le nom pour la nouvelle étiquette"),
+	Extracting_files("Extracting files", "Extraction des fichiers"),
 	Files_and_folders_found("Files and folders found", "Fichiers et dossiers trouvés"),
 	Files_found("Files found", "Fichiers trouvés"),
 	Files_not_detected("Files not detected", "Fichiers non détectés"),
@@ -100,6 +106,7 @@ public enum Local {
 	into_the_label("into the label", "vers l'étiquette"),
 	is_exactly_the_same_as_data("is exactly the same as data", "est exactement la même que la donnée"),
 	is_not_in_your_database("is not in your database", "n'est pas dans votre base de données"),
+	Keep_data_with_links_on_removed_files("Keep the data with links on removed files", "Conserver la donnée avec les liens sur les fichiers supprimés"),
 	Last_open("Last open", "Dernière ouverture"),
 	Load_information_from_the_data_sources("Load information from the data sources (i.e. previews on videos)", "Récupérer des information depuis les sources (par ex. prévisualisation sur les vidéos)"),
 	Loading_application("Loading DataOrganizer application", "Chargement de l'application DataOrganizer"),
@@ -134,9 +141,11 @@ public enum Local {
 	Refreshing_database_content("Refreshing database content", "Rafraîchissement du contenu de la base de données"),
 	Refreshing_labels("Refreshing labels", "Rafraîchissement des étiquettes"),
 	Refresh_information_from__("Refresh information from %#1%", "Rafraîchir les informations de %#1%"),
+	Remove_data("Remove data", "Supprimer la donnée"),
 	Remove_data__s("Remove data", "Supprimer des données"),
 	Remove_from_database_and_filesystem("Remove from database and filesystem", "Supprimer de la base de données et de l'ordinateur"),
 	Remove_label("Remove label", "Supprimer une étiquette"),
+	Remove_links_to_removed_files("Remove links to removed files", "Supprimer les liens vers les fichiers supprimés"),
 	Remove_only_from_database("Remove only from database", "Supprimer uniquement de la base de données"),
 	Remove_the_new_data_from_the_filesystem("Remove the new data from the file system and keep the current", "Supprimer la nouvelle donnée de l'ordinateur, et conserver la donnée actuelle"),
 	Remove_the_old_data_from_the_filesystem_and_replace_by_new("Remove the old data from the file system and replace it with the new one", "Supprimer la donnée actuelle de l'ordinateur, et remplacer par la nouvelle dans la base de données"),
@@ -149,6 +158,7 @@ public enum Local {
 	Retrieve_from_all_sources("Retrieve from all sources", "Récupérer depuis toutes les sources"),
 	Retrieve_information("Retrieve information", "Recupérer des informations"),
 	Retrieve_information_from_Internet("Retrieve information from Internet", "Récupérer les informations depuis Internet"),
+	Retrieving_update_information("Retrieving update information", "Récupération des informations de mise à jour"),
 	Reverse_search("Reverse search criterion", "Inverser le critère de recherche"),
 	Search_result("Search result", "Résultat de la recherche"),
 	Searching_data("Searching data", "Recherche de données"),
@@ -176,6 +186,7 @@ public enum Local {
 	Unable_to_remove_the_label("Unable to remove the label", "Impossible de supprimer l'étiquette"),
 	Unable_to_rename_the_label("Unable to rename the label", "Impossible de renommer l'étiquette"),
 	Update_application("Update application", "Mettre à jour l'application"),
+	Update_check_frequency("Check for available update every", "Vérifier les mises à jour disponibles tous les"),
 	Update_current_data_with_new_location("Update the current data with the new location (keep all the information, only update the data location)", "Mettre à jour la donnée actuelle avec son nouvel emplacement (toutes les informations sont conservées, uniquement l'emplacement est mis à jour)"),
 	What_do_you_want_to_do("What do you want to do ?", "Que souhaitez vous faire ?"),
 	You_are_requesting_to_remove("You are requesting to remove", "Vous demandez la suppression de"),
@@ -197,7 +208,9 @@ public enum Local {
 	
 	
 	MENU_Database("&Data Base", "&Base de données"),
+	MENU_Options("&Options", "&Options"),
 	MENU_Help("&Help", "&Aide"),
+	MENU_ITEM_Options_Configuration("&Preferences", "&Préférences"),
 	MENU_ITEM_About_DataOrganizer("&About DataOrganizer...", "&A propos de DataOrganizer..."),
 	
 	NoPluginToRetrieveInforForType("There is no plug-in to retrieve information for content type", "Il n'y a pas de plug-in pour récupérer des information du type"),
@@ -366,6 +379,31 @@ public enum Local {
 		" - le type de contenu de ces fichiers ne sont effectivement pas des types supportés,<br>" +
 		" - vous n'avez pas sélectionné ces types, ils n'ont donc pas été ajoutés,<br>" +
 		" - cette version de DataOrganizer n'a pas été capable de détecter ces fichiers comme des données; dans ce cas, vérifez que vous avez la dernière version de DataOrganizer, si tel est le cas vous pouvez le signaler à l'auteur."
+	),
+	MESSAGE_Not_Detected_Footer(
+		"<p marginTop=5>"+
+		"A data has not been added ? some files are not reconized ? Do not hesitate to let us know !!"+
+		"</p>",
+		"<p marginTop=5>"+
+		"Une donnée n'a pas été ajoutée ? des fichiers non reconnus ? n'hésitez pas à nous en faire part !!"+
+		"</p>"
+	),
+	
+	MESSAGE_Contact(
+		"To contact us, send us an email to: support.dataorganizer@gmail.com\r\n"+
+		"Try to be as precise as possible and to indicate the version number you are using, so that we can be most effective to process your request.",
+		"Pour nous contacter, ecrivez-nous un mail à l'adresse: support.dataorganizer@gmail.com\r\n"+
+		"Pensez à être le plus précis possible et à nous indiquer le numéro de version que vous utilisez, ceci afin que nous puissions être le plus efficace possible pour traiter votre demande."
+	),
+	
+	MESSAGE_Preference_Update(
+		"Configure how DataOrganizer can be updated.",
+		"Configure la manière de mettre à jour DataOrganizer."
+	),
+	
+	MESSAGE_Files_removed(
+		"The file(s)<br/>%#1%has(ve) been removed from the file system but the data %#2% contains linked to this(ese) file(s).<br/>What do you want to do ?",
+		"Le(s) fichier(s)<br/>%#1%a(ont) été supprimé(s) de l'ordinateur mais la donnée %#2% contient des liens vers ce(s) fichier(s).<br/>Que souhaitez-vous faire ?"
 	),
 		
 	

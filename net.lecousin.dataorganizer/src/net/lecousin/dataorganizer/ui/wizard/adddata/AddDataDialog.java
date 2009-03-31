@@ -84,10 +84,10 @@ public class AddDataDialog extends MyDialog {
 			}
 		});
 		
+		text = new LCMLText(panel, false, false);
+		text.setLayoutData(UIUtil.gridDataHoriz(1, true));
+		StringBuilder str = new StringBuilder();
 		if (!result.notDetectedNotTypesFiles.isEmpty() || !result.notDetectedTypesFiles.isEmpty()) {
-			text = new LCMLText(panel, false, false);
-			text.setLayoutData(UIUtil.gridDataHoriz(1, true));
-			StringBuilder str = new StringBuilder();
 			str.append(Local.MESSAGE_Not_Detected_Header);
 			if (!result.notDetectedTypesFiles.isEmpty()) {
 				str.append("<p marginTop=5>");
@@ -99,68 +99,69 @@ public class AddDataDialog extends MyDialog {
 				str.append(Local.process(Local.MESSAGE_Not_Detected_Not_Typed_Files, result.notDetectedNotTypesFiles.size()));
 				str.append("</p>");
 			}
-			text.setText(str.toString());
-			text.addLinkListener("typed", new Runnable() {
-				@SuppressWarnings("unchecked")
-				public void run() {
-		    		Set<String> extensions = new HashSet<String>();
-		    		if (!result.notDetectedTypesFiles.isEmpty())
-		    			for (Pair<IFileStore,TypedFile> file : result.notDetectedTypesFiles)
-		    				extensions.add(FileSystemUtil.getFileNameExtension(file.getValue1().getName()).toLowerCase());
-    				FlatPagedListDialog.Filter<Pair<IFileStore,TypedFile>>[] filters = new FlatPagedListDialog.Filter[1];
-    				filters[0] = new FlatPagedListDialog.FilterListPossibilities<Pair<IFileStore,TypedFile>, String>(extensions) {
-						public String getName() {
-							return Local.Extensions.toString();
-						}
-						@Override
-						protected String getName(String possibility) {
-							return possibility;
-						}
-						@Override
-						protected boolean accept(Pair<IFileStore,TypedFile> element, String possibility) {
-							return element.getValue1().getName().endsWith(possibility);
-						}
-					};
-    				FlatPagedListDialog<Pair<IFileStore,TypedFile>> dlg = new FlatPagedListDialog<Pair<IFileStore,TypedFile>>(getShell(), Local.Files_not_detected.toString(), result.notDetectedTypesFiles, 20, new FlatPagedListDialog.TextProvider<Pair<IFileStore,TypedFile>>() {
-    					@Override
-    					protected String getText(Pair<IFileStore,TypedFile> element) {
-    						return URLDecoder.decode(element.getValue1().toURI().toString());
-    					}
-    				}, filters);
-    				dlg.openProgressive(null, OrientationY.BOTTOM, false);
-				}
-			});
-			text.addLinkListener("not_typed", new Runnable() {
-				@SuppressWarnings("unchecked")
-				public void run() {
-		    		Set<String> extensions = new HashSet<String>();
-		    		if (!result.notDetectedNotTypesFiles.isEmpty())
-		    			for (IFileStore file : result.notDetectedNotTypesFiles)
-		    				extensions.add(FileSystemUtil.getFileNameExtension(file.getName()).toLowerCase());
-    				FlatPagedListDialog.Filter<IFileStore>[] filters = new FlatPagedListDialog.Filter[1];
-    				filters[0] = new FlatPagedListDialog.FilterListPossibilities<IFileStore, String>(extensions) {
-						public String getName() {
-							return Local.Extensions.toString();
-						}
-						@Override
-						protected String getName(String possibility) {
-							return possibility;
-						}
-						@Override
-						protected boolean accept(IFileStore element, String possibility) {
-							return element.getName().endsWith(possibility);
-						}
-					};
-    				FlatPagedListDialog<IFileStore> dlg = new FlatPagedListDialog<IFileStore>(getShell(), Local.Files_not_detected.toString(), result.notDetectedNotTypesFiles, 20, new FlatPagedListDialog.TextProvider<IFileStore>() {
-    					@Override
-    					protected String getText(IFileStore element) {
-    						return URLDecoder.decode(element.toURI().toString());
-    					}
-    				}, filters);
-    				dlg.openProgressive(null, OrientationY.BOTTOM, false);
-				}
-			});
 		}
+		str.append(Local.MESSAGE_Not_Detected_Footer);
+		text.setText(str.toString());
+		text.addLinkListener("typed", new Runnable() {
+			@SuppressWarnings("unchecked")
+			public void run() {
+	    		Set<String> extensions = new HashSet<String>();
+	    		if (!result.notDetectedTypesFiles.isEmpty())
+	    			for (Pair<IFileStore,TypedFile> file : result.notDetectedTypesFiles)
+	    				extensions.add(FileSystemUtil.getFileNameExtension(file.getValue1().getName()).toLowerCase());
+				FlatPagedListDialog.Filter<Pair<IFileStore,TypedFile>>[] filters = new FlatPagedListDialog.Filter[1];
+				filters[0] = new FlatPagedListDialog.FilterListPossibilities<Pair<IFileStore,TypedFile>, String>(extensions) {
+					public String getName() {
+						return Local.Extensions.toString();
+					}
+					@Override
+					protected String getName(String possibility) {
+						return possibility;
+					}
+					@Override
+					protected boolean accept(Pair<IFileStore,TypedFile> element, String possibility) {
+						return element.getValue1().getName().endsWith(possibility);
+					}
+				};
+				FlatPagedListDialog<Pair<IFileStore,TypedFile>> dlg = new FlatPagedListDialog<Pair<IFileStore,TypedFile>>(getShell(), Local.Files_not_detected.toString(), result.notDetectedTypesFiles, 20, new FlatPagedListDialog.TextProvider<Pair<IFileStore,TypedFile>>() {
+					@Override
+					protected String getText(Pair<IFileStore,TypedFile> element) {
+						return URLDecoder.decode(element.getValue1().toURI().toString());
+					}
+				}, filters);
+				dlg.openProgressive(null, OrientationY.BOTTOM, false);
+			}
+		});
+		text.addLinkListener("not_typed", new Runnable() {
+			@SuppressWarnings("unchecked")
+			public void run() {
+	    		Set<String> extensions = new HashSet<String>();
+	    		if (!result.notDetectedNotTypesFiles.isEmpty())
+	    			for (IFileStore file : result.notDetectedNotTypesFiles)
+	    				extensions.add(FileSystemUtil.getFileNameExtension(file.getName()).toLowerCase());
+				FlatPagedListDialog.Filter<IFileStore>[] filters = new FlatPagedListDialog.Filter[1];
+				filters[0] = new FlatPagedListDialog.FilterListPossibilities<IFileStore, String>(extensions) {
+					public String getName() {
+						return Local.Extensions.toString();
+					}
+					@Override
+					protected String getName(String possibility) {
+						return possibility;
+					}
+					@Override
+					protected boolean accept(IFileStore element, String possibility) {
+						return element.getName().endsWith(possibility);
+					}
+				};
+				FlatPagedListDialog<IFileStore> dlg = new FlatPagedListDialog<IFileStore>(getShell(), Local.Files_not_detected.toString(), result.notDetectedNotTypesFiles, 20, new FlatPagedListDialog.TextProvider<IFileStore>() {
+					@Override
+					protected String getText(IFileStore element) {
+						return URLDecoder.decode(element.toURI().toString());
+					}
+				}, filters);
+				dlg.openProgressive(null, OrientationY.BOTTOM, false);
+			}
+		});
 		
 		new OkCancelButtonsPanel(panel, true) {
 			@Override

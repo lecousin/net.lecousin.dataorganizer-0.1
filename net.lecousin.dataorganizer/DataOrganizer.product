@@ -3,6 +3,7 @@
 
 <product name="DataOrganizer" id="net.lecousin.dataorganizer.product" application="net.lecousin.dataorganizer.application" version="0.1.0" useFeatures="false">
 
+
    <configIni use="default">
    </configIni>
 
@@ -15,12 +16,14 @@
 
    <windowImages i16="/net.lecousin.dataorganizer/icons/icon.gif"/>
 
+
    <launcher name="DataOrganizer">
       <solaris/>
       <win useIco="false">
          <bmp/>
       </win>
    </launcher>
+
 
    <vm>
       <windows>org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jre1.5.0_10</windows>
@@ -30,18 +33,27 @@
       <plugin id="com.ibm.icu"/>
       <plugin id="net.lecousin.dataorganizer"/>
       <plugin id="net.lecousin.dataorganizer.allocine"/>
+      <plugin id="net.lecousin.dataorganizer.audio"/>
       <plugin id="net.lecousin.dataorganizer.mediaplayer"/>
       <plugin id="net.lecousin.dataorganizer.neufbox.mediacenter"/>
       <plugin id="net.lecousin.dataorganizer.people"/>
       <plugin id="net.lecousin.dataorganizer.video"/>
       <plugin id="net.lecousin.framework"/>
+      <plugin id="net.lecousin.framework.files"/>
+      <plugin id="net.lecousin.framework.files.audio"/>
+      <plugin id="net.lecousin.framework.files.image"/>
+      <plugin id="net.lecousin.framework.files.playlist"/>
+      <plugin id="net.lecousin.framework.files.video"/>
       <plugin id="net.lecousin.framework.media"/>
       <plugin id="net.lecousin.framework.net.http"/>
       <plugin id="net.lecousin.framework.net.mime"/>
       <plugin id="net.lecousin.framework.ui"/>
       <plugin id="net.lecousin.framework.ui.eclipse.browser"/>
+      <plugin id="net.lecousin.media.jsound"/>
+      <plugin id="net.lecousin.media.jsound.mp3"/>
       <plugin id="net.lecousin.media.jvlc.client"/>
       <plugin id="net.lecousin.media.jvlc.common"/>
+      <plugin id="net.lecousin.media.mp3"/>
       <plugin id="net.lecousin.neufbox.mediacenter"/>
       <plugin id="org.eclipse.core.commands"/>
       <plugin id="org.eclipse.core.contenttype"/>

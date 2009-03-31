@@ -1,10 +1,15 @@
 package net.lecousin.dataorganizer.core.database.source;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
+import net.lecousin.framework.collections.CollectionUtil;
 import net.lecousin.framework.xml.XmlWriter;
 
 import org.eclipse.core.filesystem.EFS;
@@ -34,9 +39,32 @@ public class NetworkFileDataSource extends FileDataSource {
 	}
 	
 	@Override
-	public void removeFromFileSystem() throws Exception {
+	public List<File> removeFromFileSystem() throws Exception {
 		IFileStore store = EFS.getStore(new URI(uri));
 		store.delete(0, null);
+		File file = store.toLocalFile(EFS.NONE, null);
+		if (file == null) return new LinkedList<File>();
+		return CollectionUtil.single_element_list(file);
+	}
+	@Override
+	public List<File> getLinkedFiles() {
+		try {
+			IFileStore store = EFS.getStore(new URI(uri));
+			File file = store.toLocalFile(EFS.NONE, null);
+			if (file != null) 
+				return CollectionUtil.single_element_list(file);
+		} catch (Throwable t) {}
+		return new LinkedList<File>();
+	}
+	@Override
+	public boolean unlink(Collection<File> files) {
+		try {
+			IFileStore store = EFS.getStore(new URI(uri));
+			File file = store.toLocalFile(EFS.NONE, null);
+			if (file == null) return false;
+			if (!files.contains(file)) return false;
+			return true;
+		} catch (Throwable t) { return false; }
 	}
 	
 	@Override

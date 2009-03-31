@@ -20,10 +20,10 @@ public class DescriptionPanel {
 	public static void create(VideoDataType data, Composite parent) {
 		VideoInfo i = (VideoInfo)data.getInfo();
 		if (i == null) return;
-		Set<String> sources = i.getResumesSources();
+		Set<String> sources = i.getSources();
 		boolean hasResume = false;
 		for (String source : sources)
-			if (i.getResume(source).length() > 0) { hasResume = true; break; }
+			if (i.getSourceInfo(source).getResume().length() > 0) { hasResume = true; break; }
 		if (hasResume) {
 			GridLayout layout = UIUtil.gridLayout(parent, 1);
 			layout.marginHeight = layout.marginWidth = 0;
@@ -31,7 +31,7 @@ public class DescriptionPanel {
 			folder.setBackground(parent.getBackground());
 			UIUtil.gridDataHorizFill(folder);
 			for (String source : sources) {
-				String resume = i.getResume(source);
+				String resume = i.getSourceInfo(source).getResume();
 				if (resume.length() == 0) continue;
 				TabItem item = new TabItem(folder, SWT.NONE);
 				item.setText(InfoRetrieverPluginRegistry.getNameForSource(source, VideoContentType.VIDEO_TYPE));

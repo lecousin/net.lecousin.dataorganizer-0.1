@@ -8,17 +8,19 @@
 	
 	<update version="DEBUG" simulated="99.99.99" jre="99.99.99" extras="99.99.99">
 		<updater>
-			<file>/update/updater.jar</file>
+			<file host="dataorganizer.webhop.net" port="80">/update/updater.zip</file>
 		</updater>
 		<application>
-			<file>/update/app-test.zip</file>
+			<file host="dataorganizer.webhop.net" port="80">/update/app-test.zip.part1</file>
+			<file host="dataorganizer.webhop.net" port="80">/update/app-test.zip.part2</file>
 		</application>
 	</update>
 	<jre version="99.99.99">
-		<file>/update/jre-test.zip</file>
+		<file host="dataorganizer.webhop.net" port="80">/update/jre-test.zip</file>
 	</jre>
 	<extras version="99.99.99">
-		<file>/update/extras-test.zip</file>
+		<file host="dataorganizer.webhop.net" port="80">/update/extras-test.zip.part1</file>
+		<file host="dataorganizer.webhop.net" port="80">/update/extras-test.zip.part2</file>
 	</extras>
 	<news version="99.99.98">
 		<content language="FRENCH" url="/update/news-test1-fr.html"/>

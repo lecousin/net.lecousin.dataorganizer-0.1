@@ -4,10 +4,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.lecousin.dataorganizer.core.database.info.SourceInfo;
 import net.lecousin.dataorganizer.core.database.info.Info.DataLink;
+import net.lecousin.dataorganizer.core.database.info.SourceInfo.Review;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader_0_1_0;
-import net.lecousin.dataorganizer.video.VideoInfo.Genre;
+import net.lecousin.dataorganizer.video.VideoSourceInfo.Genre;
 import net.lecousin.framework.Pair;
+import net.lecousin.framework.collections.SelfMap;
 import net.lecousin.framework.version.Version;
 import net.lecousin.framework.xml.XmlUtil;
 
@@ -42,11 +45,10 @@ public class Loader_0_1_0 extends ContentTypeLoader_0_1_0 implements Loader {
 		return list;
 	}
 	
-	public Map<String,String> getResumes(Element root) {
-		Map<String,String> resumes = new HashMap<String,String>();
-		for (Element e : XmlUtil.get_childs_element(root, "resume"))
-			resumes.put(e.getAttribute("source"), XmlUtil.get_inner_text(e));
-		return resumes;
+	public String getResume(Element root) {
+		Element e = XmlUtil.get_child_element(root, "resume");
+		if (e == null) return null;
+		return XmlUtil.get_inner_text(e);
 	}
 	
 	public List<Pair<List<String>,List<DataLink>>> getDirectors(Element root) {
@@ -69,11 +71,11 @@ public class Loader_0_1_0 extends ContentTypeLoader_0_1_0 implements Loader {
 		return posters;
 	}
 	
-	public Map<String,Map<String,Pair<String,Integer>>> getPressReviews(Element root) {
-		return loadReviews("pressReviews", root);
+	public SelfMap<String,Review> getPressReviews(SourceInfo source, Element root) {
+		return loadReviews(source, "pressReview", root);
 	}
-	public Map<String,Map<String,Pair<String,Integer>>> getPublicReviews(Element root) {
-		return loadReviews("publicReviews", root);
+	public SelfMap<String,Review> getPublicReviews(SourceInfo source, Element root) {
+		return loadReviews(source, "publicReview", root);
 	}
 	
 	private List<Pair<List<String>,List<DataLink>>> loadListLinks(String tag, Element elt) {
@@ -88,22 +90,6 @@ public class Loader_0_1_0 extends ContentTypeLoader_0_1_0 implements Loader {
 			list.add(new Pair<List<String>,List<DataLink>>(roles, links));
 		}
 		return list;
-	}
-	
-	private Map<String,Map<String,Pair<String,Integer>>> loadReviews(String tag, Element elt) {
-		Map<String,Map<String,Pair<String,Integer>>> reviews = new HashMap<String,Map<String,Pair<String,Integer>>>();
-		for (Element e : XmlUtil.get_childs_element(elt, tag)) {
-			String source = e.getAttribute("source");
-			Map<String,Pair<String,Integer>> m = new HashMap<String,Pair<String,Integer>>();
-			for (Element e2 : XmlUtil.get_childs_element(e, "critik")) {
-				String author = e2.getAttribute("author");
-				Integer note = Integer.parseInt(e2.getAttribute("note"));
-				String critik = XmlUtil.get_inner_text(e2);
-				m.put(author, new Pair<String,Integer>(critik, note));
-			}
-			reviews.put(source, m);
-		}
-		return reviews;
 	}
 	
 }

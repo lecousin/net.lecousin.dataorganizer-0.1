@@ -128,6 +128,14 @@ public abstract class DataBase {
 	public final synchronized Data addData(String name, ContentType type, List<DataSource> sources) throws CoreException {
 		long id = ids.allocate();
 		try {
+			IFolder folder = getFolder(id);
+			if (folder.exists())
+				folder.delete(true, null);
+		} catch (CoreException e) {
+			if (Log.error(this))
+				Log.error(this, "Database: addData: Folder for data " + id + " already exist, and it is not possible to remove it (clean database)", e);
+		}
+		try {
 			Data d = createData(id, name, type, sources);
 			data.add(d);
 			dataAdded.fire(d);

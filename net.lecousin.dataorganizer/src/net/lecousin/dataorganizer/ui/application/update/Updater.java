@@ -82,10 +82,11 @@ public class Updater {
 		private Update(
 				Element currentNode, Version currentVersion, Version currentJRE, Version currentExtras,
 				Element newNode, Version newVersion, Version newJRE, Version newExtras, 
-				Element root) {
+				Element root, WorkProgress progress) {
 			this.newVersion = newVersion;
 			this.currentVersion = currentVersion;
-			news = getNews(root, currentVersion, newVersion);
+			progress.reset(Local.A_new_version_has_been_found__Retrieving_information_about_this_version.toString(), 10000);
+			news = getNews(root, currentVersion, newVersion, progress, 10000);
 			if (currentJRE == null || newJRE.compareTo(currentJRE)>0)
 				jreFiles = getFiles(getNode(root, "jre", newJRE));
 			if (currentExtras == null || newExtras.compareTo(currentExtras)>0)
@@ -96,138 +97,158 @@ public class Updater {
 		private Version currentVersion;
 		private Version newVersion;
 		private String news;
-		private List<String> updaterFiles;
-		private List<String> applicationFiles;
-		private List<String> jreFiles;
-		private List<String> extrasFiles;
+		private List<UpdateFile> updaterFiles;
+		private List<UpdateFile> applicationFiles;
+		private List<UpdateFile> jreFiles;
+		private List<UpdateFile> extrasFiles;
 		
 		private Element getNode(Element root, String name, Version version) {
 			return XmlUtil.get_child_with_attr(root, name, "version", version.toString());
 		}
-		private List<String> getFiles(Element node) {
+		private List<UpdateFile> getFiles(Element node) {
 			if (node == null) return null;
-			List<String> list = new LinkedList<String>();
-			for (Element e : XmlUtil.get_childs_element(node, "file"))
-				list.add(XmlUtil.get_inner_text(e));
+			List<UpdateFile> list = new LinkedList<UpdateFile>();
+			for (Element e : XmlUtil.get_childs_element(node, "file")) {
+				UpdateFile file = new UpdateFile();
+				file.host = e.getAttribute("host");
+				try { file.port = Integer.parseInt(e.getAttribute("port")); }
+				catch (NumberFormatException ex) { file.port = 80; }
+				file.path = XmlUtil.get_inner_text(e);
+				list.add(file);
+			}
 			return list;
 		}
 	}
+	private static class UpdateFile {
+		String host;
+		int port;
+		String path;
+	}
 	
-	public static Update getLatestVersionInfo() throws UpdateException {
-		HttpClient client = new HttpClient(SocketFactory.getDefault());
-		HttpRequest req;
-		HttpResponse resp;
-		if (!isMySelf()) {
-			req = new HttpRequest(update_tracker_host, update_tracker_path);
+	public static Update getLatestVersionInfo(Shell shell) throws UpdateException {
+		WorkProgress progress = new WorkProgress(Local.Retrieving_update_information.toString(), 10000, true);
+		WorkProgressDialog dlg = new WorkProgressDialog(shell, progress);
+
+		try {
+			HttpClient client = new HttpClient(SocketFactory.getDefault());
+			HttpRequest req;
+			HttpResponse resp;
+			if (!isMySelf()) {
+				req = new HttpRequest(update_tracker_host, update_tracker_path);
+				try { resp = client.send(req, true, progress, 9500); }
+				catch (IOException e) {
+					if (Log.warning(Updater.class))
+						Log.warning(Updater.class, "Unable to track update", e);
+				}
+			}
+			req = new HttpRequest(update_host, update_path);
 			try { resp = client.send(req, true, null, 0); }
 			catch (IOException e) {
-				if (Log.warning(Updater.class))
-					Log.warning(Updater.class, "Unable to track update", e);
-			}
-		}
-		req = new HttpRequest(update_host, update_path);
-		try { resp = client.send(req, true, null, 0); }
-		catch (IOException e) {
-			if (Log.error(Updater.class))
-				Log.error(Updater.class, "Unable to get update.xml file", e);
-			throw new UpdateException(Local.ERROR_UPDATE_WEB_CONNECTION.toString());
-		}
-		if (resp.getStatusCode() != HttpStatus.SC_OK) {
-			if (Log.error(Updater.class))
-				Log.error(Updater.class, "Unable to get update.xml file: status = " + resp.getStatusCode() + " (" + resp.getStatusDescription() + ")");
-			throw new UpdateException(Local.ERROR_UPDATE_WEB_SITE.toString());
-		}			
-		Mime mime = resp.getContent();
-		if (mime == null) {
-			if (Log.error(Updater.class))
-				Log.error(Updater.class, "Unable to get update.xml file content: no MIME in response.");
-			throw new UpdateException(Local.ERROR_UPDATE_WEB_SITE.toString());
-		}			
-		MimeContent content = mime.getContent();
-		if (content == null) {
-			if (Log.error(Updater.class))
-				Log.error(Updater.class, "Unable to get update.xml file content: no MIME content.");
-			throw new UpdateException(Local.ERROR_UPDATE_WEB_SITE.toString());
-		}			
-		String xml;
-		try { xml = content.getAsString(); }
-		catch (IOException e) {
-			if (Log.error(Updater.class))
-				Log.error(Updater.class, "Unable to get update.xml file content", e);
-			throw new UpdateException(Local.ERROR_UPDATE_WEB_SITE.toString());
-		}
-		
-		Element root;
-		try { root = XmlUtil.loadFile(new ByteArrayInputStream(xml.getBytes())); }
-		catch (Throwable t) {
-			if (Log.error(Updater.class))
-				Log.error(Updater.class, "Unable to parse update.xml", t);
-			throw new UpdateException(Local.ERROR_UPDATE_WEB_SITE.toString());
-		}
-		
-		if (!root.getNodeName().equals("dataorganizer")) {
-			if (Log.error(Updater.class))
-				Log.error(Updater.class, "Invalid update.xml file: expected root node is <dataorganizer>");
-			throw new UpdateException(Local.ERROR_UPDATE_WEB_SITE.toString());
-		}
-		
-		Version latest = null;
-		Element updateNode = null;
-		Version latestJRE = null;
-		Version latestExtras = null;
-		Element currentNode = null;
-		Version currentJRE = null;
-		Version currentExtras = null;
-		Version current = getCurrentVersion();
-		for (Element e : XmlUtil.get_childs_element(root, "update")) {
-			if (!e.hasAttribute("version")) {
 				if (Log.error(Updater.class))
-					Log.error(Updater.class, "update.xml contains an invalid update node: missing attribute 'version'.");
-				continue;
+					Log.error(Updater.class, "Unable to get update.xml file", e);
+				throw new UpdateException(Local.ERROR_UPDATE_WEB_CONNECTION.toString());
 			}
-			String version = e.getAttribute("version");
-			if (version.equals("DEBUG")) {
-				if (!Application.isDebugEnabled || !isMySelf())
-					continue;
-				version = e.getAttribute("simulated");
-			}
-			Version v = new Version(version);
-			if (!e.hasAttribute("jre")) {
+			if (resp.getStatusCode() != HttpStatus.SC_OK) {
 				if (Log.error(Updater.class))
-					Log.error(Updater.class, "update.xml contains an invalid update node: missing attribute 'jre'.");
-				continue;
-			}
-			Version jre = new Version(e.getAttribute("jre"));
-			if (!e.hasAttribute("extras")) {
+					Log.error(Updater.class, "Unable to get update.xml file: status = " + resp.getStatusCode() + " (" + resp.getStatusDescription() + ")");
+				throw new UpdateException(Local.ERROR_UPDATE_WEB_SITE.toString());
+			}			
+			Mime mime = resp.getContent();
+			if (mime == null) {
 				if (Log.error(Updater.class))
-					Log.error(Updater.class, "update.xml contains an invalid update node: missing attribute 'extras'.");
-				continue;
+					Log.error(Updater.class, "Unable to get update.xml file content: no MIME in response.");
+				throw new UpdateException(Local.ERROR_UPDATE_WEB_SITE.toString());
+			}			
+			MimeContent content = mime.getContent();
+			if (content == null) {
+				if (Log.error(Updater.class))
+					Log.error(Updater.class, "Unable to get update.xml file content: no MIME content.");
+				throw new UpdateException(Local.ERROR_UPDATE_WEB_SITE.toString());
+			}			
+			String xml;
+			try { xml = content.getAsString(); }
+			catch (IOException e) {
+				if (Log.error(Updater.class))
+					Log.error(Updater.class, "Unable to get update.xml file content", e);
+				throw new UpdateException(Local.ERROR_UPDATE_WEB_SITE.toString());
 			}
-			Version extras = new Version(e.getAttribute("extras"));
-			if (latest == null || v.compareTo(latest) > 0) {
-				latest = v;
-				updateNode = e;
-				latestJRE = jre;
-				latestExtras = extras;
-			}
-			if (v.compareTo(current)==0) {
-				currentNode = e;
-				currentJRE = jre;
-				currentExtras = extras;
-			}
-		}
 			
-		if (latest == null) {
-			if (Log.error(Updater.class))
-				Log.error(Updater.class, "Invalid update.xml file: no valid update node.");
-			throw new UpdateException(Local.ERROR_UPDATE_WEB_SITE.toString());
+			Element root;
+			try { root = XmlUtil.loadFile(new ByteArrayInputStream(xml.getBytes())); }
+			catch (Throwable t) {
+				if (Log.error(Updater.class))
+					Log.error(Updater.class, "Unable to parse update.xml", t);
+				throw new UpdateException(Local.ERROR_UPDATE_WEB_SITE.toString());
+			}
+			progress.progress(450);
+			
+			if (!root.getNodeName().equals("dataorganizer")) {
+				if (Log.error(Updater.class))
+					Log.error(Updater.class, "Invalid update.xml file: expected root node is <dataorganizer>");
+				throw new UpdateException(Local.ERROR_UPDATE_WEB_SITE.toString());
+			}
+			
+			Version latest = null;
+			Element updateNode = null;
+			Version latestJRE = null;
+			Version latestExtras = null;
+			Element currentNode = null;
+			Version currentJRE = null;
+			Version currentExtras = null;
+			Version current = getCurrentVersion();
+			for (Element e : XmlUtil.get_childs_element(root, "update")) {
+				if (!e.hasAttribute("version")) {
+					if (Log.error(Updater.class))
+						Log.error(Updater.class, "update.xml contains an invalid update node: missing attribute 'version'.");
+					continue;
+				}
+				String version = e.getAttribute("version");
+				if (version.equals("DEBUG")) {
+					if (!Application.isDebugEnabled || !isMySelf())
+						continue;
+					version = e.getAttribute("simulated");
+				}
+				Version v = new Version(version);
+				if (!e.hasAttribute("jre")) {
+					if (Log.error(Updater.class))
+						Log.error(Updater.class, "update.xml contains an invalid update node: missing attribute 'jre'.");
+					continue;
+				}
+				Version jre = new Version(e.getAttribute("jre"));
+				if (!e.hasAttribute("extras")) {
+					if (Log.error(Updater.class))
+						Log.error(Updater.class, "update.xml contains an invalid update node: missing attribute 'extras'.");
+					continue;
+				}
+				Version extras = new Version(e.getAttribute("extras"));
+				if (latest == null || v.compareTo(latest) > 0) {
+					latest = v;
+					updateNode = e;
+					latestJRE = jre;
+					latestExtras = extras;
+				}
+				if (v.compareTo(current)==0) {
+					currentNode = e;
+					currentJRE = jre;
+					currentExtras = extras;
+				}
+			}
+			progress.progress(50);
+				
+			if (latest == null) {
+				if (Log.error(Updater.class))
+					Log.error(Updater.class, "Invalid update.xml file: no valid update node.");
+				throw new UpdateException(Local.ERROR_UPDATE_WEB_SITE.toString());
+			}
+			
+			if (Log.debug(Updater.class))
+				Log.debug(Updater.class, "update.xml found: version=" + latest.toString());
+			
+			if (latest.compareTo(current)<=0) return null;
+			return new Update(currentNode, current, currentJRE, currentExtras, updateNode, latest, latestJRE, latestExtras, root, progress);
+		} finally {
+			dlg.close();
 		}
-		
-		if (Log.debug(Updater.class))
-			Log.debug(Updater.class, "update.xml found: version=" + latest.toString());
-		
-		if (latest.compareTo(current)<=0) return null;
-		return new Update(currentNode, current, currentJRE, currentExtras, updateNode, latest, latestJRE, latestExtras, root);
 	}
 	
 	public static Version getCurrentVersion() throws UpdateException {
@@ -240,9 +261,9 @@ public class Updater {
 		return new Version(current);
 	}
 	
-	private static String getNews(Element root, Version currentVersion, Version newVersion) {
+	private static String getNews(Element root, Version currentVersion, Version newVersion, WorkProgress progress, int work) {
 		StringBuilder str = new StringBuilder();
-		HttpClient client = new HttpClient(SocketFactory.getDefault());
+		List<String> urls = new LinkedList<String>();
 		for (Element e : XmlUtil.get_childs_element(root, "news")) {
 			Version v = new Version(e.getAttribute("version"));
 			if (currentVersion.compareTo(v) >= 0) continue;
@@ -254,9 +275,16 @@ public class Updater {
 				}
 			}
 			if (url == null) continue;
+			urls.add(url);
+		}
+		HttpClient client = new HttpClient(SocketFactory.getDefault());
+		int nb = urls.size();
+		for (String url : urls) {
 			HttpRequest req = new HttpRequest(update_host, url);
 			HttpResponse resp;
-			try { resp = client.send(req, true, null, 0); }
+			int step = work/nb--;
+			work -= step;
+			try { resp = client.send(req, true, progress, step); }
 			catch (IOException ex) { continue; }
 			Mime mime = resp.getContent();
 			if (mime == null) continue;
@@ -304,75 +332,82 @@ public class Updater {
 		int stepFinalize = 480;
 		int stepDownload = amount - stepInit - stepFinalize;
 		
-		File updateTmp = new File(Application.deployPath, "update-tmp");
-		FileSystemUtil.deleteDirectory(updateTmp);
-		updateTmp.mkdirs();
-		progress.progress(20);
-		
-		if (update.updaterFiles == null || update.updaterFiles.isEmpty())
-			throw new UpdateException(Local.ERROR_UPDATE_INTERNAL.toString());
-		if (update.applicationFiles == null || update.applicationFiles.isEmpty())
-			throw new UpdateException(Local.ERROR_UPDATE_INTERNAL.toString());
-		if (update.jreFiles != null && update.jreFiles.isEmpty())
-			throw new UpdateException(Local.ERROR_UPDATE_INTERNAL.toString());
-		if (update.extrasFiles != null && update.extrasFiles.isEmpty())
-			throw new UpdateException(Local.ERROR_UPDATE_INTERNAL.toString());
-		
-		int nb = update.updaterFiles.size() + update.applicationFiles.size();
-		if (update.jreFiles != null)
-			nb += update.jreFiles.size();
-		if (update.extrasFiles != null)
-			nb += update.extrasFiles.size();
-		
-		int step;
-		
-		step = stepDownload*update.updaterFiles.size()/nb;
-		stepDownload -= step; nb -= update.updaterFiles.size();
-		downloadFile(update.updaterFiles, updateTmp, "update.jar", progress, step);
-		if (update.jreFiles != null) {
-			step = stepDownload*update.jreFiles.size()/nb;
-			stepDownload -= step; nb -= update.jreFiles.size();
-			downloadFile(update.jreFiles, updateTmp, "jre.zip", progress, step);
-		}
-		if (update.extrasFiles != null) {
-			step = stepDownload*update.extrasFiles.size()/nb;
-			stepDownload -= step; nb -= update.extrasFiles.size();
-			downloadFile(update.extrasFiles, updateTmp, "extras.zip", progress, step);
-		}
-		step = stepDownload;
-		stepDownload -= step; nb -= update.applicationFiles.size();
-		downloadFile(update.applicationFiles, updateTmp, "application.zip", progress, step);
-
-		int stepJRE = stepFinalize*80/100;
-		int stepRun = stepFinalize - stepJRE;
 		try {
+			File updateTmp = new File(Application.deployPath, "update-tmp");
+			//FileSystemUtil.deleteDirectory(updateTmp);
+			//updateTmp.mkdirs();
+			progress.progress(20);
+			
+			if (update.updaterFiles == null || update.updaterFiles.isEmpty())
+				throw new UpdateException(Local.ERROR_UPDATE_INTERNAL.toString());
+			if (update.applicationFiles == null || update.applicationFiles.isEmpty())
+				throw new UpdateException(Local.ERROR_UPDATE_INTERNAL.toString());
+			if (update.jreFiles != null && update.jreFiles.isEmpty())
+				throw new UpdateException(Local.ERROR_UPDATE_INTERNAL.toString());
+			if (update.extrasFiles != null && update.extrasFiles.isEmpty())
+				throw new UpdateException(Local.ERROR_UPDATE_INTERNAL.toString());
+			
+			int nb = update.updaterFiles.size() + update.applicationFiles.size();
 			if (update.jreFiles != null)
-				ZipUtil.unzip(new File(updateTmp, "jre.zip"), new File(updateTmp, "jre"), progress, stepJRE);
-			else
-				FileSystemUtil.copyDirectory(new File(Application.deployPath, "jre"), new File(updateTmp, "jre"), progress, stepJRE);
-
-			Runtime.getRuntime().exec(updateTmp.getAbsolutePath()+"\\jre\\bin\\java.exe -cp \"" + updateTmp.getAbsolutePath() + "\" -jar \"" + updateTmp.getAbsolutePath() + "\\updater.jar\" -deployPath \"" + Application.deployPath.getAbsolutePath() + "\"");
-			progress.progress(stepRun);
-			progress.done();
+				nb += update.jreFiles.size();
+			if (update.extrasFiles != null)
+				nb += update.extrasFiles.size();
+			
+			int step;
+			/*
+			step = stepDownload*update.updaterFiles.size()/nb;
+			stepDownload -= step; nb -= update.updaterFiles.size();
+			downloadFile(update.updaterFiles, updateTmp, "updater.jar", progress, step);
+			if (update.jreFiles != null) {
+				step = stepDownload*update.jreFiles.size()/nb;
+				stepDownload -= step; nb -= update.jreFiles.size();
+				downloadFile(update.jreFiles, updateTmp, "jre.zip", progress, step);
+			}
+			if (update.extrasFiles != null) {
+				step = stepDownload*update.extrasFiles.size()/nb;
+				stepDownload -= step; nb -= update.extrasFiles.size();
+				downloadFile(update.extrasFiles, updateTmp, "extras.zip", progress, step);
+			}
+			step = stepDownload;
+			stepDownload -= step; nb -= update.applicationFiles.size();
+			downloadFile(update.applicationFiles, updateTmp, "application.zip", progress, step);
+*/
+			int stepJRE = stepFinalize*80/100;
+			int stepRun = stepFinalize - stepJRE;
+			try {
+				if (update.jreFiles != null) {
+					progress.setSubDescription(Local.Extracting_files+"...");
+					ZipUtil.unzip(new File(updateTmp, "jre.zip"), new File(updateTmp, "jre"), progress, stepJRE);
+				} else {
+					progress.setSubDescription(Local.Copying_files+"...");
+					FileSystemUtil.copyDirectory(new File(Application.deployPath, "jre"), new File(updateTmp, "jre"), progress, stepJRE);
+				}
+	
+				progress.setSubDescription("");
+				Runtime.getRuntime().exec(updateTmp.getAbsolutePath()+"\\jre\\bin\\java.exe -cp \"" + updateTmp.getAbsolutePath() + "\\updater.jar\" -jar \"" + updateTmp.getAbsolutePath() + "\\updater.jar\" -deployPath \"" + Application.deployPath.getAbsolutePath() + "\"");
+				progress.progress(stepRun);
+				progress.done();
+			} catch (IOException e) {
+				if (Log.error(Updater.class))
+					Log.error(Updater.class, "Unable to prepare/launch updater", e);
+				throw new UpdateException(Local.ERROR_UPDATE_FILESYSTEM.toString());
+			}
+		} finally {
 			dlg.close();
-		} catch (IOException e) {
-			if (Log.error(Updater.class))
-				Log.error(Updater.class, "Unable to prepare/launch updater", e);
-			throw new UpdateException(Local.ERROR_UPDATE_FILESYSTEM.toString());
 		}
 	}
 	
-	private static void downloadFile(List<String> urls, File targetDir, String targetFilename, WorkProgress progress, int amount) throws UpdateException {
-		int nb = urls.size();
+	private static void downloadFile(List<UpdateFile> files, File targetDir, String targetFilename, WorkProgress progress, int amount) throws UpdateException {
+		int nb = files.size();
 		int i = 0;
 		int total = amount*95/100;
 		amount -= total;
-		for (String url : urls) {
+		for (UpdateFile file : files) {
 			int step = total/(nb--);
 			total -= step;
-			if (!HttpUtil.retrieveFile(update_host, 80, url, new File(targetDir, "file"+(i++)), true, progress, step)) {
+			if (!HttpUtil.retrieveFile(file.host, file.port, file.path, new File(targetDir, "file"+(i++)), true, progress, step)) {
 				if (Log.error(Updater.class))
-					Log.error(Updater.class, "Unable to retrieve file: " + url);
+					Log.error(Updater.class, "Unable to retrieve file: " + file.path + " on " + file.host + ":" + file.port);
 				throw new UpdateException(Local.ERROR_UPDATE_WEB.toString());
 			}
 		}

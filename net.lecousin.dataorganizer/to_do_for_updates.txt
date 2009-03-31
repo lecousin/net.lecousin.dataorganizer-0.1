@@ -1,0 +1,2 @@
+- jre.zip => do not put the jre directory, but directly its content in the archive
+- updater.jar => name it updater.zip in the server, because else the server send a bad file

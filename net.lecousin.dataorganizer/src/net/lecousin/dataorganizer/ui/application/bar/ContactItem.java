@@ -8,8 +8,10 @@ import net.lecousin.framework.event.Event.Listener;
 import net.lecousin.framework.ui.eclipse.SharedImages;
 import net.lecousin.framework.ui.eclipse.control.ImageAndTextButton;
 import net.lecousin.framework.ui.eclipse.dialog.ErrorDlg;
+import net.lecousin.framework.ui.eclipse.dialog.MyDialog;
 
 import org.eclipse.jface.action.ControlContribution;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -32,6 +34,7 @@ public class ContactItem extends ControlContribution {
 				} catch (IOException e) {
 					ErrorDlg.exception(Local.Contact.toString(), "Unable to launch mail client", EclipsePlugin.ID, e);
 				}
+				MessageDialog.openInformation(MyDialog.getPlatformShell(), Local.Contact.toString(), Local.MESSAGE_Contact.toString());
 			}
 		});
 		return button;

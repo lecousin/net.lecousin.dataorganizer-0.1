@@ -5,7 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import net.lecousin.dataorganizer.allocine.AlloCinePage;
-import net.lecousin.dataorganizer.people.PeopleInfo;
+import net.lecousin.dataorganizer.people.PeopleSourceInfo;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.eclipse.resource.ResourceUtil;
 import net.lecousin.framework.log.Log;
@@ -17,7 +17,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.CoreException;
 
-public class People extends AlloCinePage<PeopleInfo> {
+public class People extends AlloCinePage<PeopleSourceInfo> {
 
 	@Override
 	protected String getDescription() { return "People information"; }
@@ -31,7 +31,7 @@ public class People extends AlloCinePage<PeopleInfo> {
 		return null;
 	}
 	@Override
-	protected Pair<String,Boolean> parse(String page, String pageURL, PeopleInfo info, WorkProgress progress, int work) {
+	protected Pair<String,Boolean> parse(String page, String pageURL, PeopleSourceInfo info, WorkProgress progress, int work) {
 		int i = page.indexOf("Posters<br />et T-shirts");
 		if (i < 0) { progress.progress(work); return new Pair<String,Boolean>(null, false); }
 		i = page.indexOf("style=\"padding:10 0 0 0\"", i);

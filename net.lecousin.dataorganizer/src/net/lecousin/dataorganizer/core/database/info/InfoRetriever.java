@@ -144,7 +144,7 @@ public class InfoRetriever {
 				}
 				retrieve.done();
 			} else {
-				String name = info.getName(p.getValue1().getSourceID());
+				String name = info.getSourceName(p.getValue1().getSourceID());
 				if (name == null || name.length() == 0) name = data.getName();
 				try {
 					p.getValue1().retrieve(id, name, info, p.getValue2(), 999);
@@ -198,12 +198,13 @@ public class InfoRetriever {
 	
 	public static void refresh(Data data, String source) {
 		InfoRetrieverPlugin plugin = InfoRetrieverPluginRegistry.getPlugin(source, data.getContentType().getID());
+		if (plugin == null) return;
 		WorkProgress progress = new WorkProgress(Local.Retrieve_information.toString(), 10001, true);
 		WorkProgressDialog dlg = new WorkProgressDialog(null, progress);
 		progress.progress(1);
 		Info info = data.getContent().getInfo();
 		String id = info.getSourceID(source);
-		String name = info.getName(source);
+		String name = info.getSourceName(source);
 		plugin.retrieve(id, name, info, progress, 10000);
 		progress.done();
 		dlg.close();

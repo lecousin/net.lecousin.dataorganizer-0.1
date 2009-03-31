@@ -18,7 +18,9 @@ public class RefreshOptionsControl extends Composite {
 		setBackground(parent.getBackground());
 		UIUtil.gridLayout(this, 1);
 	
-		UIUtil.newCheck(this, Local.Load_information_from_the_data_sources.toString(), loadInfo.checkListener, null).setSelection(options.getDataContentIfNotYetDone || options.refreshAllDataContent);
+		boolean checked = options.getDataContentIfNotYetDone || options.refreshAllDataContent;
+		UIUtil.newCheck(this, Local.Load_information_from_the_data_sources.toString(), loadInfo.checkListener, null).setSelection(checked);
+		loadInfo.checked = checked;
 		Radio radio = UIUtil.newRadio(this, new String[] { Local.Only_if_not_yet_done.toString(), Local.Always.toString() }, loadInfo.radioListener, null);
 		UIUtil.indentOnGrid(radio, 10);
 		radio.setSelection(options.refreshAllDataContent ? Local.Always.toString() : options.getDataContentIfNotYetDone ? Local.Only_if_not_yet_done.toString() : null);

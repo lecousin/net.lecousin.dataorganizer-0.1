@@ -1,12 +1,11 @@
 package net.lecousin.dataorganizer.allocine.film;
 
 import net.lecousin.dataorganizer.allocine.AlloCinePage;
-import net.lecousin.dataorganizer.allocine.AlloCineUtil;
-import net.lecousin.dataorganizer.video.VideoInfo;
+import net.lecousin.dataorganizer.video.VideoSourceInfo;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.progress.WorkProgress;
 
-public class PressCritik extends AlloCinePage<VideoInfo> {
+public class PressCritik extends AlloCinePage<VideoSourceInfo> {
 
 	@Override
 	protected String getCategory() {
@@ -27,7 +26,7 @@ public class PressCritik extends AlloCinePage<VideoInfo> {
 		return null;
 	}
 	@Override
-	protected Pair<String,Boolean> parse(String page, String pageURL, VideoInfo info, WorkProgress progress, int work) {
+	protected Pair<String,Boolean> parse(String page, String pageURL, VideoSourceInfo info, WorkProgress progress, int work) {
 		int i = page.indexOf("<b>Critiques Presse</b>");
 		if (i < 0) { progress.progress(work); return new Pair<String,Boolean>(null, false); }
 		int j = page.indexOf("<b>Toutes les critiques", i);
@@ -56,7 +55,7 @@ public class PressCritik extends AlloCinePage<VideoInfo> {
 			if (critik == null) continue;
 			if (critik.getValue1().indexOf("<i>") >= 0) continue;
 			
-			info.setPressReview(AlloCineUtil.SOURCE_ID, name.getValue1(), critik.getValue1(), noteI);
+			info.setPressReview(name.getValue1(), critik.getValue1(), noteI);
 		} while (true);
 		
 		if (i == 0) return new Pair<String,Boolean>(null, true); // no review

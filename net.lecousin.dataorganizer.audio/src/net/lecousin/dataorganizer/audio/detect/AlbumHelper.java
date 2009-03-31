@@ -12,6 +12,7 @@ import java.util.Set;
 import net.lecousin.dataorganizer.audio.AudioContentType;
 import net.lecousin.dataorganizer.audio.AudioDataType;
 import net.lecousin.dataorganizer.audio.AudioInfo;
+import net.lecousin.dataorganizer.audio.AudioSourceInfo;
 import net.lecousin.dataorganizer.audio.Local;
 import net.lecousin.dataorganizer.audio.internal.EclipsePlugin;
 import net.lecousin.dataorganizer.core.database.Data;
@@ -122,7 +123,8 @@ public class AlbumHelper {
 			return null;
 		}
 		AudioDataType content = (AudioDataType)data.getContent();
-		AudioInfo info = (AudioInfo)content.getInfo();
+		AudioInfo i = (AudioInfo)content.getInfo();
+		AudioSourceInfo info = (AudioSourceInfo)i.setSource(AudioInfo.FILE_SOURCE, "file", "");
 		info.setAlbum(t.getValue1());
 		if (t.getValue2() != null)
 			info.setArtist(t.getValue2());
@@ -134,7 +136,7 @@ public class AlbumHelper {
 		List<Picture> cover_back = new LinkedList<Picture>();
 		for (AudioFile file : tracks) {
 			AudioFileInfo ai = file.getInfo();
-			AudioInfo.Track track;
+			AudioSourceInfo.Track track;
 			if (ai == null)
 				track = info.newTrack();
 			else {
@@ -149,7 +151,7 @@ public class AlbumHelper {
 						default:
 							String filename = saveImage(data, pic.data);
 							if (filename != null)
-								track.addImage(AudioInfo.FILE_SOURCE, pic.description, filename);
+								track.addImage(pic.description, filename);
 							break;
 						}
 					}

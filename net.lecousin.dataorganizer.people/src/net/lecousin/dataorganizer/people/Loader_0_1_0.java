@@ -18,10 +18,6 @@ public class Loader_0_1_0 extends ContentTypeLoader_0_1_0 implements Loader {
 	private static final Version version = new Version(0,1,0);
 	public Version getVersion() { return version; }
 
-	public Element getInfo(Element root) {
-		return XmlUtil.get_child_element(root, "info");
-	}
-
 	public long getBirthDay(Element root) {
 		return Long.parseLong(root.getAttribute("birthDay"));
 	}

@@ -1,14 +1,16 @@
 package net.lecousin.dataorganizer.core.database.info;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.content.DataContentType;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
-import net.lecousin.framework.Pair;
+import net.lecousin.framework.Triple;
 import net.lecousin.framework.event.Event;
+import net.lecousin.framework.xml.XmlUtil;
 import net.lecousin.framework.xml.XmlWriter;
 
 import org.eclipse.core.resources.IFolder;
@@ -17,32 +19,42 @@ import org.w3c.dom.Element;
 
 public abstract class Info {
 
-	public Info(DataContentType data, String source, String name) {
+	public Info(DataContentType data) {
 		this.data = data;
-		if (source != null && name != null)
-			this.names.put(source, name);
 		signalModification();
 	}
 	public Info(DataContentType data, Element elt, ContentTypeLoader loader) {
 		this.data = data;
 		if (elt == null) return;
-		names = loader.getInfoNames(elt);
-		ids = loader.getInfoIDs(elt);
+		for (Element e : XmlUtil.get_childs_element(elt, "source")) {
+			String source = e.getAttribute("source");
+			String id = e.getAttribute("id");
+			String name = e.getAttribute("name");
+			Element infoNode = XmlUtil.get_child_element(e, "info");
+			SourceInfo info = null;
+			if (infoNode != null)
+				info = createSourceInfo(this, infoNode, loader);
+			sources.put(source, new Triple<String,String,SourceInfo>(id, name, info));
+		}
 	}
 	public final void save(XmlWriter xml) {
 		saveInfo(xml);
-		for (String s : names.keySet())
-			xml.openTag("name").addAttribute("source", s).addAttribute("name", names.get(s)).closeTag();
-		for (String s : ids.keySet())
-			xml.openTag("id").addAttribute("source", s).addAttribute("id", ids.get(s)).closeTag();
+		for (String s : sources.keySet()) {
+			Triple<String,String,SourceInfo> t = sources.get(s);
+			xml.openTag("source").addAttribute("source", s).addAttribute("id", t.getValue1()).addAttribute("name", t.getValue2());
+			if (t.getValue3() != null) {
+				xml.openTag("info");
+				t.getValue3().save(xml);
+				xml.closeTag();
+			}
+			xml.closeTag();
+		}
 	}
 	protected abstract void saveInfo(XmlWriter xml);
 	
 	private DataContentType data;
-	/** names <Source,Name> */
-	private Map<String,String> names = new HashMap<String,String>();
-	/** source IDs <Source,ID> */
-	private Map<String,String> ids = new HashMap<String,String>();
+	/** sources <Source,<ID,Name,SourceInfo>> */
+	private Map<String,Triple<String,String,SourceInfo>> sources = new HashMap<String,Triple<String,String,SourceInfo>>();
 	
 	private Event<Info> modified = new Event<Info>();
 	
@@ -51,33 +63,50 @@ public abstract class Info {
 	public DataContentType getDataContent() { return data; }
 	public Data getData() { return data.getData(); }
 	
-	public Set<String> getSources() { return ids.keySet(); }
-	public String getSourceID(String source) { return ids.get(source); }
+	public Set<String> getSources() { return sources.keySet(); }
+	public String getSourceID(String source) { Triple<String,String,SourceInfo> t = sources.get(source); if (t == null) return null; return t.getValue1(); }
+	public String getSourceName(String source) { Triple<String,String,SourceInfo> t = sources.get(source); if (t == null) return null; return t.getValue2(); }
+	public SourceInfo getSourceInfo(String source) { Triple<String,String,SourceInfo> t = sources.get(source); if (t == null) return null; return t.getValue3(); }
 	
-	public Set<String> getNamesSources() { return names.keySet(); }
-	public String getName(String source) { return names.get(source); }
+	public SourceInfo getMergedInfo(List<String> sources) {
+		SourceInfo result = createSourceInfo(null);
+		for (String source : sources) {
+			Triple<String,String,SourceInfo> t = this.sources.get(source);
+			if (t == null || t.getValue3() == null) continue;
+			result.merge(t.getValue3());
+		}
+		return result;
+	}
 	
-	public void setID(String source, String id) {
-		String old = ids.get(source);
-		if (old == null || !old.equals(id)) {
-			ids.put(source, id);
+	public SourceInfo setSource(String source, String id, String name) {
+		Triple<String,String,SourceInfo> t = sources.get(source);
+		SourceInfo info;
+		if (t == null) {
+			info = createSourceInfo(this);
+			t = new Triple<String,String,SourceInfo>(id, name, info);
+			sources.put(source, t);
 			signalModification();
+		} else {
+			boolean changed = false;
+			if (!t.getValue1().equals(id)) { t.setValue1(id); changed = true; }
+			if (name != null && !name.equals(t.getValue2())) { t.setValue2(name); changed = true; }
+			info = t.getValue3();
+			if (info == null) {
+				info = createSourceInfo(this);
+				t.setValue3(info);
+				changed = true;
+			}
+			if (changed) signalModification();
 		}
+		return info;
 	}
-	public void setName(String source, String name) {
-		String old = names.get(source);
-		if (old == null || !old.equals(name)) {
-			names.put(source, name);
-			signalModification();
-		}
-	}
+	
+	protected abstract SourceInfo createSourceInfo(Info parent);
+	protected abstract SourceInfo createSourceInfo(Info parent, Element elt, ContentTypeLoader loader);
 	
 	public abstract Set<String> getReviewsTypes();
-	/** reviews <Source,<Author,<Critik,Note/20>>> */
-	public abstract Map<String,Map<String,Pair<String,Integer>>> getReviews(String type);
 	
 	protected void signalModification() {
-//		System.out.println("Info: signal: Info=" + this.toString() + " Data=" + data.toString() + " Data.Data=" + data.getData().toString() + " Data.Data.Content=" + data.getData().getContent().toString());
 		data.signalModification();
 		modified.fire(this);
 	}
@@ -102,17 +131,57 @@ public abstract class Info {
 		public String id;
 		public String name;
 		
+		/** return true if the merge made a change */
 		public boolean merge(DataLink link) {
+			if (link.source == null || link.id == null) return false;
 			if (!link.contentTypeID.equals(contentTypeID)) return false;
 			if (!link.source.equals(source)) return false;
 			if (!link.id.equals(id)) return false;
-			if (link.name.length() > 0 && name.length() == 0)
+			if (link.name != null && link.name.length() > 0 && name.length() == 0) {
 				name = link.name;
+				return true;
+			}
+			return false;
+		}
+		
+		public boolean isSame(DataLink link) {
+			if (!link.contentTypeID.equals(contentTypeID)) return false;
+			if (link.source == null || link.id == null) return false;
+			if (source == null || id == null) return false;
+			if (!link.source.equals(source)) return false;
+			if (!link.id.equals(id)) return false;
 			return true;
 		}
 		
 		public void save(XmlWriter xml) {
 			xml.addAttribute("content_type_id", contentTypeID).addAttribute("source", source).addAttribute("id", id).addAttribute("name", name);
+		}
+		
+		/** return true if at least one link is common (in the isSame method sense) */
+		public static boolean isMergeable(List<DataLink> list1, List<DataLink> list2) {
+			for (DataLink l1 : list1)
+				for (DataLink l2 : list2)
+					if (l1.isSame(l2)) return true;
+			return false;
+		}
+		/** merge the 2 lists into list1, and return true if a changed has been made */
+		public static boolean merge(List<DataLink> list1, List<DataLink> list2) {
+			boolean changed = false;
+			for (DataLink newLink : list2) {
+				boolean found = false;
+				for (DataLink oldLink : list1) {
+					if (oldLink.isSame(newLink)) {
+						changed |= oldLink.merge(newLink);
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					list1.add(newLink);
+					changed = true;
+				}
+			}
+			return changed;
 		}
 	}
 }

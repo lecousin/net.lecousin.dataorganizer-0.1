@@ -2,9 +2,9 @@ package net.lecousin.dataorganizer.audio;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.lecousin.dataorganizer.audio.AudioInfo.Track;
+import net.lecousin.dataorganizer.audio.AudioSourceInfo.Track;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader_0_1_0;
-import net.lecousin.framework.Triple;
+import net.lecousin.framework.Pair;
 import net.lecousin.framework.strings.StringUtil;
 import net.lecousin.framework.version.Version;
 import net.lecousin.framework.xml.XmlUtil;
@@ -29,7 +29,7 @@ public class Loader_0_1_0 extends ContentTypeLoader_0_1_0 implements Loader {
 	public int getYear(Element root) {
 		return root.hasAttribute("year") ? Integer.parseInt(root.getAttribute("year")) : -1;
 	}
-	public List<Track> getTracks(Element root, AudioInfo info) {
+	public List<Track> getTracks(Element root, AudioSourceInfo info) {
 		List<Track> result = new LinkedList<Track>();
 		for (Element e : XmlUtil.get_childs_element(root, "track")) {
 			Track t = info.new Track();
@@ -40,10 +40,10 @@ public class Loader_0_1_0 extends ContentTypeLoader_0_1_0 implements Loader {
 		}
 		return result;
 	}
-	public List<Triple<String,String,String>> readImages(Element elt, String nodeName) {
-		List<Triple<String,String,String>> result = new LinkedList<Triple<String,String,String>>();
+	public List<Pair<String,String>> readImages(Element elt, String nodeName) {
+		List<Pair<String,String>> result = new LinkedList<Pair<String,String>>();
 		for (Element e : XmlUtil.get_childs_element(elt, nodeName))
-			result.add(new Triple<String,String,String>(e.getAttribute("source"), e.getAttribute("description"), e.getAttribute("path")));
+			result.add(new Pair<String,String>(e.getAttribute("description"), e.getAttribute("path")));
 		return result;
 	}
 	public List<String> getGenres(Element root) {
@@ -52,13 +52,13 @@ public class Loader_0_1_0 extends ContentTypeLoader_0_1_0 implements Loader {
 			result.add(e.getAttribute("name"));
 		return result;
 	}
-	public List<Triple<String,String,String>> getCoverFront(Element root) {
+	public List<Pair<String,String>> getCoverFront(Element root) {
 		return readImages(root, "cover_front");
 	}
-	public List<Triple<String,String,String>> getCoverBack(Element root) {
+	public List<Pair<String,String>> getCoverBack(Element root) {
 		return readImages(root, "cover_back");
 	}
-	public List<Triple<String,String,String>> getImages(Element root) {
+	public List<Pair<String,String>> getImages(Element root) {
 		return readImages(root, "image");
 	}
 	

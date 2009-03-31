@@ -3,12 +3,12 @@ package net.lecousin.dataorganizer.allocine.personne;
 import net.lecousin.dataorganizer.allocine.AlloCinePage;
 import net.lecousin.dataorganizer.allocine.AlloCineUtil;
 import net.lecousin.dataorganizer.core.database.info.Info.DataLink;
-import net.lecousin.dataorganizer.people.PeopleInfo;
+import net.lecousin.dataorganizer.people.PeopleSourceInfo;
 import net.lecousin.dataorganizer.video.VideoContentType;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.progress.WorkProgress;
 
-public class Filmographie extends AlloCinePage<PeopleInfo> {
+public class Filmographie extends AlloCinePage<PeopleSourceInfo> {
 
 	@Override
 	protected String getDescription() { return "Activities"; }
@@ -22,7 +22,7 @@ public class Filmographie extends AlloCinePage<PeopleInfo> {
 		return null;
 	}
 	@Override
-	protected Pair<String,Boolean> parse(String page, String pageURL, PeopleInfo info, WorkProgress progress, int work) {
+	protected Pair<String,Boolean> parse(String page, String pageURL, PeopleSourceInfo info, WorkProgress progress, int work) {
 		int i = page.indexOf("<b>Filmographie</b>");
 		if (i < 0) { progress.progress(work); return new Pair<String,Boolean>(null, false); }
 

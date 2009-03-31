@@ -2,8 +2,11 @@ package net.lecousin.dataorganizer.core.database;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import net.lecousin.dataorganizer.core.database.content.ContentType;
 import net.lecousin.dataorganizer.core.database.content.DataContentType;
@@ -11,6 +14,7 @@ import net.lecousin.dataorganizer.core.database.info.InfoRetriever;
 import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.dataorganizer.core.database.source.LocalFileDataSource;
 import net.lecousin.dataorganizer.ui.dialog.EditDataInfosDlg;
+import net.lecousin.framework.Pair;
 import net.lecousin.framework.collections.SelfMap;
 import net.lecousin.framework.event.Event;
 
@@ -181,12 +185,32 @@ public abstract class Data implements SelfMap.Entry<Long> {
 		db.internal_removeData(this);
 	}
 	
-	public List<Exception> removeFromFileSystem() {
+	public Pair<List<Exception>,List<File>> removeFromFileSystem() {
 		List<Exception> errors = new LinkedList<Exception>();
+		List<File> files = new LinkedList<File>();
 		for (DataSource source : sources)
-			try { source.removeFromFileSystem(); }
+			try { files.addAll(source.removeFromFileSystem()); }
 			catch (Exception e) { errors.add(e); }
-		return errors;
+		return new Pair<List<Exception>,List<File>>(errors,files);
+	}
+	public void unlinkSources(Collection<File> files) {
+		List<DataSource> toRemove = new LinkedList<DataSource>();
+		for (DataSource source : sources) {
+			if (source.unlink(files))
+				toRemove.add(source);
+		}
+		sources.removeAll(toRemove);
+	}
+	public Set<File> getLinkedFiles() {
+		Set<File> files = new HashSet<File>();
+		for (DataSource source : sources)
+			files.addAll(source.getLinkedFiles());
+		return files;
+	}
+	public Set<File> getLinkedFiles(List<File> files) {
+		Set<File> links = getLinkedFiles();
+		links.retainAll(files);
+		return links;
 	}
 	
 	@Override

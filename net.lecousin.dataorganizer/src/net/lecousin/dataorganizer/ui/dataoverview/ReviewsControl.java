@@ -1,11 +1,9 @@
 package net.lecousin.dataorganizer.ui.dataoverview;
 
-import java.util.LinkedList;
-import java.util.Map;
-
 import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.core.database.Data;
-import net.lecousin.framework.Pair;
+import net.lecousin.dataorganizer.core.database.info.SourceInfo.Review;
+import net.lecousin.framework.collections.SelfMap;
 import net.lecousin.framework.event.Event.Listener;
 import net.lecousin.framework.ui.eclipse.UIUtil;
 import net.lecousin.framework.ui.eclipse.control.chart.BarChart;
@@ -23,7 +21,7 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 
 public class ReviewsControl extends Composite {
 
-	public ReviewsControl(Composite parent, Data data, String name, Map<String,Map<String,Pair<String,Integer>>> reviews) {
+	public ReviewsControl(Composite parent, Data data, String name, SelfMap<String,Review> reviews) {
 		super(parent, SWT.NONE);
 		this.data = data;
 		this.name = name;
@@ -33,12 +31,11 @@ public class ReviewsControl extends Composite {
 		Composite tmpPanel = UIUtil.newGridComposite(this, 0, 0, 2);
 		UIUtil.newLabel(tmpPanel, name, true, false);
 		long total = 0, nb = 0;
-		for (Map<String,Pair<String,Integer>> m : reviews.values())
-			for (Pair<String,Integer> p : m.values()) {
-				if (p.getValue2() == null) continue;
-				total += p.getValue2();
-				nb++;
-			}
+		for (Review r : reviews) {
+			if (r.getRate() == null) continue;
+			total += r.getRate();
+			nb++;
+		}
 		if (nb > 0) {
 			int note = (int)(total/nb);
 			UIUtil.newLabel(tmpPanel, note + "/20 (" + nb + ")");
@@ -47,11 +44,10 @@ public class ReviewsControl extends Composite {
 		}
 		
 		BarChart chart = new BarChart(this, 0, 20, ColorUtil.getWhite(), ColorUtil.getBlack(), ColorUtil.getOrange());
-		for (Map<String,Pair<String,Integer>> m : reviews.values())
-			for (Pair<String,Integer> p : m.values()) {
-				if (p.getValue2() == null) continue;
-				chart.addValue(p.getValue2(), 1);
-			}
+		for (Review r : reviews) {
+			if (r.getRate() == null) continue;
+			chart.addValue(r.getRate(), 1);
+		}
 		GridData gd = new GridData();
 		gd.widthHint = 100;
 		gd.heightHint = 70;
@@ -68,35 +64,20 @@ public class ReviewsControl extends Composite {
 	
 	private Data data;
 	private String name;
-	private Map<String,Map<String,Pair<String,Integer>>> reviews;
+	private SelfMap<String,Review> reviews;
 	
 	private class ReviewsListDialog {
+		@SuppressWarnings("unchecked")
 		public ReviewsListDialog(Control c) {
-			LinkedList<Review> list = new LinkedList<Review>();
-			for (Map.Entry<String,Map<String,Pair<String,Integer>>> source : ReviewsControl.this.reviews.entrySet())
-				for (Map.Entry<String,Pair<String,Integer>> author : source.getValue().entrySet()) {
-					Review r = new Review();
-					r.source = source.getKey();
-					r.author = author.getKey();
-					r.comment = author.getValue().getValue1();
-					r.note = author.getValue().getValue2();
-					list.add(r);
-				}
 			FlatPagedListDialog<Review> dlg = new FlatPagedListDialog<Review>(
-					c.getShell(), ReviewsControl.this.name + " " + Local.reviews, list, 10, new Provider<Review>() {
+					c.getShell(), ReviewsControl.this.name + " " + Local.reviews, reviews, 10, new Provider<Review>() {
 						public Control createControl(Composite parent, Review element) {
-							return new ReviewControl(parent, element.source, element.author, element.comment, element.note, ReviewsControl.this.data);
+							return new ReviewControl(parent, element.getAuthor(), element.getReview(), element.getRate(), ReviewsControl.this.data);
 						}
 					}, new Filter[] {}
 				);
 			dlg.openRelative(c, Orientation.TOP_BOTTOM, true, false);
 		}
-	}
-	private static class Review {
-		String source;
-		String author;
-		String comment;
-		Integer note;
 	}
 //		public ReviewsListDialog(Control c) {
 //			dlg = new FlatPopupMenu(c, ReviewsControl.this.name + " " + Local.reviews, true, false, false, true);

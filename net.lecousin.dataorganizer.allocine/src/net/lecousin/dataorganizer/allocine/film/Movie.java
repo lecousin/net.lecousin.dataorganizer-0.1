@@ -8,13 +8,13 @@ import java.util.List;
 
 import net.lecousin.dataorganizer.allocine.AlloCinePage;
 import net.lecousin.dataorganizer.allocine.AlloCineUtil;
-import net.lecousin.dataorganizer.video.VideoInfo;
-import net.lecousin.dataorganizer.video.VideoInfo.Genre;
+import net.lecousin.dataorganizer.video.VideoSourceInfo;
+import net.lecousin.dataorganizer.video.VideoSourceInfo.Genre;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.log.Log;
 import net.lecousin.framework.progress.WorkProgress;
 
-public class Movie extends AlloCinePage<VideoInfo> {
+public class Movie extends AlloCinePage<VideoSourceInfo> {
 
 	@Override
 	protected String getCategory() {
@@ -35,7 +35,7 @@ public class Movie extends AlloCinePage<VideoInfo> {
 		return null;
 	}
 	@Override
-	protected Pair<String,Boolean> parse(String page, String pageURL, VideoInfo info, WorkProgress progress, int work) {
+	protected Pair<String,Boolean> parse(String page, String pageURL, VideoSourceInfo info, WorkProgress progress, int work) {
 		int nb = 3;
 		int step;
 		boolean success = false;
@@ -66,7 +66,7 @@ public class Movie extends AlloCinePage<VideoInfo> {
 		work -= step;
 		String resume = getResume(page);
 		if (resume != null) {
-			info.setResume(AlloCineUtil.SOURCE_ID, resume);
+			info.setResume(resume);
 			success = true;
 		}
 		progress.progress(step);

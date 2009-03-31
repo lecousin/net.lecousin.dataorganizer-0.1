@@ -5,12 +5,13 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.lecousin.dataorganizer.audio.AudioInfo.Track;
+import net.lecousin.dataorganizer.audio.AudioSourceInfo.Track;
 import net.lecousin.dataorganizer.audio.ui.OverviewPanel;
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.Data.DuplicateAnalysis;
 import net.lecousin.dataorganizer.core.database.content.DataContentType;
 import net.lecousin.dataorganizer.core.database.info.Info;
+import net.lecousin.dataorganizer.core.database.info.SourceInfo;
 import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
 import net.lecousin.dataorganizer.util.DataImageLoader;
@@ -49,14 +50,15 @@ public class AudioDataType extends DataContentType {
 	}
 
 	@Override
-	protected Info createInfo() { return new AudioInfo(this, (String)null, (String)null); }
+	protected Info createInfo() { return new AudioInfo(this); }
 	@Override
 	protected Info createInfo(Element elt, ContentTypeLoader loader) { return new AudioInfo(this, elt, loader); }
 	
 	@Override
 	public String getSourceName(DataSource source) {
 		int index = getData().getSources().indexOf(source);
-		List<Track> tracks = ((AudioInfo)getInfo()).getTracks();
+		AudioSourceInfo sourceInfo = ((AudioInfo)getInfo()).getSourceInfo(AudioInfo.FILE_SOURCE);
+		List<Track> tracks = sourceInfo.getTracks();
 		if (index < 0 || index >= tracks.size()) return null;
 		return tracks.get(index).getTitle();
 	}
@@ -79,8 +81,8 @@ public class AudioDataType extends DataContentType {
 
 	}
 	@Override
-	public void createOverviewPanel(Composite panel) {
-		new OverviewPanel(panel, this);
+	public void createOverviewPanel(Composite panel, SourceInfo source) {
+		new OverviewPanel(panel, this, (AudioSourceInfo)source);
 	}
 
 	private List<Image> coverFront = null; 
@@ -216,10 +218,11 @@ public class AudioDataType extends DataContentType {
 		try {
 			IFolder folder = getFolder("audio");
 			ResourceUtil.createFolderAndParents(folder);
-			int index = 1;
+			int index = 0;
 			int type = data[0].type;
 			IFile file;
 			do {
+				index++;
 				file = folder.getFile(prefix + index + getImageExtension(type));
 			} while (file.exists() && index < 100);
 			if (file.exists()) return;

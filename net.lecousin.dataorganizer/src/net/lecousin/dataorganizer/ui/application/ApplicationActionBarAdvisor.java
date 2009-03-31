@@ -3,6 +3,7 @@ package net.lecousin.dataorganizer.ui.application;
 import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.ui.action.AboutAction;
 import net.lecousin.dataorganizer.ui.action.AddDataAction;
+import net.lecousin.dataorganizer.ui.action.ConfigAction;
 import net.lecousin.dataorganizer.ui.action.RefreshDataBaseAction;
 import net.lecousin.dataorganizer.ui.action.ShowLabelsViewAction;
 import net.lecousin.dataorganizer.ui.action.UpdateAction;
@@ -36,6 +37,7 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
     private ShowLabelsViewAction showLabelsViewAction;
     private UpdateAction updateAction;
     private AboutAction aboutAction;
+    private ConfigAction configAction;
 //    private TestAction testAction;
     
     public ApplicationActionBarAdvisor(IActionBarConfigurer configurer) {
@@ -60,20 +62,30 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 
         aboutAction = new AboutAction();
         register(aboutAction);
+
+        configAction = new ConfigAction();
+        register(configAction);
     }
     
     protected void fillMenuBar(IMenuManager menuBar) {
-        MenuManager fileMenu = new MenuManager(Local.MENU_Database.toString(), "DataOrganizer.Database");
+        MenuManager dbMenu = new MenuManager(Local.MENU_Database.toString(), "DataOrganizer.Database");
+        MenuManager optionsMenu = new MenuManager(Local.MENU_Options.toString(), "DataOrganizer.Options");
         MenuManager helpMenu = new MenuManager(Local.MENU_Help.toString(), "DataOrganizer.Help");
         
-        menuBar.add(fileMenu);
+        menuBar.add(dbMenu);
         // Add a group marker indicating where action set menus will appear.
         menuBar.add(new GroupMarker(IWorkbenchActionConstants.MB_ADDITIONS));
+        menuBar.add(optionsMenu);
         menuBar.add(helpMenu);
         
-        // File
-        fileMenu.add(addDataAction);
-        fileMenu.add(new GroupMarker(IWorkbenchActionConstants.MB_ADDITIONS));
+        // DataBase
+        dbMenu.add(addDataAction);
+        dbMenu.add(refreshDataBaseAction);
+        dbMenu.add(new GroupMarker(IWorkbenchActionConstants.MB_ADDITIONS));
+        
+        // Options
+        optionsMenu.add(configAction);
+        optionsMenu.add(new GroupMarker(IWorkbenchActionConstants.MB_ADDITIONS));
         
         // Help
         helpMenu.add(aboutAction);
@@ -86,6 +98,7 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
         toolbar.add(refreshDataBaseAction);
         toolbar.add(showLabelsViewAction);
         toolbar.add(new Separator());
+        toolbar.add(configAction);
         toolbar.add(updateAction);
 //        toolbar.add(testAction);
         toolbar.add(new Separator());

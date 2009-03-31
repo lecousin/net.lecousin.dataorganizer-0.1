@@ -84,6 +84,10 @@ public class SearchLabelsPanel extends Composite {
 				if (!(element instanceof Label)) return true;
 				Label label = (Label)element;
 				if (label.getParent() == null) return true;
+				if (DataOrganizer.search().getLabelsParameter().getReverse()) {
+					if (DataOrganizer.search().getLabelsParameter().getLabels().contains(label))
+						return true;
+				}
 				return DataOrganizer.search().getLabelsParameter().resultsContainsLabel(label);
 			}
 		});

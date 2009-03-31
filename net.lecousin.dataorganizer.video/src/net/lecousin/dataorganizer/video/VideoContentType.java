@@ -102,6 +102,8 @@ public class VideoContentType extends ContentType {
 		ctx.player = MediaPlayer.create("net.lecousin.media.jvlc");
 		Control ctrl = ctx.player.createVisual(ctx.visual);
 		ctrl.setLayoutData(UIUtil.gridData(1, true, 1, true));
+		ctx.visual.setSize(new Point(120, 120));
+		ctx.visual.setSize(new Point(128, 128));
 		return ctx;
 	}
 	@Override

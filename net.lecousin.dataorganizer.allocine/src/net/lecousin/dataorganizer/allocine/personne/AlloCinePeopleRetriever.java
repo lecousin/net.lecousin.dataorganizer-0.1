@@ -8,6 +8,7 @@ import net.lecousin.dataorganizer.allocine.internal.EclipsePlugin;
 import net.lecousin.dataorganizer.core.database.info.Info;
 import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPlugin;
 import net.lecousin.dataorganizer.people.PeopleInfo;
+import net.lecousin.dataorganizer.people.PeopleSourceInfo;
 import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.ui.eclipse.EclipseImages;
 
@@ -40,16 +41,15 @@ public class AlloCinePeopleRetriever implements InfoRetrieverPlugin {
 	
 	public boolean retrieve(String id, String name, Info info, WorkProgress progress,	int work) {
 		PeopleInfo pi = (PeopleInfo)info;
-		pi.setName(AlloCineUtil.SOURCE_ID, name);
-		pi.setID(AlloCineUtil.SOURCE_ID, id);
+		PeopleSourceInfo source = (PeopleSourceInfo)pi.setSource(AlloCineUtil.SOURCE_ID, id, name);
 		boolean success = false;
 		int nb = 2;
 		int step = work/nb--;
 		work -= step;
-		success |= new People().retrieve(id, pi, progress, step);
+		success |= new People().retrieve(id, source, progress, step);
 		step = work/nb--;
 		work -= step;
-		success |= new Filmographie().retrieve(id, pi, progress, step);
+		success |= new Filmographie().retrieve(id, source, progress, step);
 		return success;
 	}
 }

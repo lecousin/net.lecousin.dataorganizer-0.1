@@ -2,14 +2,16 @@ package net.lecousin.dataorganizer.video;
 
 import java.io.ByteArrayInputStream;
 import java.net.URI;
-import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.Data.DuplicateAnalysis;
 import net.lecousin.dataorganizer.core.database.content.DataContentType;
 import net.lecousin.dataorganizer.core.database.info.Info;
+import net.lecousin.dataorganizer.core.database.info.SourceInfo;
 import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
 import net.lecousin.dataorganizer.util.DataImageLoader;
@@ -58,7 +60,7 @@ public class VideoDataType extends DataContentType {
 		super(data);
 	}
 	@Override
-	protected Info createInfo() { return new VideoInfo(this, (String)null, null); }
+	protected Info createInfo() { return new VideoInfo(this); }
 	
 	private boolean loaded = false;
 	private long duration = -1;
@@ -95,7 +97,12 @@ public class VideoDataType extends DataContentType {
 				return;
 			}
 		}
-		Collection<String> paths = info.getPostersPaths();
+		Set<String> paths = new HashSet<String>();
+		for (String source : info.getSources()) {
+			VideoSourceInfo s = (VideoSourceInfo)info.getSourceInfo(source);
+			if (s == null) continue;
+			paths.addAll(s.getPostersPaths());
+		}
 		if (paths.isEmpty()) {
 			synchronized (this) {
 				posterImages = new LinkedList<Image>();
@@ -224,12 +231,13 @@ public class VideoDataType extends DataContentType {
 	public boolean isContentAvailable() { return loaded; }
 	
 	void loadContent(Composite visual, MediaPlayer player, WorkProgress progress, int work) {
+		loaded = true;
 		List<DataSource> sources = getData().getSources();
-		if (sources.size() == 0) { progress.progress(work); return; }
+		if (sources.size() == 0) { progress.progress(work); signalModification(); return; }
 		DataSource src = sources.get(0);
-		if (src == null) { progress.progress(work); return; }
+		if (src == null) { progress.progress(work); signalModification(); return; }
 		URI uri = src.ensurePresenceAndGetURI();
-		if (uri == null) { progress.progress(work); return; }
+		if (uri == null) { progress.progress(work); signalModification(); return; }
 		Media media = player.addMedia(uri);
 		player.start();
 		if (duration < 0)
@@ -239,11 +247,12 @@ public class VideoDataType extends DataContentType {
 			duration = media.getDuration();
 		player.stop();
 		player.removeMedia(media);
+		signalModification();
 	}
 	
 	@Override
-	public void createOverviewPanel(Composite panel) {
-		new OverviewPanel(panel, this);
+	public void createOverviewPanel(Composite panel, SourceInfo source) {
+		new OverviewPanel(panel, this, (VideoSourceInfo)source);
 	}
 	@Override
 	public void createDescriptionPanel(Composite panel) {

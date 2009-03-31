@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.List;
 
 import javax.swing.filechooser.FileSystemView;
 
@@ -93,7 +95,10 @@ public abstract class DataSource {
 	public abstract boolean isSameInDifferentLocation(DataSource src);
 
 	public abstract void ensurePresence();
-	public abstract void removeFromFileSystem() throws Exception;
+	public abstract List<File> removeFromFileSystem() throws Exception;
+	/** return true if the data source do not contain any files after the unlink operation */
+	public abstract boolean unlink(Collection<File> files);
+	public abstract List<File> getLinkedFiles();
 	
 	public abstract URI ensurePresenceAndGetURI();
 }

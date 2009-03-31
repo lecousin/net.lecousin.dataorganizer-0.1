@@ -35,6 +35,7 @@ public class HeaderPanel extends Composite {
 		layout.wrap = true;
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
+		layout.marginTop = layout.marginBottom = 0;
 		layout.center = true;
 		setLayout(layout);
 		labelImage = UIUtil.newImage(this, SharedImages.getImage(SharedImages.icons.x16.basic.LABEL));

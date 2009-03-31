@@ -14,16 +14,14 @@ import org.eclipse.swt.widgets.Control;
 
 public class ReviewControl extends Composite {
 
-	public ReviewControl(Composite parent, String source, String author, String comment, Integer note, Data data) {
+	public ReviewControl(Composite parent, String author, String comment, Integer note, Data data) {
 		super(parent, SWT.NONE);
 		setBackground(parent.getBackground());
-		UIUtil.gridLayout(this, 4, 0, 0);
+		UIUtil.gridLayout(this, 2, 0, 0);
 		UIUtil.newLabel(this, author, true, false);
 		UIUtil.newLabel(this, note != null ? note + "/20" : Local.no_rated.toString());
-		UIUtil.newLabel(this, Local.Source+":");
-		new SourceControl(this, data, source);
 		LCMLText text = new LCMLText(this, false, false);
-		text.setLayoutData(UIUtil.gridDataHoriz(4, true));
+		text.setLayoutData(UIUtil.gridDataHoriz(2, true));
 		text.setText(comment);
 	}
 	

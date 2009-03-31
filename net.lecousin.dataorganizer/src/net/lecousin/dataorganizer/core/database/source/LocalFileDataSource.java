@@ -4,8 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Collection;
+import java.util.List;
 
 import net.lecousin.dataorganizer.Local;
+import net.lecousin.framework.collections.CollectionUtil;
 import net.lecousin.framework.xml.XmlWriter;
 
 import org.eclipse.core.runtime.CoreException;
@@ -36,11 +39,12 @@ public class LocalFileDataSource extends FileDataSource {
 	}
 	
 	@Override
-	public void removeFromFileSystem() throws Exception {
+	public List<File> removeFromFileSystem() throws Exception {
 		File f = new File(path);
 		if (!f.exists())
 			throw new Exception(Local.Unable_to_locate_file.toString());
 		f.delete();
+		return CollectionUtil.single_element_list(f);
 	}
 	
 	@Override
@@ -52,6 +56,18 @@ public class LocalFileDataSource extends FileDataSource {
 	@Override
 	public URI ensurePresenceAndGetURI() {
 		return getLocalFile().toURI();
+	}
+	
+	@Override
+	public List<File> getLinkedFiles() {
+		return CollectionUtil.single_element_list(new File(path));
+	}
+	@Override
+	public boolean unlink(Collection<File> files) {
+		File f = new File(path);
+		if (files.contains(f))
+			return true;
+		return false;
 	}
 	
 	@Override

@@ -4,6 +4,7 @@
    <extension-point id="contenttype" name="Data Content Type" schema="schema/contenttype.exsd"/>
    <extension-point id="inforetriever" name="Data Info Retriever" schema="schema/inforetriever.exsd"/>
    <extension-point id="contenttype_action" name="Content Type Action" schema="schema/contenttype_action.exsd"/>
+   <extension-point id="preference" name="DataOrganizer Preferences" schema="schema/preference.exsd"/>
 
    <extension
          id="application"
@@ -75,6 +76,12 @@
             productId="net.lecousin.dataorganizer.product"
             splashId="net.lecousin.dataorganizer.ui.application.splash.interactive">
       </splashHandlerProductBinding>
+   </extension>
+   <extension
+         point="net.lecousin.dataorganizer.preference">
+      <page
+            provider="net.lecousin.dataorganizer.ui.application.preferences.UpdatePageProvider">
+      </page>
    </extension>
 
 </plugin>

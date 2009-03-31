@@ -3,7 +3,6 @@ package net.lecousin.dataorganizer.ui.dataoverview;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import net.lecousin.dataorganizer.Local;
@@ -12,13 +11,19 @@ import net.lecousin.dataorganizer.core.database.info.Info;
 import net.lecousin.dataorganizer.core.database.info.InfoRetriever;
 import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPlugin;
 import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPluginRegistry;
+import net.lecousin.dataorganizer.core.database.info.SourceInfo;
+import net.lecousin.dataorganizer.core.database.info.SourceInfo.Review;
 import net.lecousin.dataorganizer.ui.control.DataImageControl;
 import net.lecousin.dataorganizer.ui.control.RateControl;
 import net.lecousin.framework.Pair;
+import net.lecousin.framework.collections.SelfMap;
+import net.lecousin.framework.event.Event.Listener;
 import net.lecousin.framework.thread.RunnableWithData;
+import net.lecousin.framework.time.DateTimeUtil;
 import net.lecousin.framework.ui.eclipse.SharedImages;
 import net.lecousin.framework.ui.eclipse.UIUtil;
 import net.lecousin.framework.ui.eclipse.control.LCGroup;
+import net.lecousin.framework.ui.eclipse.control.Separator;
 import net.lecousin.framework.ui.eclipse.control.UIControlUtil;
 import net.lecousin.framework.ui.eclipse.control.button.MenuButton;
 import net.lecousin.framework.ui.eclipse.control.button.MenuButton.MenuProvider;
@@ -32,18 +37,18 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 public class OverviewPanel extends Composite {
 
 	public OverviewPanel(Composite parent) {
 		super(parent, SWT.NONE);
-		GridLayout layout = UIUtil.gridLayout(this, 2);
-		layout.verticalSpacing = 0;
+		UIUtil.gridLayout(this, 2, 2, 2, 2, 2);
 		setBackground(ColorUtil.getWhite());
 
 		Composite tmpPanel = UIUtil.newGridComposite(this, 2, 0, 1);
@@ -51,13 +56,14 @@ public class OverviewPanel extends Composite {
 		labelsPanel = new HeaderPanel(tmpPanel);
 		labelsPanel.setLayoutData(UIUtil.gridDataHoriz(1, true));
 		
+		Separator sep = new Separator(this, true, new Separator.GradientLine(ColorUtil.get(40, 40, 255), ColorUtil.get(255, 255, 255)), 5);
+		UIUtil.gridDataHorizFill(sep);
+		
 		Composite leftPanel = UIUtil.newComposite(this);
-		UIUtil.gridLayout(leftPanel, 1);
+		UIUtil.gridLayout(leftPanel, 1, 0, 0);
 		leftPanel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
 		Composite centerPanel = UIUtil.newComposite(this);
-		layout = UIUtil.gridLayout(centerPanel, 1);
-		layout.marginHeight = 0;
-		layout.verticalSpacing = 1;
+		UIUtil.gridLayout(centerPanel, 1, 0, 0, 0, 1);
 		GridData gd = UIUtil.gridDataHoriz(1, true);
 		gd.verticalAlignment = SWT.BEGINNING;
 		centerPanel.setLayoutData(gd);
@@ -75,51 +81,63 @@ public class OverviewPanel extends Composite {
 		gd = new GridData();
 		gd.horizontalAlignment = SWT.FILL;
 		group.setLayoutData(gd);
-		layout = UIUtil.gridLayout(group.getInnerControl(), 1);
-		layout.marginHeight = layout.marginWidth = 0;
+		UIUtil.gridLayout(group.getInnerControl(), 1, 0, 0);
 		reviewsPanel = group.getInnerControl();
 		
 		// center
-		// + name and sources
+		// + infos
 		tmpPanel = UIUtil.newGridComposite(centerPanel, 0, 0, 2);
 		UIUtil.gridDataHorizFill(tmpPanel);
 		UIUtil.newLabel(tmpPanel, Local.Name+":", true, false);
 		textName = UIUtil.newText(tmpPanel, "", new NameChanged());
 		textName.setLayoutData(UIUtil.gridDataHoriz(1, true));
+		Composite infoPanel = UIUtil.newRowComposite(centerPanel, SWT.HORIZONTAL, 0, 0, 5, true);
+		UIUtil.gridDataHorizFill(infoPanel);
+		// - note
+		tmpPanel = UIUtil.newGridComposite(infoPanel, 0, 0, 2);
+		UIUtil.newLabel(tmpPanel, Local.Rate+":", true, false);
+		barRate = new RateControl(tmpPanel, null, true);
+		// - added
+		tmpPanel = UIUtil.newGridComposite(infoPanel, 0, 0, 2);
+		UIUtil.newLabel(tmpPanel, Local.Added+":", true, false);
+		labelAdded = UIUtil.newLabel(tmpPanel, "");
+		// - vues
+		tmpPanel = UIUtil.newGridComposite(infoPanel, 0, 0, 2);
+		UIUtil.newLabel(tmpPanel, Local.Opened+":", true, false);
+		labelOpened = UIUtil.newLabel(tmpPanel, "");
+		// - last time
+		tmpPanel = UIUtil.newGridComposite(infoPanel, 0, 0, 2);
+		UIUtil.newLabel(tmpPanel, Local.Last_open+":", true, false);
+		labelLastOpen = UIUtil.newLabel(tmpPanel, "");
+		// - comment
+		tmpPanel = UIUtil.newGridComposite(centerPanel, 0, 0, 2);
+		UIUtil.gridDataHorizFill(tmpPanel);
+		UIUtil.newLabel(tmpPanel, Local.Comment+":", true, false);
+		comment = new Text(tmpPanel, SWT.WRAP | SWT.MULTI | SWT.BORDER);
+		comment.setLayoutData(UIUtil.gridDataHoriz(1, true));
+		comment.addModifyListener(new CommentChanged());
+		
+		// + sources
+		tmpPanel = UIUtil.newGridComposite(centerPanel, 0, 0, 2);
 		UIUtil.newLabel(tmpPanel, Local.Sources+":", true, false);
 		sourcesPanel = UIUtil.newComposite(tmpPanel);
 		RowLayout rowLayout = new RowLayout(SWT.HORIZONTAL);
 		rowLayout.wrap = true;
-		rowLayout.marginHeight = 0;
+		rowLayout.marginHeight = rowLayout.marginTop = rowLayout.marginBottom = 0;
 		sourcesPanel.setLayout(rowLayout);
 		buttonRetrieveInfo = new MenuButton(sourcesPanel, SharedImages.getImage(SharedImages.icons.x16.basic.SEARCH), Local.Retrieve_information.toString(), true, new RetrieveInfoMenuProvider());
-		// + you
-		group = new LCGroup(centerPanel, Local.Your_review.toString(), groupColor);
-		group.setBackground(ColorUtil.getWhite());
-		UIUtil.gridDataHorizFill(group);
-		layout = UIUtil.gridLayout(group.getInnerControl(), 2);
-		layout.marginHeight = layout.marginWidth = 0;
-		layout.verticalSpacing = 1;
-		UIUtil.newLabel(group.getInnerControl(), Local.Rating.toString());
-		UIUtil.newLabel(group.getInnerControl(), Local.Comment.toString());
-		barRate = new RateControl(group.getInnerControl(), null, true);
-		comment = new Text(group.getInnerControl(), SWT.WRAP | SWT.MULTI | SWT.BORDER);
-		comment.setLayoutData(UIUtil.gridDataHoriz(1, true));
-		comment.addModifyListener(new CommentChanged());
-		// + content Type
+		// + content Type overview
 		group = new LCGroup(centerPanel, Local.Details.toString(), groupColor);
 		group.setBackground(ColorUtil.getWhite());
 		UIUtil.gridDataHorizFill(group);
-		layout = UIUtil.gridLayout(group.getInnerControl(), 1);
-		layout.marginHeight = layout.marginWidth = 0;
+		UIUtil.gridLayout(group.getInnerControl(), 1, 0, 0);
 		contentTypePanel = UIUtil.newComposite(group.getInnerControl());
 		UIUtil.gridDataHorizFill(contentTypePanel);
 		// + descriptions
 		group = new LCGroup(centerPanel, Local.Description+" / "+Local.Resume, groupColor);
 		group.setBackground(ColorUtil.getWhite());
 		UIUtil.gridDataHorizFill(group);
-		layout = UIUtil.gridLayout(group.getInnerControl(), 1);
-		layout.marginHeight = layout.marginWidth = 0;
+		UIUtil.gridLayout(group.getInnerControl(), 1, 0, 0);
 		contentDescriptionPanel = UIUtil.newComposite(group.getInnerControl());
 		UIUtil.gridDataHorizFill(contentDescriptionPanel);
 	}
@@ -134,6 +152,7 @@ public class OverviewPanel extends Composite {
 	private Composite contentDescriptionPanel;
 	private RateControl barRate;
 	private Text comment;
+	private Label labelOpened, labelLastOpen, labelAdded;
 	private Composite sourcesPanel;
 	private MenuButton buttonRetrieveInfo;
 	
@@ -142,12 +161,13 @@ public class OverviewPanel extends Composite {
 		imageControl.setData(data);
 		labelsPanel.refresh(data);
 		textName.setText(data.getName());
+		labelOpened.setText(Integer.toString(data.getViews().size()));
+		labelLastOpen.setText(data.getViews().isEmpty() ? Local.Never.toString() : DateTimeUtil.getDateString(data.getViews().get(data.getViews().size()-1)));
+		labelAdded.setText(DateTimeUtil.getDateString(data.getDateAdded()));
 		refreshSources(data);
 		barRate.setData(data);
 		comment.setText(data.getComment() != null ? data.getComment() : "");
-		UIControlUtil.clear(contentTypePanel);
-		data.getContent().createOverviewPanel(contentTypePanel);
-		refreshReviews(data);
+		sourceSelectionChanged(false);
 		UIControlUtil.clear(contentDescriptionPanel);
 		data.getContent().createDescriptionPanel(contentDescriptionPanel);
 		layout(true, true);
@@ -157,19 +177,62 @@ public class OverviewPanel extends Composite {
 		for (Control c : sourcesPanel.getChildren())
 			if (c != buttonRetrieveInfo) c.dispose();
 		for (String source : data.getContent().getInfo().getSources()) {
-			SourceControl c = new SourceControl(sourcesPanel, data, source);
+			SourcePanel c = new SourcePanel(sourcesPanel, data, source);
 			c.moveAbove(buttonRetrieveInfo);
 		}
 	}
-	private void refreshReviews(Data data) {
+	private void refreshReviews(Data data, SourceInfo info) {
 		UIControlUtil.clear(reviewsPanel);
 		Set<String> types = data.getContent().getInfo().getReviewsTypes();
 		if (types == null) return;
 		for (String type : types) {
-			Map<String,Map<String,Pair<String,Integer>>> reviews = data.getContent().getInfo().getReviews(type);
+			SelfMap<String,Review> reviews = info.getReviews(type);
 			if (reviews == null) continue;
 			new ReviewsControl(reviewsPanel, data, type, reviews);
 		}
+	}
+	
+	private class SourcePanel extends Composite {
+		public SourcePanel(Composite parent, Data data, String source) {
+			super(parent, SWT.NONE);
+			this.source = source;
+			setBackground(parent.getBackground());
+			UIUtil.gridLayout(this, 3, 0, 0, 2, 0);
+			button = UIUtil.newCheck(this, "", new Listener<Pair<Boolean,String>>() {
+				public void fire(Pair<Boolean, String> event) {
+					sourceSelectionChanged(true);
+				}
+			}, source);
+			button.setSelection(true);
+			new SourceControl(this, data, source);
+			UIUtil.newImageButton(this, SharedImages.getImage(SharedImages.icons.x16.basic.REFRESH), new Listener<Pair<Data,String>>() {
+				public void fire(Pair<Data,String> event) {
+					InfoRetriever.refresh(event.getValue1(), event.getValue2());
+				}
+			}, new Pair<Data,String>(data, source)).setToolTipText(Local.process(Local.Refresh_information_from__, InfoRetrieverPluginRegistry.getNameForSource(source, data.getContentType().getID())));
+		}
+		private Button button;
+		private String source;
+	}
+	
+	private void sourceSelectionChanged(boolean layout) {
+		UIControlUtil.clear(contentTypePanel);
+		SourceInfo info = data.getContent().getInfo().getMergedInfo(getSelectedSources());
+		data.getContent().createOverviewPanel(contentTypePanel, info);
+		refreshReviews(data, info);
+		if (layout) {
+			layout(true, true);
+			UIControlUtil.resize(this);
+		}
+	}
+	private List<String> getSelectedSources() {
+		List<String> sources = new LinkedList<String>();
+		for (Control c : sourcesPanel.getChildren())
+			if (c instanceof SourcePanel) {
+				if (((SourcePanel)c).button.getSelection())
+					sources.add(((SourcePanel)c).source);
+			}
+		return sources;
 	}
 	
 	private class NameChanged implements ModifyListener {

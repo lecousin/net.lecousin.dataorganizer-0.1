@@ -1,13 +1,15 @@
 package net.lecousin.dataorganizer.people;
 
-import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.Data.DuplicateAnalysis;
 import net.lecousin.dataorganizer.core.database.content.DataContentType;
 import net.lecousin.dataorganizer.core.database.info.Info;
+import net.lecousin.dataorganizer.core.database.info.SourceInfo;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
 import net.lecousin.dataorganizer.people.ui.OverviewPanel;
 import net.lecousin.dataorganizer.util.DataImageLoader;
@@ -33,7 +35,7 @@ public class PeopleDataType extends DataContentType {
 	@Override
 	protected Info createInfo(Element elt, ContentTypeLoader loader) { return new PeopleInfo(this, elt, (Loader)loader); }
 	@Override
-	protected Info createInfo() { return new PeopleInfo(this, (String)null, null); }
+	protected Info createInfo() { return new PeopleInfo(this); }
 
 	@Override
 	protected void saveContent(XmlWriter xml) {
@@ -56,21 +58,33 @@ public class PeopleDataType extends DataContentType {
 		if (info == null || !(info instanceof PeopleInfo)) return false;
 		PeopleInfo i1 = (PeopleInfo)getInfo();
 		PeopleInfo i2 = (PeopleInfo)info;
-		for (String s : i1.getNamesSources()) {
-			String n1 = i1.getName(s);
-			String n2 = i2.getName(s);
+		for (String s : i1.getSources()) {
+			String n1 = i1.getSourceName(s);
+			String n2 = i2.getSourceName(s);
 			if (n2 == null) continue;
 			if (!n1.equalsIgnoreCase(n2)) return false;
 		}
-		if (i1.getBirthDay() == 0) return true;
-		if (i2.getBirthDay() == 0) return true; 
-		if (i1.getBirthDay() != i2.getBirthDay()) return false;
+		PeopleSourceInfo info1 = new PeopleSourceInfo(null);
+		PeopleSourceInfo info2 = new PeopleSourceInfo(null);
+		for (String s : i1.getSources()) {
+			PeopleSourceInfo pi = i1.getSourceInfo(s);
+			if (pi == null) continue;
+			info1.merge(pi);
+		}
+		for (String s : i2.getSources()) {
+			PeopleSourceInfo pi = i2.getSourceInfo(s);
+			if (pi == null) continue;
+			info2.merge(pi);
+		}
+		if (info1.getBirthDay() == 0) return true;
+		if (info2.getBirthDay() == 0) return true; 
+		if (info1.getBirthDay() != info2.getBirthDay()) return false;
 		return true;
 	}
 
 	@Override
-	public void createOverviewPanel(Composite panel) {
-		new OverviewPanel(panel, this);
+	public void createOverviewPanel(Composite panel, SourceInfo info) {
+		new OverviewPanel(panel, this, (PeopleSourceInfo)info);
 	}
 	@Override
 	public void createDescriptionPanel(Composite panel) {
@@ -105,7 +119,10 @@ public class PeopleDataType extends DataContentType {
 				return;
 			}
 		}
-		Collection<String> paths = info.getPhotosPaths();
+		Set<String> paths = new HashSet<String>();
+		for (String source : info.getSources())
+			if (info.getSourceInfo(source) != null)
+				paths.addAll(info.getSourceInfo(source).getPhotosPaths());
 		if (paths.isEmpty()) {
 			synchronized (this) {
 				photos = new LinkedList<Image>();

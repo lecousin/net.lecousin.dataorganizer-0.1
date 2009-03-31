@@ -8,6 +8,7 @@ import net.lecousin.dataorganizer.allocine.internal.EclipsePlugin;
 import net.lecousin.dataorganizer.core.database.info.Info;
 import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPlugin;
 import net.lecousin.dataorganizer.video.VideoInfo;
+import net.lecousin.dataorganizer.video.VideoSourceInfo;
 import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.ui.eclipse.EclipseImages;
 
@@ -41,23 +42,22 @@ public class AlloCineMovieRetriever implements InfoRetrieverPlugin {
 	
 	public boolean retrieve(String id, String name, Info info, WorkProgress progress, int work) {
 		VideoInfo mi = (VideoInfo)info;
-		mi.setName(AlloCineUtil.SOURCE_ID, name);
-		mi.setID(AlloCineUtil.SOURCE_ID, id);
+		VideoSourceInfo source = (VideoSourceInfo)mi.setSource(AlloCineUtil.SOURCE_ID, id, name);
 		boolean success = false;
 		int nb = 5;
 		int step = work/nb--;
 		work -= step;
-		success |= new Movie().retrieve(id, mi, progress, step);
+		success |= new Movie().retrieve(id, source, progress, step);
 		step = work/nb--;
 		work -= step;
-		success |= new Casting().retrieve(id, mi, progress, step);
+		success |= new Casting().retrieve(id, source, progress, step);
 		step = work/nb--;
 		work -= step;
-		success |= new Poster().retrieve(id, mi, progress, step);
+		success |= new Poster().retrieve(id, source, progress, step);
 		step = work/nb--;
 		work -= step;
-		success |= new PressCritik().retrieve(id, mi, progress, step);
-		success |= new UsersCritik().retrieve(id, mi, progress, work);
+		success |= new PressCritik().retrieve(id, source, progress, step);
+		success |= new UsersCritik().retrieve(id, source, progress, work);
 		return success;
 	}
 }

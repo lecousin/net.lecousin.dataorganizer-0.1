@@ -11,6 +11,7 @@ import net.lecousin.dataorganizer.core.search.DataSearch.ReversableParameter;
 import net.lecousin.dataorganizer.video.Local;
 import net.lecousin.dataorganizer.video.VideoContentType;
 import net.lecousin.dataorganizer.video.VideoInfo;
+import net.lecousin.dataorganizer.video.VideoSourceInfo;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.strings.StringUtil;
 import net.lecousin.framework.ui.eclipse.UIUtil;
@@ -63,10 +64,13 @@ public class Param_Casting extends ReversableParameter {
 		protected boolean _accept(Data data) {
 			VideoInfo info = (VideoInfo)data.getContent().getInfo();
 			Set<String> values = new HashSet<String>();
-			addList(info.getActors(), values);
-			addList(info.getDirectors(), values);
-			addList(info.getProductors(), values);
-			addList(info.getScenaristes(), values);
+			for (String source : info.getSources()) {
+				VideoSourceInfo i = info.getSourceInfo(source);
+				addList(i.getActors(), values);
+				addList(i.getDirectors(), values);
+				addList(i.getProductors(), values);
+				addList(i.getScenaristes(), values);
+			}
 			if (values.isEmpty()) return false;
 			String[] strs = casting.split(" ");
 			// filter words
