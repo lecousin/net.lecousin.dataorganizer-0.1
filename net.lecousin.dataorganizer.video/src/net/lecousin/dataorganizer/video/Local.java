@@ -10,6 +10,7 @@ public enum Local {
 	Add_to_Media_Player_List("Add to Media Player List", "Ajouter à la liste du Media Player"),
 	Add_videos("Add videos", "Ajouter des vidéos"),
 	Casting("Casting", "Casting"),
+	Dimension("Dimension", "Dimension"),
 	Directed_by("Directed by", "Réalisé par"),
 	Direction("Direction", "Réalisation"),
 	Duration("Duration", "Durée"),

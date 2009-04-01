@@ -11,6 +11,7 @@ import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader_0_1_0;
 import net.lecousin.dataorganizer.video.VideoSourceInfo.Genre;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.collections.SelfMap;
+import net.lecousin.framework.geometry.PointInt;
 import net.lecousin.framework.version.Version;
 import net.lecousin.framework.xml.XmlUtil;
 
@@ -32,6 +33,11 @@ public class Loader_0_1_0 extends ContentTypeLoader_0_1_0 implements Loader {
 	}
 	public boolean getLoaded(Element root) {
 		return Boolean.parseBoolean(root.getAttribute("loaded"));
+	}
+	public PointInt getDimension(Element root) {
+		if (root.hasAttribute("width") && root.hasAttribute("height"))
+			return new PointInt(Integer.parseInt(root.getAttribute("width")), Integer.parseInt(root.getAttribute("height")));
+		return null;
 	}
 	
 	public long getReleaseDate(Element root) {

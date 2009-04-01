@@ -1,6 +1,5 @@
 package net.lecousin.dataorganizer.ui.wizard.adddata;
 
-import java.net.URLDecoder;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,7 +11,6 @@ import net.lecousin.dataorganizer.ui.dialog.DataLinkPopup;
 import net.lecousin.dataorganizer.ui.wizard.adddata.AddData_Page.Result;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.event.Event.Listener;
-import net.lecousin.framework.files.TypedFile;
 import net.lecousin.framework.io.FileSystemUtil;
 import net.lecousin.framework.thread.RunnableWithData;
 import net.lecousin.framework.ui.eclipse.EclipseImages;
@@ -24,7 +22,6 @@ import net.lecousin.framework.ui.eclipse.control.text.lcml.LCMLText;
 import net.lecousin.framework.ui.eclipse.dialog.FlatPagedListDialog;
 import net.lecousin.framework.ui.eclipse.dialog.MyDialog;
 
-import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
@@ -107,10 +104,10 @@ public class AddDataDialog extends MyDialog {
 			public void run() {
 	    		Set<String> extensions = new HashSet<String>();
 	    		if (!result.notDetectedTypesFiles.isEmpty())
-	    			for (Pair<IFileStore,TypedFile> file : result.notDetectedTypesFiles)
-	    				extensions.add(FileSystemUtil.getFileNameExtension(file.getValue1().getName()).toLowerCase());
-				FlatPagedListDialog.Filter<Pair<IFileStore,TypedFile>>[] filters = new FlatPagedListDialog.Filter[1];
-				filters[0] = new FlatPagedListDialog.FilterListPossibilities<Pair<IFileStore,TypedFile>, String>(extensions) {
+	    			for (String file : result.notDetectedTypesFiles)
+	    				extensions.add(FileSystemUtil.getFileNameExtension(file).toLowerCase());
+				FlatPagedListDialog.Filter<String>[] filters = new FlatPagedListDialog.Filter[1];
+				filters[0] = new FlatPagedListDialog.FilterListPossibilities<String, String>(extensions) {
 					public String getName() {
 						return Local.Extensions.toString();
 					}
@@ -119,14 +116,14 @@ public class AddDataDialog extends MyDialog {
 						return possibility;
 					}
 					@Override
-					protected boolean accept(Pair<IFileStore,TypedFile> element, String possibility) {
-						return element.getValue1().getName().endsWith(possibility);
+					protected boolean accept(String element, String possibility) {
+						return element.endsWith(possibility);
 					}
 				};
-				FlatPagedListDialog<Pair<IFileStore,TypedFile>> dlg = new FlatPagedListDialog<Pair<IFileStore,TypedFile>>(getShell(), Local.Files_not_detected.toString(), result.notDetectedTypesFiles, 20, new FlatPagedListDialog.TextProvider<Pair<IFileStore,TypedFile>>() {
+				FlatPagedListDialog<String> dlg = new FlatPagedListDialog<String>(getShell(), Local.Files_not_detected.toString(), result.notDetectedTypesFiles, 20, new FlatPagedListDialog.TextProvider<String>() {
 					@Override
-					protected String getText(Pair<IFileStore,TypedFile> element) {
-						return URLDecoder.decode(element.getValue1().toURI().toString());
+					protected String getText(String element) {
+						return element;
 					}
 				}, filters);
 				dlg.openProgressive(null, OrientationY.BOTTOM, false);
@@ -137,10 +134,10 @@ public class AddDataDialog extends MyDialog {
 			public void run() {
 	    		Set<String> extensions = new HashSet<String>();
 	    		if (!result.notDetectedNotTypesFiles.isEmpty())
-	    			for (IFileStore file : result.notDetectedNotTypesFiles)
-	    				extensions.add(FileSystemUtil.getFileNameExtension(file.getName()).toLowerCase());
-				FlatPagedListDialog.Filter<IFileStore>[] filters = new FlatPagedListDialog.Filter[1];
-				filters[0] = new FlatPagedListDialog.FilterListPossibilities<IFileStore, String>(extensions) {
+	    			for (String file : result.notDetectedNotTypesFiles)
+	    				extensions.add(FileSystemUtil.getFileNameExtension(file).toLowerCase());
+				FlatPagedListDialog.Filter<String>[] filters = new FlatPagedListDialog.Filter[1];
+				filters[0] = new FlatPagedListDialog.FilterListPossibilities<String, String>(extensions) {
 					public String getName() {
 						return Local.Extensions.toString();
 					}
@@ -149,14 +146,14 @@ public class AddDataDialog extends MyDialog {
 						return possibility;
 					}
 					@Override
-					protected boolean accept(IFileStore element, String possibility) {
-						return element.getName().endsWith(possibility);
+					protected boolean accept(String element, String possibility) {
+						return element.endsWith(possibility);
 					}
 				};
-				FlatPagedListDialog<IFileStore> dlg = new FlatPagedListDialog<IFileStore>(getShell(), Local.Files_not_detected.toString(), result.notDetectedNotTypesFiles, 20, new FlatPagedListDialog.TextProvider<IFileStore>() {
+				FlatPagedListDialog<String> dlg = new FlatPagedListDialog<String>(getShell(), Local.Files_not_detected.toString(), result.notDetectedNotTypesFiles, 20, new FlatPagedListDialog.TextProvider<String>() {
 					@Override
-					protected String getText(IFileStore element) {
-						return URLDecoder.decode(element.toURI().toString());
+					protected String getText(String element) {
+						return element;
 					}
 				}, filters);
 				dlg.openProgressive(null, OrientationY.BOTTOM, false);

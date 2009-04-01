@@ -22,6 +22,7 @@ import net.lecousin.framework.thread.RunnableWithData;
 import net.lecousin.framework.time.DateTimeUtil;
 import net.lecousin.framework.ui.eclipse.SharedImages;
 import net.lecousin.framework.ui.eclipse.UIUtil;
+import net.lecousin.framework.ui.eclipse.control.LCCombo;
 import net.lecousin.framework.ui.eclipse.control.LCGroup;
 import net.lecousin.framework.ui.eclipse.control.Separator;
 import net.lecousin.framework.ui.eclipse.control.UIControlUtil;
@@ -36,6 +37,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
@@ -89,7 +91,8 @@ public class OverviewPanel extends Composite {
 		tmpPanel = UIUtil.newGridComposite(centerPanel, 0, 0, 2);
 		UIUtil.gridDataHorizFill(tmpPanel);
 		UIUtil.newLabel(tmpPanel, Local.Name+":", true, false);
-		textName = UIUtil.newText(tmpPanel, "", new NameChanged());
+		textName = new LCCombo(tmpPanel, null);
+		textName.selectionEvent().addListener(new NameChanged());
 		textName.setLayoutData(UIUtil.gridDataHoriz(1, true));
 		Composite infoPanel = UIUtil.newRowComposite(centerPanel, SWT.HORIZONTAL, 0, 0, 5, true);
 		UIUtil.gridDataHorizFill(infoPanel);
@@ -146,7 +149,7 @@ public class OverviewPanel extends Composite {
 	
 	private HeaderPanel labelsPanel;
 	private DataImageControl imageControl;
-	private Text textName;
+	private LCCombo textName;
 	private Composite contentTypePanel;
 	private Composite reviewsPanel;
 	private Composite contentDescriptionPanel;
@@ -160,7 +163,16 @@ public class OverviewPanel extends Composite {
 		this.data = data;
 		imageControl.setData(data);
 		labelsPanel.refresh(data);
-		textName.setText(data.getName());
+		textName.clear();
+		boolean nameFound = false;
+		for (Pair<String,Image> p : data.getContent().getAllPossibleNames()) {
+			textName.addItem(p.getValue2(), p.getValue1(), null);
+			if (p.getValue1().equals(data.getName()))
+				nameFound = true;
+		}
+		if (!nameFound)
+			textName.addItem(null, data.getName(), null);
+		textName.setSelection(data.getName());
 		labelOpened.setText(Integer.toString(data.getViews().size()));
 		labelLastOpen.setText(data.getViews().isEmpty() ? Local.Never.toString() : DateTimeUtil.getDateString(data.getViews().get(data.getViews().size()-1)));
 		labelAdded.setText(DateTimeUtil.getDateString(data.getDateAdded()));
@@ -235,10 +247,11 @@ public class OverviewPanel extends Composite {
 		return sources;
 	}
 	
-	private class NameChanged implements ModifyListener {
-		public void modifyText(ModifyEvent e) {
-			if (textName.getText().equals(data.getName())) return;
-			data.setName(textName.getText());
+	private class NameChanged implements Listener<Pair<String,Object>> {
+		public void fire(Pair<String, Object> event) {
+			String s = event.getValue1();
+			if (s.equals(data.getName())) return;
+			data.setName(s);
 		}
 	}
 	private class CommentChanged implements ModifyListener {

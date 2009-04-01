@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.lecousin.framework.collections.CollectionUtil;
+import net.lecousin.framework.io.FileSystemUtil;
 import net.lecousin.framework.xml.XmlWriter;
 
 import org.eclipse.core.filesystem.EFS;
@@ -32,7 +33,7 @@ public class NetworkFileDataSource extends FileDataSource {
 		xml.addAttribute("uri", uri);
 	}
 	
-	private String uri;
+	String uri;
 	
 	@Override
 	public void ensurePresence() {
@@ -77,6 +78,12 @@ public class NetworkFileDataSource extends FileDataSource {
 	public URI ensurePresenceAndGetURI() {
 		try { return new URI(uri); }
 		catch (URISyntaxException e) { return null; }
+	}
+	
+	@Override
+	public String getFileName() {
+		try { return FileSystemUtil.getFileName(new URI(uri).getPath()); }
+		catch (URISyntaxException e) { return FileSystemUtil.getFileName(uri); }
 	}
 	
 	@Override

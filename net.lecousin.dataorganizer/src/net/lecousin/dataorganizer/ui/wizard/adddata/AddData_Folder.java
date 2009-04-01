@@ -3,6 +3,7 @@ package net.lecousin.dataorganizer.ui.wizard.adddata;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -10,10 +11,13 @@ import java.util.List;
 import java.util.Set;
 
 import net.lecousin.dataorganizer.Local;
+import net.lecousin.dataorganizer.core.DataOrganizer;
 import net.lecousin.dataorganizer.core.InitializationException;
+import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.VirtualData;
 import net.lecousin.dataorganizer.core.database.VirtualDataBase;
 import net.lecousin.dataorganizer.core.database.content.ContentType;
+import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.dataorganizer.internal.EclipsePlugin;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.collections.ArrayUtil;
@@ -21,6 +25,7 @@ import net.lecousin.framework.event.Event.Listener;
 import net.lecousin.framework.files.FileType;
 import net.lecousin.framework.files.TypedFile;
 import net.lecousin.framework.files.TypedFolder;
+import net.lecousin.framework.log.Log;
 import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.ui.eclipse.UIUtil;
 import net.lecousin.framework.ui.eclipse.dialog.ErrorDlg;
@@ -53,6 +58,7 @@ public class AddData_Folder extends WizardPage implements AddData_Page {
 	
 	private Text textFolder;
 	private Button checkSubFolders;
+	private Button checkCheckLinkedFiles;
 	private List<Button> checkContentTypes = new LinkedList<Button>();
 	
 	public void createControl(Composite parent) {
@@ -87,8 +93,7 @@ public class AddData_Folder extends WizardPage implements AddData_Page {
 			}
 		}, null);
 		
-		checkSubFolders = new Button(panel, SWT.CHECK);
-		checkSubFolders.setText(Local.Analyze_sub_folders_recursively.toString());
+		checkSubFolders = UIUtil.newCheck(panel, Local.Analyze_sub_folders_recursively.toString(), null, null);
 		UIUtil.gridDataHorizFill(checkSubFolders);
 
 		Group group = new Group(panel, SWT.SHADOW_IN);
@@ -119,6 +124,12 @@ public class AddData_Folder extends WizardPage implements AddData_Page {
 			button.setData(type.getID());
 			checkContentTypes.add(button);
 		}
+		
+		group = new Group(panel, SWT.SHADOW_IN);
+		group.setText(Local.Options.toString());
+		UIUtil.gridDataHorizFill(group);
+		UIUtil.gridLayout(group, 1);
+		checkCheckLinkedFiles = UIUtil.newCheck(group, Local.Try_to_detect_data_even_on_files_already_linked_to_an_existing_data.toString(), null, null);
 
 		setControl(panel);
 		dialogChanged();
@@ -192,21 +203,38 @@ public class AddData_Folder extends WizardPage implements AddData_Page {
 			return null;
 		}
 		boolean recurse = checkSubFolders.getSelection();
+		boolean checkLinked = checkCheckLinkedFiles.getSelection();
 		
 		Search search = new Search(textFolder.getShell());
-		return search.run(rootURI, recurse, types);
+		return search.run(rootURI, recurse, types, checkLinked);
 	}
 	
 	private static class Search {
 		Search(Shell shell) { this.shell = shell; }
 		Shell shell;
 		
-		Result run(URI rootURI, boolean recurse, List<ContentType> types) {
+		Result run(URI rootURI, boolean recurse, List<ContentType> types, boolean checkLinked) {
 			WorkProgress mainProgress = new WorkProgress(Local.Searching_data.toString(), 10000, true);
 			WorkProgressDialog dlg = new WorkProgressDialog(shell, mainProgress);
 			
-			WorkProgress fileSystemProgress = mainProgress.addSubWork(Local.Analyzing_file_system.toString(), 9500, 100000);
-			WorkProgress detectProgress = mainProgress.addSubWork(Local.Detecting_data_from_analyzed_files.toString(), 500, 10000);
+			int stepAnalyze;
+			int stepFilterLinked;
+			int stepDetect;
+			if (!checkLinked) {
+				stepAnalyze = 7500;
+				stepFilterLinked = 2000;
+				stepDetect = 500;
+			} else {
+				stepAnalyze = 9000;
+				stepFilterLinked = 0;
+				stepDetect = 1000;
+			}
+			
+			WorkProgress fileSystemProgress = mainProgress.addSubWork(Local.Analyzing_file_system.toString(), stepAnalyze, 100000);
+			WorkProgress filterProgress = null;
+			if (!checkLinked)
+				filterProgress = mainProgress.addSubWork(Local.Filter_files_already_linked.toString(), stepFilterLinked, 10000);
+			WorkProgress detectProgress = mainProgress.addSubWork(Local.Detecting_data_from_analyzed_files.toString(), stepDetect, 10000);
 
 			IFileStore rootFolder;
 			try { rootFolder = EFS.getStore(rootURI); }
@@ -242,7 +270,22 @@ public class AddData_Folder extends WizardPage implements AddData_Page {
 			
 			// analyze file system
 			TypedFolder root = new TypedFolder(rootURI, rootFolder, recurse, filetypes, fileSystemProgress, 100000);
+			fileSystemProgress.done();
 
+			if (mainProgress.isCancelled()) {
+				dlg.close();
+				return null;
+			}
+			
+			if (!checkLinked) {
+				List<Data> allData = DataOrganizer.database().getAllData();
+				List<DataSource> sources = new ArrayList<DataSource>(allData.size()*2);
+				for (Data d : allData)
+					sources.addAll(d.getSources());
+				filterLinked(root, sources, filterProgress, 10000);
+				filterProgress.done();
+			}
+			
 			if (mainProgress.isCancelled()) {
 				dlg.close();
 				return null;
@@ -273,14 +316,14 @@ public class AddData_Folder extends WizardPage implements AddData_Page {
 				if (mainProgress.isCancelled())
 					break;
 			}
+			root = null;
+			detectProgress.done();
 			
 			if (mainProgress.isCancelled()) {
 				result.db.close();
 				dlg.close();
 				return null;
 			}
-			
-			addNotDetected(root, result);
 			
 			dlg.close();
 			if (mainProgress.isCancelled()) { 
@@ -291,15 +334,80 @@ public class AddData_Folder extends WizardPage implements AddData_Page {
 			return result;
 		}
 
-		private void detect(URI rootURI, TypedFolder folder, ContentType type, Result result, List<IFileStore> used, WorkProgress progress, int amount) {
+		private boolean filterLinked(TypedFolder folder, List<DataSource> allSources, WorkProgress progress, int amount) {
+			if (progress.isCancelled())
+				return true;
+			int nb = folder.typedFiles.size() + folder.notTypedFiles.size() + folder.subFolders.size()*5;
+			List<Pair<IFileStore,TypedFile>> typedToRemove = new LinkedList<Pair<IFileStore,TypedFile>>();
+			for (Pair<IFileStore,TypedFile> p : folder.typedFiles) {
+				int step = amount/nb--;
+				amount -= step;
+				IFileStore file = p.getValue1();
+				File local;
+				try { local = file.toLocalFile(EFS.NONE, null); }
+				catch (CoreException e) { local = null; }
+				for (DataSource source : allSources) {
+					if ((local != null && source.hasLink(local)) || (local == null && source.hasLinkNotLocal(file))) {
+						typedToRemove.add(p);
+						break;
+					}
+				}
+				progress.progress(step);
+				if (progress.isCancelled())
+					return true;
+			}
+			List<IFileStore> notTypedToRemove = new LinkedList<IFileStore>();
+			for (IFileStore file : folder.notTypedFiles) {
+				int step = amount/nb--;
+				amount -= step;
+				File local;
+				try { local = file.toLocalFile(EFS.NONE, null); }
+				catch (CoreException e) { local = null; }
+				for (DataSource source : allSources) {
+					if ((local != null && source.hasLink(local)) || (local == null && source.hasLinkNotLocal(file))) {
+						notTypedToRemove.add(file);
+						break;
+					}
+				}
+				progress.progress(step);
+				if (progress.isCancelled())
+					return true;
+			}
+			folder.typedFiles.removeAll(typedToRemove); typedToRemove = null;
+			folder.notTypedFiles.removeAll(notTypedToRemove); notTypedToRemove = null;
+			List<TypedFolder> folderToRemove = new LinkedList<TypedFolder>();
+			nb /= 5;
+			for (TypedFolder f : folder.subFolders) {
+				int step = amount/nb--;
+				amount -= step;
+				if (!filterLinked(f, allSources, progress, step))
+					folderToRemove.add(f);
+				if (progress.isCancelled())
+					return true;
+			}
+			folder.subFolders.removeAll(folderToRemove);
+			if (folder.subFolders.isEmpty() &&
+				folder.typedFiles.isEmpty() &&
+				folder.notTypedFiles.isEmpty())
+				return false;
+			return true;
+		}
+		
+		private void detect(URI rootURI, TypedFolder folder, ContentType type, Result result, List<IFileStore> usedBefore, WorkProgress progress, int amount) {
 			progress.setSubDescription(rootURI.relativize(folder.folder.toURI()).toString());
 			List<Pair<List<IFileStore>,VirtualData>> data;
+			List<IFileStore> used = new LinkedList<IFileStore>();
+			used.addAll(usedBefore);
 			if (!used.contains(folder.folder)) {
-				data = type.detectOnFolder(result.db, folder, shell);
+				try { data = type.detectOnFolder(result.db, folder, shell); }
+				catch (Throwable t) {
+					if (Log.error(this))
+						Log.error(this, "Content Type " + type.getName() + " threw an exception while detecting on folder", t);
+					data = null;
+				}
 				if (data != null) {
 					for (Pair<List<IFileStore>,VirtualData> p : data) {
 						result.toAdd.add(p.getValue2());
-						result.usedFiles.addAll(p.getValue1());
 						used.addAll(p.getValue1());
 					}
 				}
@@ -311,11 +419,15 @@ public class AddData_Folder extends WizardPage implements AddData_Page {
 				int step = amount/nb--;
 				amount -= step;
 				if (!used.contains(p.getValue1())) {
-					data = type.detectOnFile(result.db, folder, p.getValue1(), p.getValue2(), shell);
+					try { data = type.detectOnFile(result.db, folder, p.getValue1(), p.getValue2(), shell); }
+					catch (Throwable t) {
+						if (Log.error(this))
+							Log.error(this, "Content Type " + type.getName() + " threw an exception while detecting on typed file", t);
+						data = null;
+					}
 					if (data != null) {
 						for (Pair<List<IFileStore>,VirtualData> p2 : data) {
 							result.toAdd.add(p2.getValue2());
-							result.usedFiles.addAll(p2.getValue1());
 							used.addAll(p2.getValue1());
 						}
 					}
@@ -328,11 +440,15 @@ public class AddData_Folder extends WizardPage implements AddData_Page {
 				int step = amount/nb--;
 				amount -= step;
 				if (!used.contains(file)) {
-					data = type.detectOnFile(result.db, folder, file, shell);
+					try { data = type.detectOnFile(result.db, folder, file, shell); }
+					catch (Throwable t) {
+						if (Log.error(this))
+							Log.error(this, "Content Type " + type.getName() + " threw an exception while detecting on non-typed file", t);
+						data = null;
+					}
 					if (data != null) {
 						for (Pair<List<IFileStore>,VirtualData> p : data) {
 							result.toAdd.add(p.getValue2());
-							result.usedFiles.addAll(p.getValue1());
 							used.addAll(p.getValue1());
 						}
 					}
@@ -349,17 +465,20 @@ public class AddData_Folder extends WizardPage implements AddData_Page {
 				if (progress.isCancelled())
 					return;
 			}
-		}
-		
-		private void addNotDetected(TypedFolder folder, Result result) {
+
 			for (IFileStore file : folder.notTypedFiles)
-				if (!result.usedFiles.contains(file))
-					result.notDetectedNotTypesFiles.add(file);
+				if (!used.contains(file))
+					result.notDetectedNotTypesFiles.add(URLDecoder.decode(file.toURI().toString()));
 			for (Pair<IFileStore,TypedFile> p : folder.typedFiles)
-				if (!result.usedFiles.contains(p.getValue1()))
-					result.notDetectedTypesFiles.add(p);
-			for (TypedFolder child : folder.subFolders)
-				addNotDetected(child, result);
+				if (!used.contains(p.getValue1()))
+					result.notDetectedTypesFiles.add(URLDecoder.decode(p.getValue1().toURI().toString()));
+			folder.folder = null;
+			folder.notTypedFiles.clear();
+			folder.notTypedFiles = null;
+			folder.typedFiles.clear();
+			folder.typedFiles = null;
+			folder.subFolders.clear();
+			folder.subFolders = null;
 		}
 		
 	}

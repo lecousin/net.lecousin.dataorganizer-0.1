@@ -109,7 +109,7 @@ public class Application implements IApplication {
 		return IApplication.EXIT_OK;
 
 		} finally {
-			if (display != null)
+			if (display != null && !display.isDisposed())
 				display.dispose();
 		}
 	}

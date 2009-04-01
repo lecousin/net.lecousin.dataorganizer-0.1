@@ -46,6 +46,8 @@ public class OverviewPanel {
 		line.setLayout(l);
 		UIUtil.newLabel(line, Local.Duration+":", true, false);
 		UIUtil.newLabel(line, (data.getDuration() < 0 ? "-" : DateTimeUtil.getTimeMinimalString(data.getDuration())));
+		UIUtil.newLabel(line, Local.Dimension+":", true, false);
+		UIUtil.newLabel(line, (data.getDimension() == null ? "-" : (Integer.toString(data.getDimension().x)+'x'+data.getDimension().y)));
 		if (source != null) {
 			if (source.getReleaseDate() > 0) {
 				UIUtil.newSeparator(line, false, true);

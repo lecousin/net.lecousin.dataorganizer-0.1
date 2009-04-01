@@ -1,18 +1,24 @@
 package net.lecousin.dataorganizer.core.database.content;
 
 import java.io.ByteArrayInputStream;
+import java.util.LinkedList;
+import java.util.List;
 
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.Data.DuplicateAnalysis;
 import net.lecousin.dataorganizer.core.database.info.Info;
+import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPluginRegistry;
 import net.lecousin.dataorganizer.core.database.info.SourceInfo;
 import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
+import net.lecousin.framework.Pair;
 import net.lecousin.framework.Triple;
 import net.lecousin.framework.collections.SelfMap;
 import net.lecousin.framework.eclipse.resource.ResourceUtil;
 import net.lecousin.framework.event.ProcessListener;
+import net.lecousin.framework.io.FileSystemUtil;
 import net.lecousin.framework.log.Log;
+import net.lecousin.framework.ui.eclipse.SharedImages;
 import net.lecousin.framework.xml.XmlWriter;
 
 import org.eclipse.core.resources.IFile;
@@ -42,6 +48,20 @@ public abstract class DataContentType implements SelfMap.Entry<Long> {
 	public Data getData() { return data; }
 	public Info getInfo() { return info; }
 	public void setData(Data data) { this.data = data; }
+	
+	public List<Pair<String,Image>> getAllPossibleNames() {
+		List<Pair<String,Image>> list = new LinkedList<Pair<String,Image>>();
+		for (String source : info.getSources()) {
+			String name = info.getSourceName(source);
+			if (name == null || name.trim().length() == 0) continue;
+			Image icon = InfoRetrieverPluginRegistry.getIconForSource(source, data.getContentType().getID());
+			list.add(new Pair<String,Image>(name, icon));
+		}
+		if (data.getSources().size() == 1) {
+			list.add(new Pair<String,Image>(FileSystemUtil.getFileNameWithoutExtension(data.getSources().get(0).getFileName()), SharedImages.getImage(SharedImages.icons.x16.file.FILE)));
+		}
+		return list;
+	}
 	
 	public String getSourceName(DataSource source) {
 		return null;

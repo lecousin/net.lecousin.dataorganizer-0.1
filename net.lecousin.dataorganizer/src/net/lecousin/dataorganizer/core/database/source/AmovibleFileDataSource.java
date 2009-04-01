@@ -12,6 +12,7 @@ import javax.swing.filechooser.FileSystemView;
 
 import net.lecousin.dataorganizer.Local;
 import net.lecousin.framework.collections.CollectionUtil;
+import net.lecousin.framework.io.FileSystemUtil;
 import net.lecousin.framework.xml.XmlWriter;
 
 import org.eclipse.core.runtime.CoreException;
@@ -36,8 +37,8 @@ public class AmovibleFileDataSource extends FileDataSource {
 		xml.addAttribute("fileSubPath", fileSubPath);
 	}
 	
-	private String amovibleDrivePath;
-	private String fileSubPath;
+	String amovibleDrivePath;
+	String fileSubPath;
 	
 	@Override
 	public boolean isExactlyTheSame(DataSource src) {
@@ -95,6 +96,11 @@ public class AmovibleFileDataSource extends FileDataSource {
 		File f = findFile();
 		if (f == null) return null;
 		return f.toURI();
+	}
+	
+	@Override
+	public String getFileName() {
+		return FileSystemUtil.getFileName(fileSubPath);
 	}
 	
 	@Override

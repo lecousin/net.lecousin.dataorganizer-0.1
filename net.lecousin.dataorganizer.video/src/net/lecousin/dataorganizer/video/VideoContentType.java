@@ -21,6 +21,7 @@ import net.lecousin.framework.files.FileType;
 import net.lecousin.framework.files.TypedFile;
 import net.lecousin.framework.files.TypedFolder;
 import net.lecousin.framework.files.video.VideoFile;
+import net.lecousin.framework.files.video.VideoFileInfo;
 import net.lecousin.framework.io.FileSystemUtil;
 import net.lecousin.framework.log.Log;
 import net.lecousin.framework.media.MediaPlayer;
@@ -148,6 +149,12 @@ public class VideoContentType extends ContentType {
 		if (!(typedFile instanceof VideoFile)) return null;
 		try {
 			VirtualData data = (VirtualData)db.addData(FileSystemUtil.removeFileNameExtension(file.getName()), this, CollectionUtil.single_element_list(DataSource.get(file)));
+			VideoFileInfo vi = (VideoFileInfo)typedFile.getInfo();
+			if (vi != null) {
+				VideoDataType d = (VideoDataType)data.getContent();
+				if (vi.getDimension() != null)
+					d.setDimension(vi.getDimension());
+			}
 			return CollectionUtil.single_element_list(new Pair<List<IFileStore>,VirtualData>(CollectionUtil.single_element_list(file), data));
 		} catch (Exception e) {
 			if (Log.warning(this))

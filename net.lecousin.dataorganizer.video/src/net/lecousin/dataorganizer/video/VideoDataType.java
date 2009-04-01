@@ -23,6 +23,7 @@ import net.lecousin.framework.Triple;
 import net.lecousin.framework.eclipse.resource.ResourceUtil;
 import net.lecousin.framework.event.ProcessListener;
 import net.lecousin.framework.event.SplitProcessListener;
+import net.lecousin.framework.geometry.PointInt;
 import net.lecousin.framework.io.MyByteArrayOutputStream;
 import net.lecousin.framework.log.Log;
 import net.lecousin.framework.media.Media;
@@ -49,12 +50,17 @@ public class VideoDataType extends DataContentType {
 		super(data, elt, loader);
 		duration = loader.getDuration(elt);
 		loaded = loader.getLoaded(elt);
+		dimension = loader.getDimension(elt);
 	}
 	@Override
 	protected Info createInfo(Element elt, ContentTypeLoader loader) { return new VideoInfo(this, elt, (Loader)loader); }
 	@Override
 	protected void saveContent(XmlWriter xml) {
 		xml.addAttribute("duration", Long.toString(duration));
+		if (dimension != null) {
+			xml.addAttribute("width", Long.toString(dimension.x));
+			xml.addAttribute("height", Long.toString(dimension.y));
+		}
 	}
 	public VideoDataType(Data data) {
 		super(data);
@@ -64,6 +70,17 @@ public class VideoDataType extends DataContentType {
 	
 	private boolean loaded = false;
 	private long duration = -1;
+	private PointInt dimension = null;
+	
+	public void setDimension(PointInt dim) {
+		if (dim == null) return;
+		if (dimension != null && dimension.equals(dim)) return;
+		dimension = dim;
+		signalModification();
+	}
+	public PointInt getDimension() {
+		return dimension;
+	}
 	
 	private List<Image> previewImages = null;
 	private List<Image> posterImages = null;

@@ -9,6 +9,7 @@ import java.util.List;
 
 import net.lecousin.dataorganizer.Local;
 import net.lecousin.framework.collections.CollectionUtil;
+import net.lecousin.framework.io.FileSystemUtil;
 import net.lecousin.framework.xml.XmlWriter;
 
 import org.eclipse.core.runtime.CoreException;
@@ -29,7 +30,7 @@ public class LocalFileDataSource extends FileDataSource {
 		xml.addAttribute("path", path);
 	}
 	
-	private String path;
+	String path;
 	
 	public String getLocalPath() { return path; }
 	public File getLocalFile() { return new File(path); }
@@ -68,6 +69,11 @@ public class LocalFileDataSource extends FileDataSource {
 		if (files.contains(f))
 			return true;
 		return false;
+	}
+	
+	@Override
+	public String getFileName() {
+		return FileSystemUtil.getFileName(path);
 	}
 	
 	@Override

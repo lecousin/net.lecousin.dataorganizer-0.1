@@ -24,6 +24,7 @@ import net.lecousin.framework.files.audio.AudioFile;
 import net.lecousin.framework.files.audio.AudioFileInfo;
 import net.lecousin.framework.files.image.ImageFile;
 import net.lecousin.framework.files.playlist.PlayList;
+import net.lecousin.framework.io.FileSystemUtil;
 import net.lecousin.framework.strings.StringUtil;
 
 import org.eclipse.core.filesystem.IFileStore;
@@ -81,7 +82,7 @@ public class AlbumDetector {
 			if (!files.isEmpty())
 				return null; // TODO
 			// the playlist contains exactly all the tracks
-			return AlbumHelper.createAlbumFromOrderedList(db, orderedFiles, playlist, null, images, rootDir, shell);
+			return AlbumHelper.createAlbumFromOrderedList(db, orderedFiles, playlist, null, null, images, rootDir, shell);
 		}
 		return null;
 	}
@@ -92,10 +93,12 @@ public class AlbumDetector {
 	
 	static class Album {
 		String name;
+		String artist;
 		List<Track> noNumber = new LinkedList<Track>();
 		List<SortedListTree<Track>> sorted = new LinkedList<SortedListTree<Track>>();
 //		boolean userAlreadySawNoInfo = false;
 		boolean nameIsFromUser = false;
+		boolean artistIsFromUser = false;
 	}
 	// TODO improvment? use the number of tracks to better detect... ???
 	private static List<Pair<List<IFileStore>,VirtualData>> handleTracks(VirtualDataBase db, List<Track> tracks, List<PictureFile> images, IFileStore rootDir, Shell shell) {
@@ -143,6 +146,8 @@ public class AlbumDetector {
 		for (Map.Entry<String, Album> entry : new ArrayList<Map.Entry<String, Album>>(albums.entrySet())) {
 			Album album = entry.getValue();
 			List<Album> list = consolidateAlbum(album, noName, noInfo, rootDir, shell);
+			if (noName != null && noName.noNumber.isEmpty() && noName.sorted.isEmpty())
+				noName = null;
 			if (list == null)
 				needUser = true;
 			else {
@@ -163,7 +168,7 @@ public class AlbumDetector {
 					needUser = true;
 				} else {
 					// 1 seul album, ok => create
-					return AlbumHelper.createAlbumFromOrderedList(db, album.sorted.get(0), null, album.nameIsFromUser ? album.name : null, images, rootDir, shell);
+					return AlbumHelper.createAlbumFromOrderedList(db, album.sorted.get(0), null, album.nameIsFromUser ? album.name : null, album.artistIsFromUser ? album.artist : null, images, rootDir, shell);
 				}
 			} else {
 				// no album
@@ -210,7 +215,7 @@ public class AlbumDetector {
 								}
 							if (!needUser) {
 								// victoire, on a une série continue démarrant à 1
-								return AlbumHelper.createAlbumFromOrderedList(db, list, null, null, images, rootDir, shell);
+								return AlbumHelper.createAlbumFromOrderedList(db, list, null, null, null, images, rootDir, shell);
 							}
 						}
 					}
@@ -227,7 +232,7 @@ public class AlbumDetector {
 		
 		List<Pair<List<IFileStore>,VirtualData>> result = new LinkedList<Pair<List<IFileStore>,VirtualData>>();
 		for (Album album : albumsReadyToBeCreated) {
-			List<Pair<List<IFileStore>,VirtualData>> list = AlbumHelper.createAlbumFromOrderedList(db, album.sorted.get(0), null, album.name, images, rootDir, shell);
+			List<Pair<List<IFileStore>,VirtualData>> list = AlbumHelper.createAlbumFromOrderedList(db, album.sorted.get(0), null, album.name, album.artist, images, rootDir, shell);
 			if (list != null)
 				result.addAll(list);
 		}
@@ -262,19 +267,86 @@ public class AlbumDetector {
 			}
 			if (ok) {
 				// from the filenames we've got the numbers
-				if (first != 1)
-					ok = false;
-				else {
-					for (int i = 2; i < last; ++i)
-						if (!found.contains(i)) {
-							// il y a un trou dans la numerotation
-							ok = false;
-							break;
+				album.sorted.add(list);
+				album.noNumber.clear();
+				
+				// look at noName if it can be included in the album
+				if (noName != null && noName.sorted.size() <= 1) {
+					List<Integer> found2 = new LinkedList<Integer>(found);
+					List<Pair<Track,Integer>> numbered = new LinkedList<Pair<Track,Integer>>();
+					boolean ok2 = true;
+					for (Track t : noName.noNumber) {
+						int i = detectTrackNumberOnlyFromFile(t, CollectionUtil.toList(list));
+						if (i <= 0) { ok2 = false; break; }
+						if (found2.contains(i)) { ok2 = false; break; }
+						found2.add(i);
+						numbered.add(new Pair<Track,Integer>(t, i));
+					}
+					if (noName.sorted.size() == 1) {
+						for (Track t : noName.sorted.get(0)) {
+							if (found2.contains(t.trackNumber)) { ok2 = false; break; }
+							found2.add(t.trackNumber);
 						}
-					if (ok) {
-						// victoire, on a une série continue démarrant à 1
-						album.sorted.add(list);
-						album.noNumber.clear();
+					}
+					if (ok2) {
+						// all noName can be included => let's do it
+						found = found2;
+						for (Pair<Track,Integer> p : numbered) {
+							Track t = p.getValue1();
+							int i = p.getValue2();
+							t.trackNumber = i;
+							if (first == -1 || t.trackNumber < first) first = t.trackNumber;
+							if (last == -1 || t.trackNumber > last) last = t.trackNumber;
+							list.add(t);
+							noName.noNumber.remove(t);
+						}
+						if (noName.sorted.size() == 1) {
+							for (Track t : noName.sorted.get(0)) {
+								list.add(t);
+							}
+							noName.sorted.clear();
+						}						
+					}
+				}
+				
+				// look at noInfo list if it can be included in the album
+				List<Integer> found2 = new LinkedList<Integer>(found);
+				List<Pair<Track,Integer>> numbered = new LinkedList<Pair<Track,Integer>>();
+				boolean ok2 = true;
+				for (Track t : noInfo) {
+					int i = detectTrackNumberOnlyFromFile(t, CollectionUtil.toList(list));
+					if (i <= 0) { ok2 = false; break; }
+					if (found2.contains(i)) { ok2 = false; break; }
+					found2.add(i);
+					numbered.add(new Pair<Track,Integer>(t, i));
+				}
+				if (ok2) {
+					// all noInfo can be included => let's do it
+					found = found2;
+					for (Pair<Track,Integer> p : numbered) {
+						Track t = p.getValue1();
+						int i = p.getValue2();
+						t.trackNumber = i;
+						if (first == -1 || t.trackNumber < first) first = t.trackNumber;
+						if (last == -1 || t.trackNumber > last) last = t.trackNumber;
+						list.add(t);
+						noInfo.remove(t);
+					}
+				}
+			}
+			if (ok) {
+				// from the filenames we've got the numbers
+				if (!album.noNumber.isEmpty() || !noInfo.isEmpty()) {
+					// if there are remaining tracks, it is ok only if there is no whole
+					if (first != 1)
+						ok = false;
+					else {
+						for (int i = 2; i < last; ++i)
+							if (!found.contains(i)) {
+								// il y a un trou dans la numerotation
+								ok = false;
+								break;
+							}
 					}
 				}
 			}
@@ -334,7 +406,7 @@ public class AlbumDetector {
 		if (!dlg.open()) return null;
 		List<Pair<List<IFileStore>,VirtualData>> result = new LinkedList<Pair<List<IFileStore>,VirtualData>>();
 		for (Album album : list) {
-			List<Pair<List<IFileStore>,VirtualData>> data = AlbumHelper.createAlbumFromOrderedList(db, album.sorted.get(0), null, album.name, images, rootDir, shell);
+			List<Pair<List<IFileStore>,VirtualData>> data = AlbumHelper.createAlbumFromOrderedList(db, album.sorted.get(0), null, album.name, album.artist, images, rootDir, shell);
 			if (data != null)
 				result.addAll(data);
 		}
@@ -479,7 +551,7 @@ public class AlbumDetector {
 		return -1;
 	}
 
-	private static int detectTrackNumberOnlyFromFile(Track track, List<Track> allTracks) {
+	private static int detectTrackNumberOnlyFromFile(Track track, Collection<Track> allTracks) {
 		if (allTracks.size() == 1)
 			return 1;
 		
@@ -503,8 +575,28 @@ public class AlbumDetector {
 		
 		String name = track.file.getName();
 		int pos = head.length();
-		if (!StringUtil.isDigit(name.charAt(pos))) return -1;
-		while (StringUtil.isDigit(name.charAt(++pos)));
-		return Integer.parseInt(name.substring(head.length(), pos));
+		while (StringUtil.isSpace(name.charAt(pos))) pos++;
+		if (StringUtil.isDigit(name.charAt(pos))) {
+			while (StringUtil.isDigit(name.charAt(++pos)));
+			return Integer.parseInt(name.substring(head.length(), pos).trim());
+		}
+		
+		boolean ok = true;
+		for (Track t : allTracks) {
+			String tname = FileSystemUtil.getFileNameWithoutExtension(t.file.getName());
+			if (tname.length() == 0 || !StringUtil.isDigit(tname.charAt(tname.length()-1))) {
+				ok = false;
+				break;
+			}
+		}
+
+		if (ok) {
+			String tname = FileSystemUtil.getFileNameWithoutExtension(track.file.getName());
+			int i = tname.length()-1;
+			while (i>=0 && StringUtil.isDigit(tname.charAt(i))) i--;
+			return Integer.parseInt(tname.substring(i+1));
+		}
+		
+		return -1;
 	}
 }

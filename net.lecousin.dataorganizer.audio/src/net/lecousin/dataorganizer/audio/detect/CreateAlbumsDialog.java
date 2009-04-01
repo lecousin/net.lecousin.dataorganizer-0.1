@@ -17,6 +17,7 @@ import net.lecousin.framework.ui.eclipse.EclipseImages;
 import net.lecousin.framework.ui.eclipse.EclipseWorkbenchUtil;
 import net.lecousin.framework.ui.eclipse.SharedImages;
 import net.lecousin.framework.ui.eclipse.UIUtil;
+import net.lecousin.framework.ui.eclipse.control.LCCombo;
 import net.lecousin.framework.ui.eclipse.control.ValidationControl;
 import net.lecousin.framework.ui.eclipse.control.buttonbar.OkCancelButtonsPanel;
 import net.lecousin.framework.ui.eclipse.control.list.LCContentProvider;
@@ -243,16 +244,29 @@ public class CreateAlbumsDialog extends FlatDialog {
 			validation = new ValidationControl(panel);
 			UIUtil.gridDataHorizFill(validation);
 			
-			Composite header = UIUtil.newGridComposite(panel, 0, 0, 2);
+			Composite header = UIUtil.newGridComposite(panel, 0, 0, 4);
 			UIUtil.gridDataHorizFill(header);
 			UIUtil.newLabel(header, Local.Album_name.toString());
-			textAlbumName = UIUtil.newText(header, album.name, new ModifyListener() {
-				public void modifyText(ModifyEvent e) {
-					parent.setText(((Text)e.widget).getText());
+			textAlbumName = new LCCombo(header, null);
+			for (String s : AlbumHelper.getPossibleAlbumNames(album, dir))
+				textAlbumName.addItem(null, s, null);
+			textAlbumName.selectionEvent().addFireListener(new Runnable() {
+				public void run() {
+					parent.setText(textAlbumName.getSelection());
 					validate();
 				}
 			});
 			textAlbumName.setLayoutData(UIUtil.gridDataHoriz(1, true));
+			UIUtil.newLabel(header, Local.Artist.toString());
+			textArtistName = new LCCombo(header, null);
+			for (String s : AlbumHelper.getPossibleArtistNames(album))
+				textArtistName.addItem(null, s, null);
+			textArtistName.selectionEvent().addFireListener(new Runnable() {
+				public void run() {
+					validate();
+				}
+			});
+			textArtistName.setLayoutData(UIUtil.gridDataHoriz(1, true));
 			
 			// not numbered
 			tableNotNumbered = new LCTableWithControls<Track>(panel, Local.Not_numbered_tracks+":", new TrackProvider(album.noNumber, true), false, true, true, true);
@@ -321,7 +335,8 @@ public class CreateAlbumsDialog extends FlatDialog {
 			panel.setSize(panel.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 		}
 		private CTabItem parent;
-		private Text textAlbumName;
+		private LCCombo textAlbumName;
+		private LCCombo textArtistName;
 		private ValidationControl validation;
 		private CTabFolder folder;
 		private LCTableWithControls<Track> tableNotNumbered;
@@ -379,7 +394,7 @@ public class CreateAlbumsDialog extends FlatDialog {
 		int nbInvalid = 0;
 		for (CTabItem item : albumsFolder.getItems()) {
 			AlbumControl a = (AlbumControl)item.getControl();
-			if (a.textAlbumName.getText().length() == 0) {
+			if (a.textAlbumName.getSelection().length() == 0) {
 				a.validation.updateValidation(Local.The_name_cannot_be_empty.toString());
 				item.setImage(SharedImages.getImage(SharedImages.icons.x16.basic.ERROR));
 				nbInvalid++;
@@ -455,8 +470,13 @@ public class CreateAlbumsDialog extends FlatDialog {
 			} else
 				album = albums.get(i);
 			AlbumControl c = (AlbumControl)item.getControl();
-			album.name = c.textAlbumName.getText();
+			album.name = c.textAlbumName.getSelection();
 			album.nameIsFromUser = true;
+			album.artist = c.textArtistName.getSelection();
+			if (album.artist.length() == 0) {
+				album.artist = null;
+			} else
+				album.artistIsFromUser = true;
 			album.noNumber.clear();
 			album.sorted.clear();
 			SortedListTree<Track> list = new SortedListTree<Track>(new TrackComparator());

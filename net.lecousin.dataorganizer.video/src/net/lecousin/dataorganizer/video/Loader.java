@@ -10,6 +10,7 @@ import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
 import net.lecousin.dataorganizer.video.VideoSourceInfo.Genre;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.collections.SelfMap;
+import net.lecousin.framework.geometry.PointInt;
 
 import org.w3c.dom.Element;
 
@@ -17,6 +18,7 @@ public interface Loader extends ContentTypeLoader {
 
 	public long getDuration(Element root);
 	public boolean getLoaded(Element root);
+	public PointInt getDimension(Element root);
 	
 	public long getReleaseDate(Element root);
 	public List<Genre> getGenres(Element root);

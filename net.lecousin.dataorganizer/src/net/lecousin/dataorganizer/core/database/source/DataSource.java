@@ -91,6 +91,46 @@ public abstract class DataSource {
 		return getAmovibleFile(p);
 	}
 	
+	public boolean hasLink(IFileStore file) {
+		File f = null;
+		try { f = file.toLocalFile(0, null); }
+		catch (CoreException e) {}
+		if (f == null) {
+			// not local
+			return hasLinkNotLocal(file);
+		}
+		// local
+		return hasLink(f);
+	}
+	public boolean hasLinkNotLocal(IFileStore file) {
+		if (!(this instanceof NetworkFileDataSource)) return false;
+		if (((NetworkFileDataSource)this).uri.equals(file.toURI().toString())) return true;
+		return false;
+	}
+	public boolean hasLink(File file) {
+		if (this instanceof LocalFileDataSource) {
+			if (((LocalFileDataSource)this).path.equals(file.getAbsolutePath())) return true;
+			return false;
+		}
+		Pair<String,String> amovible = getAmovibleSubPaths(file);
+		if (amovible != null) {
+			// on amovible media
+			if (!(this instanceof AmovibleFileDataSource)) return false;
+			if (((AmovibleFileDataSource)this).fileSubPath.equals(amovible.getValue2())) return true;
+			return false;
+		}
+		return false;
+	}
+	public boolean hasLink(String uri) {
+		try { return hasLink(new URI(uri)); }
+		catch (URISyntaxException e) { return false; }
+	}
+	public boolean hasLink(URI uri) {
+		try { return hasLink(EFS.getStore(uri)); }
+		catch (CoreException e) { return false; }
+	}
+	
+	
 	public abstract boolean isExactlyTheSame(DataSource src);
 	public abstract boolean isSameInDifferentLocation(DataSource src);
 
@@ -99,6 +139,8 @@ public abstract class DataSource {
 	/** return true if the data source do not contain any files after the unlink operation */
 	public abstract boolean unlink(Collection<File> files);
 	public abstract List<File> getLinkedFiles();
+	
+	public abstract String getFileName();
 	
 	public abstract URI ensurePresenceAndGetURI();
 }

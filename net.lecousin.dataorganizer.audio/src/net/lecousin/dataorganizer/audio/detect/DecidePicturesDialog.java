@@ -13,6 +13,7 @@ import net.lecousin.framework.ui.eclipse.control.buttonbar.OkCancelButtonsPanel;
 import net.lecousin.framework.ui.eclipse.control.text.lcml.LCMLText;
 import net.lecousin.framework.ui.eclipse.dialog.FlatDialog;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
@@ -55,6 +56,7 @@ public class DecidePicturesDialog extends FlatDialog {
 						coverFront.clear();
 						coverBack.clear();
 						others.clear();
+						MessageDialog.openError(getShell(), Local.Create_Music_Album.toString(), Local.Please_select_an_option_for_each_picture.toString());
 						return false;
 					}
 					if (s.equals("front"))

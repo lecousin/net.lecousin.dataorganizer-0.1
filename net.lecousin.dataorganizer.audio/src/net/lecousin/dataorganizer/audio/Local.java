@@ -36,6 +36,7 @@ public enum Local {
 	Other_album_picture("Other album picture", "Autre image de l'album"),
 	Please_select_an_album_name("Please select an album name", "Veuillez sélectionner un nom pour l'album"),
 	Please_select_an_artist_name("Please select an artist name", "Veuillez sélectionner un nom pour l'artiste"),
+	Please_select_an_option_for_each_picture("Please select an option for each picture", "Veuillez sélectionner une option pour chaqune des images"),
 	Please_select_a_year("Please select a year", "Veuillez sélectionner une année pour l'album"),
 	Remaining_files("Remaining files", "Fichiers restants"),
 	Remove_selected_tracks_from_the_album("Remove selected tracks from the album", "Supprimer les pistes sélectionnées de l'album"),

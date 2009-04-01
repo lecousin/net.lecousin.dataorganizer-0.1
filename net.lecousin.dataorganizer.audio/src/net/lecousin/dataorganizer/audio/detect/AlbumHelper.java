@@ -1,10 +1,12 @@
 package net.lecousin.dataorganizer.audio.detect;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -14,6 +16,7 @@ import net.lecousin.dataorganizer.audio.AudioDataType;
 import net.lecousin.dataorganizer.audio.AudioInfo;
 import net.lecousin.dataorganizer.audio.AudioSourceInfo;
 import net.lecousin.dataorganizer.audio.Local;
+import net.lecousin.dataorganizer.audio.detect.AlbumDetector.Album;
 import net.lecousin.dataorganizer.audio.internal.EclipsePlugin;
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.VirtualData;
@@ -23,6 +26,8 @@ import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.Triple;
 import net.lecousin.framework.collections.CollectionUtil;
+import net.lecousin.framework.collections.SortedListTree;
+import net.lecousin.framework.eclipse.resource.ResourceUtil;
 import net.lecousin.framework.files.audio.AudioFile;
 import net.lecousin.framework.files.audio.AudioFileInfo;
 import net.lecousin.framework.files.audio.AudioFileInfo.Picture;
@@ -66,13 +71,13 @@ public class AlbumHelper {
 		}
 	}
 	
-	static List<Pair<List<IFileStore>,VirtualData>> createAlbumFromOrderedList(VirtualDataBase db, Iterable<Track> orderedTracks, PlayListFile playlist, String finalAlbumName, List<PictureFile> images, IFileStore rootDir, Shell shell) {
+	static List<Pair<List<IFileStore>,VirtualData>> createAlbumFromOrderedList(VirtualDataBase db, Iterable<Track> orderedTracks, PlayListFile playlist, String finalAlbumName, String finalArtist, List<PictureFile> images, IFileStore rootDir, Shell shell) {
 		LinkedList<Track> tracks = new LinkedList<Track>();
 		for (Track t : orderedTracks)
 			tracks.add(t);
-		return createAlbumFromOrderedList(db, tracks, playlist, finalAlbumName, images, rootDir, shell);
+		return createAlbumFromOrderedList(db, tracks, playlist, finalAlbumName, finalArtist, images, rootDir, shell);
 	}
-	static List<Pair<List<IFileStore>,VirtualData>> createAlbumFromOrderedList(VirtualDataBase db, List<Track> orderedTracks, PlayListFile playlist, String finalAlbumName, List<PictureFile> images, IFileStore rootDir, Shell shell) {
+	static List<Pair<List<IFileStore>,VirtualData>> createAlbumFromOrderedList(VirtualDataBase db, List<Track> orderedTracks, PlayListFile playlist, String finalAlbumName, String finalArtist, List<PictureFile> images, IFileStore rootDir, Shell shell) {
 		List<IFileStore> files = new LinkedList<IFileStore>();
 		List<AudioFile> list = new ArrayList<AudioFile>(orderedTracks.size());
 		for (Track p : orderedTracks) {
@@ -80,7 +85,7 @@ public class AlbumHelper {
 			list.add(p.audio);
 		}
 		if (playlist != null) files.add(playlist.file);
-		VirtualData data = createAlbum(db, list, finalAlbumName, rootDir, playlist != null ? playlist.list : null, images, shell);
+		VirtualData data = createAlbum(db, list, finalAlbumName, finalArtist, rootDir, playlist != null ? playlist.list : null, images, shell);
 		if (data == null) return null;
 		if (!images.isEmpty()) {
 			Triple<List<PictureFile>,List<PictureFile>,List<PictureFile>> pictures = getPictures(data, images, shell);
@@ -104,7 +109,7 @@ public class AlbumHelper {
 		return CollectionUtil.single_element_list(new Pair<List<IFileStore>,VirtualData>(files, data));
 	}
 	
-	static VirtualData createAlbum(VirtualDataBase db, List<AudioFile> tracks, String finalAlbumName, IFileStore rootDir, PlayList list, List<PictureFile> images, Shell shell) {
+	static VirtualData createAlbum(VirtualDataBase db, List<AudioFile> tracks, String finalAlbumName, String finalArtist, IFileStore rootDir, PlayList list, List<PictureFile> images, Shell shell) {
 		List<DataSource> sources = new ArrayList<DataSource>(tracks.size());
 		for (AudioFile file : tracks)
 			try { sources.add(DataSource.get(file.getURI())); }
@@ -112,7 +117,7 @@ public class AlbumHelper {
 				ErrorDlg.exception(Local.Create_Music_Album.toString(), "Unable to add DataSource for file: " + file.getURI(), EclipsePlugin.ID, t);
 				sources.add(null);
 			}
-		Triple<String,String,Integer> t = getAlbumArtistYear(tracks, list, finalAlbumName, rootDir, shell);
+		Triple<String,String,Integer> t = getAlbumArtistYear(tracks, list, finalAlbumName, finalArtist, rootDir, shell);
 		if (t == null) return null;
 		VirtualData data;
 		String name = t.getValue1();
@@ -166,7 +171,7 @@ public class AlbumHelper {
 		return data;
 	}
 	
-	static Triple<String,String,Integer> getAlbumArtistYear(List<AudioFile> tracks, PlayList list, String finalAlbumName, IFileStore rootDir, Shell shell) {
+	static Triple<String,String,Integer> getAlbumArtistYear(List<AudioFile> tracks, PlayList list, String finalAlbumName, String finalArtist, IFileStore rootDir, Shell shell) {
 		Triple<String,String,Integer> result = new Triple<String,String,Integer>(null, null, null);
 		Set<String> albumNames = new HashSet<String>();
 		if (finalAlbumName != null)
@@ -181,14 +186,17 @@ public class AlbumHelper {
 				}
 			}
 		Set<String> artistNames = new HashSet<String>();
-		for (AudioFile file : tracks) {
-			AudioFileInfo ai = file.getInfo();
-			if (ai != null) {
-				String name = normalize_name(ai.getArtist());
-				if (name != null && name.length() > 0)
-					artistNames.add(name);
+		if (finalArtist != null)
+			artistNames.add(finalArtist);
+		else
+			for (AudioFile file : tracks) {
+				AudioFileInfo ai = file.getInfo();
+				if (ai != null) {
+					String name = normalize_name(ai.getArtist());
+					if (name != null && name.length() > 0)
+						artistNames.add(name);
+				}
 			}
-		}
 		Set<Integer> years = new HashSet<Integer>();
 		for (AudioFile file : tracks) {
 			AudioFileInfo ai = file.getInfo();
@@ -200,8 +208,7 @@ public class AlbumHelper {
 		}
 		boolean needDecision = false;
 		boolean needAlbumName = false;
-		if (albumNames.size() == 1) result.setValue1(albumNames.iterator().next());
-		else {
+		if (albumNames.size() == 0) {
 			String name = normalize_name(rootDir.getName());
 			if (name != null)
 				albumNames.add(name);
@@ -210,8 +217,11 @@ public class AlbumHelper {
 				if (name != null)
 					albumNames.add(name);
 			}
-			needDecision = true;
 			needAlbumName = true;
+		}
+		if (albumNames.size() == 1) result.setValue1(albumNames.iterator().next());
+		else {
+			needDecision = true;
 		}
 		if (artistNames.size() == 1) result.setValue2(artistNames.iterator().next());
 		else if (artistNames.size() > 1) needDecision = true;
@@ -231,6 +241,52 @@ public class AlbumHelper {
 			return result;
 		}
 		return null;
+	}
+	
+	static Set<String> getPossibleAlbumNames(Album album, IFileStore rootDir) {
+		Set<String> albumNames = new HashSet<String>();
+		for (SortedListTree<Track> list : album.sorted)
+			for (Track t : list) {
+				AudioFileInfo i = t.audio.getInfo();
+				if (i != null) {
+					String s = i.getAlbum();
+					if (s != null && s.length() > 0)
+						albumNames.add(s);
+				}
+			}
+		for (Track t : album.noNumber) {
+			AudioFileInfo i = t.audio.getInfo();
+			if (i != null) {
+				String s = i.getAlbum();
+				if (s != null && s.length() > 0)
+					albumNames.add(s);
+			}
+		}
+		String name = normalize_name(rootDir.getName());
+		if (name != null)
+			albumNames.add(name);
+		return albumNames;
+	}
+	static Set<String> getPossibleArtistNames(Album album) {
+		Set<String> albumNames = new HashSet<String>();
+		for (SortedListTree<Track> list : album.sorted)
+			for (Track t : list) {
+				AudioFileInfo i = t.audio.getInfo();
+				if (i != null) {
+					String s = i.getArtist();
+					if (s != null && s.length() > 0)
+						albumNames.add(s);
+				}
+			}
+		for (Track t : album.noNumber) {
+			AudioFileInfo i = t.audio.getInfo();
+			if (i != null) {
+				String s = i.getArtist();
+				if (s != null && s.length() > 0)
+					albumNames.add(s);
+			}
+		}
+		return albumNames;
 	}
 	
 //	static String getAlbumName(List<AudioFile> tracks, PlayList list, IFileStore rootDir, Shell shell) {
@@ -421,20 +477,52 @@ public class AlbumHelper {
 	static String saveImage(Data data, byte[] buf) {
 		ByteArrayInputStream stream = new ByteArrayInputStream(buf);
 		ImageLoader img = new ImageLoader();
-		img.load(stream);
-		try { 
-			IFolder folder = data.getFolder().getFolder("audio");
-			if (!folder.exists())
-				folder.create(true, true, null);
-			int i = 1;
-			while (folder.getFile("image_"+i+".gif").exists()) i++;
-			String filename = "image_"+i+".gif";
-			img.save(folder.getFile(filename).getLocation().toFile().getAbsolutePath(), SWT.IMAGE_GIF);
-			return "audio/"+filename;
-		} catch (CoreException e) {
-			if (Log.error(AlbumDetector.class))
-				Log.error(AlbumDetector.class, "Unable to save image file", e);
-			return null;
+		try {
+			try { img.load(stream); }
+			catch (Throwable t) {
+				if (Log.error(AlbumHelper.class))
+					Log.error(AlbumHelper.class, "Unable to load image", t);
+				return null;
+			}
+			try { 
+				IFolder folder = data.getFolder().getFolder("audio");
+				if (!folder.exists())
+					ResourceUtil.createFolderAndParents(folder);
+				int i = 1;
+				while (folder.getFile("image_"+i+".gif").exists()) i++;
+				String filename = "image_"+i+".gif";
+				try {
+					img.save(folder.getFile(filename).getLocation().toFile().getAbsolutePath(), SWT.IMAGE_GIF);
+				} catch (Throwable t) {
+					filename = "image_"+i+".jpg";
+					try { img.save(folder.getFile(filename).getLocation().toFile().getAbsolutePath(), SWT.IMAGE_JPEG); }
+					catch (Throwable t2) {
+						filename = "image_"+i+".png";
+						try { img.save(folder.getFile(filename).getLocation().toFile().getAbsolutePath(), SWT.IMAGE_PNG); }
+						catch (Throwable t3) {
+							filename = "image_"+i+".bmp";
+							try { img.save(folder.getFile(filename).getLocation().toFile().getAbsolutePath(), SWT.IMAGE_BMP_RLE); }
+							catch (Throwable t4) {
+								if (Log.error(AlbumDetector.class)) {
+									Log.error(AlbumDetector.class, "Unable to save image file (gif)", t);
+									Log.error(AlbumDetector.class, "Unable to save image file (jpg)", t2);
+									Log.error(AlbumDetector.class, "Unable to save image file (png)", t3);
+									Log.error(AlbumDetector.class, "Unable to save image file (bmp)", t4);
+								}
+								return null;
+							}
+						}
+					}
+				}
+				return "audio/"+filename;
+			} catch (CoreException e) {
+				if (Log.error(AlbumDetector.class))
+					Log.error(AlbumDetector.class, "Unable to save image file", e);
+				return null;
+			}
+		} finally {
+			img.data = null;
+			try { stream.close(); } catch (IOException e){}
 		}
 	}
 
@@ -490,9 +578,11 @@ public class AlbumHelper {
 			}
 		}
 		if (str.length() == 0) return null;
-		String s = str.toString().toLowerCase();
+		String s = str.toString().trim().toLowerCase();
 		if (s.equals("unknown")) return null;
 		if (s.equals("unknown artist")) return null;
+		if (s.equals("no artist")) return null;
+		if (s.equals("various")) return null;
 		if (s.equals("various artists")) return null;
 		return str.toString();
 	}
@@ -568,9 +658,33 @@ public class AlbumHelper {
 	}
 	
 	private static Triple<List<PictureFile>,List<PictureFile>,List<PictureFile>> getPictures(VirtualData data, List<PictureFile> images, Shell shell) {
-		DecidePicturesDialog dlg = new DecidePicturesDialog(shell, data, images);
-		if (!dlg.open())
-			return null;
-		return new Triple<List<PictureFile>,List<PictureFile>,List<PictureFile>>(dlg.getCoverFront(), dlg.getCoverBack(), dlg.getOthers());
+		List<PictureFile> coverFront = new LinkedList<PictureFile>();
+		List<PictureFile> coverBack = new LinkedList<PictureFile>();
+		List<PictureFile> others = new LinkedList<PictureFile>();
+		for (Iterator<PictureFile> it = images.iterator(); it.hasNext(); ) {
+			PictureFile file = it.next();
+			String name = file.file.getName();
+			if (name.equalsIgnoreCase("Folder.jpg")) {
+				coverFront.add(file);
+				it.remove();
+			} else if (name.equalsIgnoreCase("AlbumArtSmall.jpg"))
+				it.remove();
+			else if (StringUtil.containsWord(name, "front", false) || StringUtil.containsWord(name, "recto", false)) {
+				coverFront.add(file);
+				it.remove();
+			} else if (StringUtil.containsWord(name, "back", false) || StringUtil.containsWord(name, "verso", false)) {
+				coverFront.add(file);
+				it.remove();
+			}
+		}
+		if (!images.isEmpty()) {
+			DecidePicturesDialog dlg = new DecidePicturesDialog(shell, data, images);
+			if (dlg.open()) {
+				coverFront.addAll(dlg.getCoverFront());
+				coverBack.addAll(dlg.getCoverBack());
+				others.addAll(dlg.getOthers());
+			}
+		}
+		return new Triple<List<PictureFile>,List<PictureFile>,List<PictureFile>>(coverFront, coverBack, others);
 	}
 }
