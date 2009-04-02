@@ -1,15 +1,20 @@
 package net.lecousin.dataorganizer.audio;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import net.lecousin.dataorganizer.audio.detect.AlbumDetector;
 import net.lecousin.dataorganizer.audio.internal.EclipsePlugin;
+import net.lecousin.dataorganizer.audio.search.Param_AlbumName;
+import net.lecousin.dataorganizer.audio.search.Param_ArtistName;
+import net.lecousin.dataorganizer.audio.search.Param_TrackName;
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.VirtualData;
 import net.lecousin.dataorganizer.core.database.VirtualDataBase;
 import net.lecousin.dataorganizer.core.database.content.ContentType;
 import net.lecousin.dataorganizer.core.database.content.DataContentType;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
+import net.lecousin.dataorganizer.core.search.DataSearch.Parameter;
 import net.lecousin.dataorganizer.ui.wizard.adddata.AddData_Page;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.files.FileType;
@@ -56,6 +61,14 @@ public class AudioContentType extends ContentType {
 	@Override
 	public DataContentType loadContent(Data data, Element elt, ContentTypeLoader loader) { return new AudioDataType(data, elt, loader); }
 
+	@Override
+	public List<Parameter> createSearchParameters() {
+		List<Parameter> params = new LinkedList<Parameter>();
+		params.add(new Param_AlbumName());
+		params.add(new Param_ArtistName());
+		params.add(new Param_TrackName());
+		return params;
+	}
 
 	@Override
 	public AddData_Page createAddDataWizardPage() {

@@ -84,6 +84,10 @@ public class AudioDataType extends DataContentType {
 	public void createOverviewPanel(Composite panel, SourceInfo source) {
 		new OverviewPanel(panel, this, (AudioSourceInfo)source);
 	}
+	@Override
+	public boolean isOverviewPanelSupprotingSourceMerge() {
+		return false;
+	}
 
 	private List<Image> coverFront = null; 
 	private List<Image> coverBack = null; 

@@ -24,6 +24,10 @@ public abstract class AlloCinePage<T extends SourceInfo> {
 		progress.setSubDescription(getDescription());
 		String url = "/" + getCategory() + "/" + getPage() + "_gen_c" + getCategory() + "=" + id + ".html";
 		String page = loadPage(url);
+		if (page == null) {
+			progress.progress(work);
+			return false;
+		}
 		int step = work*80/100;
 		progress.progress(step);
 		work -= step;

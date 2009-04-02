@@ -88,7 +88,8 @@ public class PeopleSourceInfo extends SourceInfo {
 	public boolean hasPhotoURL(String url) { return photos.containsKey(url); }
 	public void addPhoto(String url, String localPath) {
 		photos.put(url, localPath);
-		((PeopleDataType)getParent().getDataContent()).signalNewPhoto();
+		if (getParent() != null)
+			((PeopleDataType)getParent().getDataContent()).signalNewPhoto();
 		signalModification();
 	}
 	

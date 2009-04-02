@@ -69,6 +69,7 @@ public class SearchView extends ViewPart {
 			public void controlResized(ControlEvent e) {
 				ExpandBar panel = (ExpandBar)e.widget;
 				for (ExpandItem item : panel.getItems()) {
+					if (item.getControl() == null) continue;
 					if (item.getControl() instanceof Composite)
 						((Composite)item.getControl()).layout(true, true);
 					Point size = item.getControl().computeSize(panel.getSize().x-panel.getSpacing()*2, SWT.DEFAULT);
@@ -94,6 +95,7 @@ public class SearchView extends ViewPart {
 			item.setControl(c);
 			item.setExpanded(true);
 			item.setData(type);
+			item.setHeight(c.getSize().y);
 			register(c, item);
 		}
 	}

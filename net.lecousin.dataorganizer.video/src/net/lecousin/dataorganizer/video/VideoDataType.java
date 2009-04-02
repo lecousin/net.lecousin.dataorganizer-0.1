@@ -272,6 +272,10 @@ public class VideoDataType extends DataContentType {
 		new OverviewPanel(panel, this, (VideoSourceInfo)source);
 	}
 	@Override
+	public boolean isOverviewPanelSupprotingSourceMerge() {
+		return true;
+	}
+	@Override
 	public void createDescriptionPanel(Composite panel) {
 		DescriptionPanel.create(this, panel);
 	}

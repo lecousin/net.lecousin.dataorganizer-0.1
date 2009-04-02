@@ -162,6 +162,20 @@ public enum Local {
 //		"Cette fenêtre vous permet d'inclure certains de ces fichiers dans l'album."
 //	),
 	
+	HELP_Search_Album(
+		"Enter a list of words that must be in the album name.",
+		"Entrez une liste de mots qui doivent être présent dans le nom de l'album."
+	),
+	HELP_Search_Artist(
+		"Enter a list of words that must be in the artist name.",
+		"Entrez une liste de mots qui doivent être présent dans le nom de l'artiste."
+	),
+	HELP_Search_TrackName(
+		"Enter a list of words that must be in the track name.",
+		"Entrez une liste de mots qui doivent être présent dans le nom de la piste audio."
+	),
+	
+	
 	;
 	
 	private Local(String english, String french) {

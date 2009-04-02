@@ -76,6 +76,7 @@ public abstract class DataContentType implements SelfMap.Entry<Long> {
 	public abstract void getImages(ProcessListener<Triple<String,Image,Integer>> listener);
 	public abstract void createOverviewPanel(Composite panel, SourceInfo sourceInfo);
 	public abstract void createDescriptionPanel(Composite panel);
+	public abstract boolean isOverviewPanelSupprotingSourceMerge();
 	
 	public abstract DuplicateAnalysis checkForDuplicateOnContent(Data data);
 	public abstract boolean isSame(Info info);

@@ -66,6 +66,7 @@ public class Application implements IApplication {
 				return IApplication.EXIT_OK;
 		} else {
 			net.lecousin.framework.application.Application.language = net.lecousin.framework.application.Application.Language.FRENCH;
+			//net.lecousin.framework.application.Application.language = net.lecousin.framework.application.Application.Language.ENGLISH;
 		}
 		
 		try {

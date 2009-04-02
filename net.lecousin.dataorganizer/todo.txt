@@ -10,11 +10,9 @@ Audio
  + MP3 single
  + UI: genres
  + tous les TODO, icones...
- + DataOrverview: gerer les sources, source FILE... tracks order...
 
 Video
  + DVD, Video CD
- + Video search: duration: accept toutes les durees=> faire la recherche sinon c lourd il faut trouver la tranche minimum
  + AlloCine: public reviews ne marche plus
  + AlloCine: image DVD
 
@@ -62,6 +60,7 @@ Audio
  + d'autres types supportes
  + PLS +...
  + Internet: CDDB + FreeDB.org + ???
+ + DataOverview: gerer les sources, source FILE... tracks order...
  
 Picture
  + tout

@@ -101,6 +101,13 @@ public class VideoContentType extends ContentType {
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
 		ctx.player = MediaPlayer.create("net.lecousin.media.jvlc");
+		if (ctx.player == null)
+			ctx.player = MediaPlayer.create("net.lecousin.media.jvlc");
+		if (ctx.player == null) {
+			c.dispose();
+			ctx.visual = null;
+			return null;
+		}
 		Control ctrl = ctx.player.createVisual(ctx.visual);
 		ctrl.setLayoutData(UIUtil.gridData(1, true, 1, true));
 		ctx.visual.setSize(new Point(120, 120));
@@ -111,11 +118,16 @@ public class VideoContentType extends ContentType {
 	public void closeLoadDataContentContext(Object context) {
 		LoadDataContentContext ctx = (LoadDataContentContext)context;
 //		ctx.visual.dispose();
-		ctx.player.free();
+		if (ctx.player != null)
+			ctx.player.free();
 	}
 	@Override
 	public void loadDataContent(Data data, Object context, WorkProgress progress, int work) {
 		LoadDataContentContext ctx = (LoadDataContentContext)context;
+		if (ctx.visual == null || ctx.player == null) {
+			progress.progress(work);
+			return;
+		}
 		((VideoDataType)data.getContent()).loadContent(ctx.visual, ctx.player, progress, work);
 	}
 

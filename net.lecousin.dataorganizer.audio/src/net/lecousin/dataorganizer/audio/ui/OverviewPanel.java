@@ -1,15 +1,19 @@
 package net.lecousin.dataorganizer.audio.ui;
 
+import net.lecousin.dataorganizer.audio.AudioContentType;
 import net.lecousin.dataorganizer.audio.AudioDataType;
 import net.lecousin.dataorganizer.audio.AudioInfo;
 import net.lecousin.dataorganizer.audio.AudioSourceInfo;
 import net.lecousin.dataorganizer.audio.Local;
 import net.lecousin.dataorganizer.audio.AudioSourceInfo.Track;
+import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPluginRegistry;
 import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.event.Event.Listener;
+import net.lecousin.framework.event.Event.ListenerData;
 import net.lecousin.framework.time.DateTimeUtil;
 import net.lecousin.framework.ui.eclipse.UIUtil;
+import net.lecousin.framework.ui.eclipse.control.LCCombo;
 import net.lecousin.framework.ui.eclipse.control.list.LCContentProvider;
 import net.lecousin.framework.ui.eclipse.control.list.LCTableWithControls;
 import net.lecousin.framework.ui.eclipse.control.list.LCTable.ColumnProvider;
@@ -20,7 +24,6 @@ import net.lecousin.framework.ui.eclipse.graphics.ColorUtil;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridLayout;
@@ -29,45 +32,69 @@ import org.eclipse.swt.widgets.Text;
 
 public class OverviewPanel {
 
-	public OverviewPanel(Composite panel, AudioDataType data, AudioSourceInfo source) {
+	public OverviewPanel(Composite panel, AudioDataType data, AudioSourceInfo sourceNULL) {
 		GridLayout layout = UIUtil.gridLayout(panel, 1);
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
 		layout.verticalSpacing = 0;
 		
 		this.info = (AudioInfo)data.getInfo();
+
+		LCCombo combo;
 		
 		Composite line = UIUtil.newGridComposite(panel, 0, 0, 6);
 		UIUtil.gridDataHorizFill(line);
 		UIUtil.newLabel(line, Local.Artist+":", true, false);
-		UIUtil.newText(line, info.getArtist(), new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				info.setArtist(((Text)e.widget).getText());
+		combo = new LCCombo(line, null);
+		for (String s : info.getSources()) {
+			AudioSourceInfo i = (AudioSourceInfo)info.getSourceInfo(s);
+			if (i == null || i.getArtist() == null || i.getArtist().length() == 0) continue;
+			combo.addItem(InfoRetrieverPluginRegistry.getIconForSource(s, AudioContentType.AUDIO_TYPE), i.getArtist(), null);
+		}
+		combo.setSelection(info.getArtist() != null ? info.getArtist() : "");
+		combo.selectionEvent().addListener(new Listener<Pair<String,Object>>() {
+			public void fire(Pair<String, Object> event) {
+				info.setArtist(event.getValue1());
 			}
-		}).setLayoutData(UIUtil.gridDataHoriz(1, true));
+		});
+		combo.setLayoutData(UIUtil.gridDataHoriz(1, true));
+
 		UIUtil.newLabel(line, Local.Album+":", true, false);
-		UIUtil.newText(line, info.getAlbum(), new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				info.setAlbum(((Text)e.widget).getText());
+		combo = new LCCombo(line, null);
+		for (String s : info.getSources()) {
+			AudioSourceInfo i = (AudioSourceInfo)info.getSourceInfo(s);
+			if (i == null || i.getAlbum() == null || i.getAlbum().length() == 0) continue;
+			combo.addItem(InfoRetrieverPluginRegistry.getIconForSource(s, AudioContentType.AUDIO_TYPE), i.getAlbum(), null);
+		}
+		combo.setSelection(info.getAlbum() != null ? info.getAlbum() : "");
+		combo.selectionEvent().addListener(new Listener<Pair<String,Object>>() {
+			public void fire(Pair<String, Object> event) {
+				info.setAlbum(event.getValue1());
 			}
-		}).setLayoutData(UIUtil.gridDataHoriz(1, true));
+		});
+		combo.setLayoutData(UIUtil.gridDataHoriz(1, true));
+
 		UIUtil.newLabel(line, Local.Year+":", true, false);
-		UIUtil.newText(line, info.getYear() > 0 ? Integer.toString(info.getYear()) : "", new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				String s = ((Text)e.widget).getText();
-				if (s.length() == 0) {
-					info.setYear(-1);
-					((Text)e.widget).setBackground(ColorUtil.getWhite());
-				} else
-					try {
-						int year = Integer.parseInt(s);
-						info.setYear(year);
-						((Text)e.widget).setBackground(ColorUtil.getWhite());
-					} catch (NumberFormatException ex) {
-						((Text)e.widget).setBackground(ColorUtil.getOrange());
-					}
+		combo = new LCCombo(line, null);
+		for (String s : info.getSources()) {
+			AudioSourceInfo i = (AudioSourceInfo)info.getSourceInfo(s);
+			if (i == null || i.getYear() <= 0) continue;
+			combo.addItem(InfoRetrieverPluginRegistry.getIconForSource(s, AudioContentType.AUDIO_TYPE), Integer.toString(i.getYear()), null);
+		}
+		combo.setSelection(info.getYear() > 0 ? Integer.toString(info.getYear()) : "");
+		combo.selectionEvent().addListener(new ListenerData<Pair<String,Object>, LCCombo>(combo) {
+			public void fire(Pair<String, Object> event) {
+				int year;
+				try { 
+					year = Integer.parseInt(event.getValue1()); 
+					info.setYear(year);
+					data().setBackground(ColorUtil.getWhite());
+				} catch (NumberFormatException e) {
+					data().setBackground(ColorUtil.getOrange());
+				}
 			}
-		}).setLayoutData(UIUtil.gridDataHoriz(1, true));
+		});
+		combo.setLayoutData(UIUtil.gridDataHoriz(1, true));
 
 		// TODO genres (mais avec add, remove...)
 //		line = UIUtil.newGridComposite(panel, 0, 0, 2);

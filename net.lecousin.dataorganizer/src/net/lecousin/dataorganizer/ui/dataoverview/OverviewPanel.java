@@ -209,13 +209,16 @@ public class OverviewPanel extends Composite {
 			super(parent, SWT.NONE);
 			this.source = source;
 			setBackground(parent.getBackground());
-			UIUtil.gridLayout(this, 3, 0, 0, 2, 0);
-			button = UIUtil.newCheck(this, "", new Listener<Pair<Boolean,String>>() {
-				public void fire(Pair<Boolean, String> event) {
-					sourceSelectionChanged(true);
-				}
-			}, source);
-			button.setSelection(true);
+			int numcolumns = 2 + (data.getContent().isOverviewPanelSupprotingSourceMerge() ? 1 : 0);
+			UIUtil.gridLayout(this, numcolumns, 0, 0, 2, 0);
+			if (data.getContent().isOverviewPanelSupprotingSourceMerge()) {
+				button = UIUtil.newCheck(this, "", new Listener<Pair<Boolean,String>>() {
+					public void fire(Pair<Boolean, String> event) {
+						sourceSelectionChanged(true);
+					}
+				}, source);
+				button.setSelection(true);
+			}
 			new SourceControl(this, data, source);
 			UIUtil.newImageButton(this, SharedImages.getImage(SharedImages.icons.x16.basic.REFRESH), new Listener<Pair<Data,String>>() {
 				public void fire(Pair<Data,String> event) {
@@ -229,7 +232,11 @@ public class OverviewPanel extends Composite {
 	
 	private void sourceSelectionChanged(boolean layout) {
 		UIControlUtil.clear(contentTypePanel);
-		SourceInfo info = data.getContent().getInfo().getMergedInfo(getSelectedSources());
+		SourceInfo info;
+		if (data.getContent().isOverviewPanelSupprotingSourceMerge())
+			info = data.getContent().getInfo().getMergedInfo(getSelectedSources());
+		else
+			info = null;
 		data.getContent().createOverviewPanel(contentTypePanel, info);
 		refreshReviews(data, info);
 		if (layout) {

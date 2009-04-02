@@ -87,6 +87,10 @@ public class PeopleDataType extends DataContentType {
 		new OverviewPanel(panel, this, (PeopleSourceInfo)info);
 	}
 	@Override
+	public boolean isOverviewPanelSupprotingSourceMerge() {
+		return true;
+	}
+	@Override
 	public void createDescriptionPanel(Composite panel) {
 	}
 
