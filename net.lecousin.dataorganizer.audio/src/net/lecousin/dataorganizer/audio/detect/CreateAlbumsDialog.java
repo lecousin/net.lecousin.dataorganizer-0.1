@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import net.lecousin.dataorganizer.audio.Local;
 import net.lecousin.dataorganizer.audio.detect.AlbumDetector.Album;
@@ -13,6 +14,7 @@ import net.lecousin.dataorganizer.audio.internal.EclipsePlugin;
 import net.lecousin.framework.collections.SortedList;
 import net.lecousin.framework.collections.SortedListTree;
 import net.lecousin.framework.event.Event.Listener;
+import net.lecousin.framework.time.DateTimeUtil;
 import net.lecousin.framework.ui.eclipse.EclipseImages;
 import net.lecousin.framework.ui.eclipse.EclipseWorkbenchUtil;
 import net.lecousin.framework.ui.eclipse.SharedImages;
@@ -179,6 +181,19 @@ public class CreateAlbumsDialog extends FlatDialog {
 			public int compare(Track element1, String text1, Track element2, String text2) { return 0; }
 		},
 		new ColumnProviderText<Track>() {
+			public String getTitle() { return Local.Duration.toString(); }
+			public int getAlignment() { return SWT.RIGHT; }
+			public int getDefaultWidth() { return 50; }
+			public String getText(Track element) { return element.audio.getInfo() != null && element.audio.getInfo().getDuration() > 0 ? DateTimeUtil.getTimeMinimalString(element.audio.getInfo().getDuration()) : "?"; }
+			public Font getFont(Track element) { return null; }
+			public Image getImage(Track element) { return null; }
+			public int compare(Track element1, String text1, Track element2, String text2) {
+				long l1 = element1.audio.getInfo() != null && element1.audio.getInfo().getDuration() > 0 ? element1.audio.getInfo().getDuration() : -1; 
+				long l2 = element2.audio.getInfo() != null && element2.audio.getInfo().getDuration() > 0 ? element2.audio.getInfo().getDuration() : -1; 
+				return (int)(l1-l2); 
+			}
+		},
+		new ColumnProviderText<Track>() {
 			public String getTitle() { return Local.Album.toString(); }
 			public int getAlignment() { return SWT.LEFT; }
 			public int getDefaultWidth() { return 120; }
@@ -248,8 +263,13 @@ public class CreateAlbumsDialog extends FlatDialog {
 			UIUtil.gridDataHorizFill(header);
 			UIUtil.newLabel(header, Local.Album_name.toString());
 			textAlbumName = new LCCombo(header, null);
-			for (String s : AlbumHelper.getPossibleAlbumNames(album, dir))
+			Set<String> names = AlbumHelper.getPossibleAlbumNames(album, dir);
+			for (String s : names)
 				textAlbumName.addItem(null, s, null);
+			if (album.name != null) 
+				textAlbumName.setSelection(album.name);
+			else if (names.size() == 1)
+				textAlbumName.setSelection(names.iterator().next());
 			textAlbumName.selectionEvent().addFireListener(new Runnable() {
 				public void run() {
 					parent.setText(textAlbumName.getSelection());
@@ -259,8 +279,13 @@ public class CreateAlbumsDialog extends FlatDialog {
 			textAlbumName.setLayoutData(UIUtil.gridDataHoriz(1, true));
 			UIUtil.newLabel(header, Local.Artist.toString());
 			textArtistName = new LCCombo(header, null);
-			for (String s : AlbumHelper.getPossibleArtistNames(album))
+			names = AlbumHelper.getPossibleArtistNames(album);
+			for (String s : names)
 				textArtistName.addItem(null, s, null);
+			if (album.artist != null) 
+				textArtistName.setSelection(album.artist);
+			else if (names.size() == 1)
+				textArtistName.setSelection(names.iterator().next());
 			textArtistName.selectionEvent().addFireListener(new Runnable() {
 				public void run() {
 					validate();

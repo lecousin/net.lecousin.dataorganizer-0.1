@@ -394,7 +394,7 @@ public class AddData_Folder extends WizardPage implements AddData_Page {
 		}
 		
 		private void detect(URI rootURI, TypedFolder folder, ContentType type, Result result, List<IFileStore> usedBefore, WorkProgress progress, int amount) {
-			progress.setSubDescription(rootURI.relativize(folder.folder.toURI()).toString());
+			progress.setSubDescription(URLDecoder.decode(rootURI.relativize(folder.folder.toURI()).toString()));
 			List<Pair<List<IFileStore>,VirtualData>> data;
 			List<IFileStore> used = new LinkedList<IFileStore>();
 			used.addAll(usedBefore);

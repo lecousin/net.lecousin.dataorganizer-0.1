@@ -121,6 +121,7 @@ public class AlbumHelper {
 		if (t == null) return null;
 		VirtualData data;
 		String name = t.getValue1();
+		if (name == null) name = rootDir.getName();
 		if (t.getValue2() != null)
 			name = t.getValue2() + " - " + name;
 		try { data = (VirtualData)db.addData(name, ContentType.getContentType(AudioContentType.AUDIO_TYPE), sources); }
@@ -222,6 +223,7 @@ public class AlbumHelper {
 		if (albumNames.size() == 1) result.setValue1(albumNames.iterator().next());
 		else {
 			needDecision = true;
+			needAlbumName = true;
 		}
 		if (artistNames.size() == 1) result.setValue2(artistNames.iterator().next());
 		else if (artistNames.size() > 1) needDecision = true;

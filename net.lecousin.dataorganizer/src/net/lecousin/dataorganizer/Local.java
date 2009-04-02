@@ -393,10 +393,14 @@ public enum Local {
 	),
 	
 	MESSAGE_Contact(
-		"To contact us, send us an email to: support.dataorganizer@gmail.com\r\n"+
-		"Try to be as precise as possible and to indicate the version number you are using, so that we can be most effective to process your request.",
-		"Pour nous contacter, ecrivez-nous un mail à l'adresse: support.dataorganizer@gmail.com\r\n"+
-		"Pensez à être le plus précis possible et à nous indiquer le numéro de version que vous utilisez, ceci afin que nous puissions être le plus efficace possible pour traiter votre demande."
+		"You can contact us simply by mail to <a href=\"mail\">support.dataorganizer@gmail.com</a><br/>"+
+		"Try to be as precise as possible and to indicate the version number you are using, so that we can be most effective to process your request.<br/>"+
+		"<br/>"+
+		"Or visit our <a href=\"forum\">forum</a>.",
+		"Vous pouvez nous contacter simplement par mail à l'adresse <a href=\"mail\">support.dataorganizer@gmail.com</a><br/>"+
+		"Pensez à être le plus précis possible et à nous indiquer le numéro de version que vous utilisez, ceci afin que nous puissions être le plus efficace possible pour traiter votre demande.<br/>" +
+		"<br/>"+
+		"Ou visitez notre <a href=\"forum\">forum</a>."
 	),
 	
 	MESSAGE_Preference_Update(

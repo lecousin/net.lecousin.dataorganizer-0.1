@@ -5,6 +5,7 @@ DataOrganizer
 A tester:
  + MediaPlayer dans tous les sens (audio+video)
  + ajouter toutes mes donnees... 
+ + amovible
 
 Audio
  + MP3 single

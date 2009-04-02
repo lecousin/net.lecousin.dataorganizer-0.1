@@ -28,6 +28,7 @@ import net.lecousin.framework.io.MyByteArrayOutputStream;
 import net.lecousin.framework.log.Log;
 import net.lecousin.framework.media.Media;
 import net.lecousin.framework.media.MediaPlayer;
+import net.lecousin.framework.media.UnsupportedFormatException;
 import net.lecousin.framework.media.util.SnapshotTaker;
 import net.lecousin.framework.media.util.SnapshotTaker.LinkedChecker;
 import net.lecousin.framework.media.util.SnapshotTaker.SameColorChecker;
@@ -255,15 +256,19 @@ public class VideoDataType extends DataContentType {
 		if (src == null) { progress.progress(work); signalModification(); return; }
 		URI uri = src.ensurePresenceAndGetURI();
 		if (uri == null) { progress.progress(work); signalModification(); return; }
-		Media media = player.addMedia(uri);
-		player.start();
-		if (duration < 0)
-			duration = media.getDuration();
-		takePreviewImages(visual, media, player, progress, work);
-		if (duration < 0)
-			duration = media.getDuration();
-		player.stop();
-		player.removeMedia(media);
+		try {
+			Media media = player.addMedia(uri);
+			player.start();
+			if (duration < 0)
+				duration = media.getDuration();
+			takePreviewImages(visual, media, player, progress, work);
+			if (duration < 0)
+				duration = media.getDuration();
+			player.stop();
+			player.removeMedia(media);
+		} catch (UnsupportedFormatException e) {
+			// TODO
+		}
 		signalModification();
 	}
 	

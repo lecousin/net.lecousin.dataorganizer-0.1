@@ -108,6 +108,7 @@ public class RealData extends Data {
 		if (removed) throw new IllegalStateException("Data " + name + " has been removed.");
 		XmlWriter xml = new XmlWriter();
 		xml.openTag("data");
+		if (name == null) name = "";
 		xml.addAttribute("name", name);
 		xml.addAttribute("content_type", contentType.getID());
 		xml.addAttribute("dateAdded", dateAdded);

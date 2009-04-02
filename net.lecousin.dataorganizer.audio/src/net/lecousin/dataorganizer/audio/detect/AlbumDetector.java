@@ -4,6 +4,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -155,8 +156,39 @@ public class AlbumDetector {
 				albums.remove(entry.getKey());
 			}
 		}
+		if (albumsReadyToBeCreated.size() > 1) {
+			// if several albums found, check if there is a track number collision
+			// if no collision => merge into a single album
+			List<Integer> found = new LinkedList<Integer>();
+			boolean collision = false;
+			for (Album a : albumsReadyToBeCreated) {
+				for (Track t : a.sorted.get(0))
+					if (found.contains(t.trackNumber)) {
+						collision = true;
+						break;
+					} else
+						found.add(t.trackNumber);
+				if (collision) break;
+			}
+			if (!collision) {
+				// merge
+				Album album = null;
+				for (Iterator<Album> it = albumsReadyToBeCreated.iterator(); it.hasNext(); ) {
+					Album a = it.next();
+					if (album == null) album = a;
+					else  {
+						for (Track t : a.sorted.get(0))
+							album.sorted.get(0).add(t);
+						it.remove();
+					}
+				}
+				album.nameIsFromUser = false;
+				album.name = null;
+				album.artist = null;
+			}
+		}
 		
-		if (albums.size() > 1) {
+		if (albums.size() + albumsReadyToBeCreated.size() > 1) {
 			// plusieurs albums restants => besoin de l'utilisateur
 			needUser = true;
 		}
@@ -178,6 +210,31 @@ public class AlbumDetector {
 					if (list == null)
 						needUser = true;
 					else {
+						if (!albumsReadyToBeCreated.isEmpty()) {
+							// check if there is a track number collision
+							// if no collision => merge into a single album
+							List<Integer> found = new LinkedList<Integer>();
+							boolean collision = false;
+							for (Track t : albumsReadyToBeCreated.get(0).sorted.get(0))
+								found.add(t.trackNumber);
+							for (Album a : list) {
+								for (Track t : a.sorted.get(0))
+									if (found.contains(t.trackNumber)) {
+										collision = true;
+										break;
+									} else
+										found.add(t.trackNumber);
+								if (collision) break;
+							}
+							if (!collision) {
+								// merge
+								Album album = albumsReadyToBeCreated.get(0);
+								for (Album a : list)
+									for (Track t : a.sorted.get(0))
+										album.sorted.get(0).add(t);
+								list.clear();
+							}
+						}						
 						albumsReadyToBeCreated.addAll(list);
 						noName = null;
 					}
