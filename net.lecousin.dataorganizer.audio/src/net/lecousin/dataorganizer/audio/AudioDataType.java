@@ -45,8 +45,6 @@ public class AudioDataType extends DataContentType {
 	}
 	@Override
 	protected void saveContent(XmlWriter xml) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override

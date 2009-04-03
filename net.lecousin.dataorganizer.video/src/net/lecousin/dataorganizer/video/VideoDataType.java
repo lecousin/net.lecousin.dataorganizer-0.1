@@ -1,6 +1,7 @@
 package net.lecousin.dataorganizer.video;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -254,7 +255,9 @@ public class VideoDataType extends DataContentType {
 		if (sources.size() == 0) { progress.progress(work); signalModification(); return; }
 		DataSource src = sources.get(0);
 		if (src == null) { progress.progress(work); signalModification(); return; }
-		URI uri = src.ensurePresenceAndGetURI();
+		URI uri;
+		try { uri = src.ensurePresenceAndGetURI(); }
+		catch (FileNotFoundException e) { uri = null; }
 		if (uri == null) { progress.progress(work); signalModification(); return; }
 		try {
 			Media media = player.addMedia(uri);

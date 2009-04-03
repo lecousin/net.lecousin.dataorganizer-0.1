@@ -1,6 +1,7 @@
 package net.lecousin.dataorganizer.core.database.source;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -89,10 +90,10 @@ public class AmovibleFileDataSource extends FileDataSource {
 	}
 	
 	@Override
-	public URI ensurePresenceAndGetURI() {
+	public URI ensurePresenceAndGetURI() throws FileNotFoundException {
 		ensurePresence();
 		File f = findFile();
-		if (f == null) return null;
+		if (f == null) throw new FileNotFoundException(toString());
 		return f.toURI();
 	}
 	

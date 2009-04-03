@@ -1,6 +1,7 @@
 package net.lecousin.dataorganizer.core.database.source;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -34,6 +35,8 @@ public class LocalFileDataSource extends FileDataSource {
 	
 	public String getLocalPath() { return path; }
 	public File getLocalFile() { return new File(path); }
+	public void setLocation(File file) { path = file.getAbsolutePath(); }
+	public void setLocation(String path) { this.path = path; }
 	
 	@Override
 	public void ensurePresence() {
@@ -55,8 +58,10 @@ public class LocalFileDataSource extends FileDataSource {
 	}
 	
 	@Override
-	public URI ensurePresenceAndGetURI() {
-		return getLocalFile().toURI();
+	public URI ensurePresenceAndGetURI() throws FileNotFoundException {
+		File file = getLocalFile();
+		if (!file.exists()) throw new FileNotFoundException(path);
+		return file.toURI();
 	}
 	
 	@Override

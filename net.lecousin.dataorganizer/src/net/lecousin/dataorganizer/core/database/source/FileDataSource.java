@@ -1,9 +1,14 @@
 package net.lecousin.dataorganizer.core.database.source;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import net.lecousin.framework.collections.ArrayUtil;
+import net.lecousin.framework.io.IOUtil;
 import net.lecousin.framework.strings.StringUtil;
 import net.lecousin.framework.xml.XmlUtil;
 import net.lecousin.framework.xml.XmlWriter;
@@ -32,7 +37,7 @@ public abstract class FileDataSource extends DataSource {
 		if (size > 0) {
 			int hsize = size > HEADER_SIZE ? HEADER_SIZE : (int)size;
 			byte[] buffer = new byte[hsize];
-			int i = stream.read(buffer);
+			int i = IOUtil.readAllBuffer(stream, buffer);
 			if (i == hsize)
 				this.header = buffer;
 			else {
@@ -122,6 +127,35 @@ public abstract class FileDataSource extends DataSource {
 					if (parts[i].data[j] != ds.parts[i].data[j]) return false;
 		}
 		return true;
+	}
+	
+	public boolean isSameContent(File file) {
+		if (size != file.length()) return false;
+		if (size == 0) return true;
+		InputStream stream;
+		try { stream = new FileInputStream(file); }
+		catch (FileNotFoundException e) { return false; }
+		try {
+			byte[] buffer = new byte[header.length];
+			int i = IOUtil.readAllBuffer(stream, buffer);
+			if (i != header.length) return false;
+			if (!ArrayUtil.equals(header, buffer)) return false;
+			long pos = header.length;
+			buffer = new byte[PART_SIZE];
+			for (FilePart part : parts) {
+				if (stream.skip(part.offset-pos) != part.offset-pos) return false;
+				pos = part.offset;
+				if (part.data == null) continue;
+				if (IOUtil.readAllBuffer(stream, buffer, 0, part.data.length) != part.data.length) return false;
+				if (!ArrayUtil.equals(part.data, 0, buffer, 0, part.data.length)) return false;
+			}
+			return true;
+		} catch (IOException e) {
+			return false;
+		} finally {
+			try { stream.close(); }
+			catch (IOException e) {}
+		}
 	}
 	
 	private long hash(byte[] buffer) {

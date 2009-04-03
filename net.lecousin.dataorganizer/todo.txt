@@ -1,7 +1,6 @@
 Avant prochaine release:
 
 DataOrganizer
- + check tous les TODO
  
 A tester:
  + MediaPlayer dans tous les sens (audio+video)
@@ -10,9 +9,6 @@ A tester:
  + Git branches 
 
 Audio
- + MP3 single
- + UI: genres
- + tous les TODO, icones...
 
 Video
  + DVD, Video CD
@@ -64,6 +60,8 @@ Audio
  + PLS +...
  + Internet: CDDB + FreeDB.org + ???
  + DataOverview: gerer les sources, source FILE... tracks order...
+ + UI: genres
+ + tous les TODO...
  
 Picture
  + tout

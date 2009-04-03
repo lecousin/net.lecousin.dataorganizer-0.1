@@ -1,6 +1,7 @@
 package net.lecousin.dataorganizer.neufbox.mediacenter;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.URI;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import net.lecousin.neufbox.mediacenter.MediaCenter;
 import net.lecousin.neufbox.mediacenter.eclipse.NeufBoxMediaCenter;
 import net.lecousin.neufbox.mediacenter.eclipse.SharedDataView;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Image;
 
 public class ActionAdd implements Action {
@@ -35,16 +37,24 @@ public class ActionAdd implements Action {
 			if (sources.size() == 1) {
 				DataSource source = sources.get(0);
 				if (source == null) continue;
-				URI uri = source.ensurePresenceAndGetURI();
-				File file = new File(uri);
-				mc.getRoot().newMedia(d.getName(), type, file, d);
+				try {
+					URI uri = source.ensurePresenceAndGetURI();
+					File file = new File(uri);
+					mc.getRoot().newMedia(d.getName(), type, file, d);
+				} catch (FileNotFoundException e) {
+					MessageDialog.openError(null, "SFR NeufBox Media Center", Local.File_not_found+": " + e.getMessage());
+				}
 			} else {
 				Folder folder = mc.getRoot().newSubFolder(d.getName());
 				for (DataSource source : sources) {
 					if (source == null) continue;
-					URI uri = source.ensurePresenceAndGetURI();
-					File file = new File(uri);
-					folder.newMedia(d.getName(), type, file, d);
+					try {
+						URI uri = source.ensurePresenceAndGetURI();
+						File file = new File(uri);
+						folder.newMedia(d.getName(), type, file, d);
+					} catch (FileNotFoundException e) {
+						MessageDialog.openError(null, "SFR NeufBox Media Center", Local.File_not_found+": " + e.getMessage());
+					}
 				}
 			}
 		}

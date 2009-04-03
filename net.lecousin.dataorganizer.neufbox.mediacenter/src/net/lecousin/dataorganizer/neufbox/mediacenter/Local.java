@@ -5,6 +5,7 @@ import net.lecousin.framework.application.Application;
 public enum Local {
 
 	Add_to_media_center("Add to NeufBox Media Center", "Ajouter au NeufBox Media Center"),
+	File_not_found("File not found", "Fichier introuvable"),
 	
 	;
 	

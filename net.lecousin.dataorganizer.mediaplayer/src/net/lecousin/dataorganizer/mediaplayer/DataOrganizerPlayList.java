@@ -1,5 +1,6 @@
 package net.lecousin.dataorganizer.mediaplayer;
 
+import java.io.FileNotFoundException;
 import java.net.URI;
 import java.util.List;
 
@@ -15,6 +16,7 @@ import net.lecousin.framework.Triple;
 import net.lecousin.framework.collections.SelfMapUniqueLong;
 import net.lecousin.framework.event.Event.Listener;
 import net.lecousin.framework.event.Event.ListenerData;
+import net.lecousin.framework.media.ui.MediaException;
 import net.lecousin.framework.media.ui.PlayList;
 import net.lecousin.framework.ui.eclipse.SharedImages;
 import net.lecousin.framework.ui.eclipse.UIUtil;
@@ -24,6 +26,7 @@ import net.lecousin.framework.ui.eclipse.control.UIControlUtil;
 import net.lecousin.framework.ui.eclipse.dialog.FlatPopupMenu;
 import net.lecousin.framework.ui.eclipse.graphics.ColorUtil;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTargetEvent;
@@ -141,7 +144,9 @@ public class DataOrganizerPlayList extends PlayList {
 		if (data.getSources().size() > 1) {
 			for (DataSource source : data.getSources()) {
 				if (source == null) continue;
-				URI uri = source.ensurePresenceAndGetURI();
+				URI uri;
+				try { uri = source.ensurePresenceAndGetURI(); }
+				catch (FileNotFoundException e) { MessageDialog.openError(getTree().getShell(), "Media Player", net.lecousin.framework.media.Local.process(net.lecousin.framework.media.Local.File__not_found, e.getMessage())); continue; }
 				TreeItem subitem = new TreeItem(item, SWT.NONE);
 				String name = data.getContent().getSourceName(source);
 				if (name == null) {
@@ -159,7 +164,7 @@ public class DataOrganizerPlayList extends PlayList {
 	}
 	
 	@Override
-	protected URI getURI(Object media) {
+	protected URI getURI(Object media) throws MediaException {
 		if (media instanceof Data)
 			return getURI((Data)media);
 		else if (media instanceof DataSourceItem)
@@ -167,11 +172,12 @@ public class DataOrganizerPlayList extends PlayList {
 		return super.getURI(media);
 	}
 	
-	private URI getURI(Data data) {
+	private URI getURI(Data data) throws MediaException {
 		if (data.getSources().size() == 1) {
 			DataSource s = data.getSources().get(0);
 			if (s == null) return null;
-			return s.ensurePresenceAndGetURI();
+			try { return s.ensurePresenceAndGetURI(); }
+			catch (FileNotFoundException e) { throw new MediaException(net.lecousin.framework.media.Local.process(net.lecousin.framework.media.Local.File__not_found, e.getMessage())); }
 		}
 		return null;
 	}

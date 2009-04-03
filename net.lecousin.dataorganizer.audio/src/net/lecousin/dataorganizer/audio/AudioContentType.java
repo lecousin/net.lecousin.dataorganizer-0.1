@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.lecousin.dataorganizer.audio.detect.AlbumDetector;
+import net.lecousin.dataorganizer.audio.detect.AlbumHelper;
 import net.lecousin.dataorganizer.audio.internal.EclipsePlugin;
 import net.lecousin.dataorganizer.audio.search.Param_AlbumName;
 import net.lecousin.dataorganizer.audio.search.Param_ArtistName;
@@ -17,6 +18,7 @@ import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
 import net.lecousin.dataorganizer.core.search.DataSearch.Parameter;
 import net.lecousin.dataorganizer.ui.wizard.adddata.AddData_Page;
 import net.lecousin.framework.Pair;
+import net.lecousin.framework.collections.CollectionUtil;
 import net.lecousin.framework.files.FileType;
 import net.lecousin.framework.files.TypedFile;
 import net.lecousin.framework.files.TypedFolder;
@@ -105,7 +107,12 @@ public class AudioContentType extends ContentType {
 	}
 	@Override
 	public List<Pair<List<IFileStore>, VirtualData>> detectOnFile(VirtualDataBase db, TypedFolder folder, IFileStore file, TypedFile typedFile, Shell shell) {
-		return null; // TODO
+		if (typedFile != null && typedFile instanceof AudioFile) {
+			VirtualData data = AlbumHelper.createSingleData(db, file, (AudioFile)typedFile);
+			if (data == null) return null;
+			return CollectionUtil.single_element_list(new Pair<List<IFileStore>, VirtualData>(CollectionUtil.single_element_list(file), data));
+		}
+		return null;
 	}
 
 }

@@ -33,6 +33,7 @@ import net.lecousin.framework.files.audio.AudioFileInfo;
 import net.lecousin.framework.files.audio.AudioFileInfo.Picture;
 import net.lecousin.framework.files.image.ImageFile;
 import net.lecousin.framework.files.playlist.PlayList;
+import net.lecousin.framework.io.FileSystemUtil;
 import net.lecousin.framework.log.Log;
 import net.lecousin.framework.strings.StringUtil;
 import net.lecousin.framework.ui.eclipse.dialog.ErrorDlg;
@@ -165,10 +166,80 @@ public class AlbumHelper {
 			if (track.getTitle() == null)
 				track.setTitle(getTrackNameFromFile(file, tracks));
 		}
+		ImageLoader img = new ImageLoader();
+		for (Picture p : cover_front)
+			try { content.saveCoverFront(img.load(new ByteArrayInputStream(p.data))); }
+			catch (Throwable e) {}
+		for (Picture p : cover_back)
+			try { content.saveCoverBack(img.load(new ByteArrayInputStream(p.data))); }
+			catch (Throwable e) {}
 		byte[] mcdi = getMCDI(tracks, list, rootDir, shell);
 		if (mcdi != null)
 			info.setMCDI(mcdi);
 		
+		return data;
+	}
+	
+	public static VirtualData createSingleData(VirtualDataBase db, IFileStore file, AudioFile afile) {
+		List<DataSource> sources = new ArrayList<DataSource>(1);
+		try { sources.add(DataSource.get(afile.getURI())); }
+		catch (Throwable t) {
+			ErrorDlg.exception(Local.Create_Music_Album.toString(), "Unable to add DataSource for file: " + afile.getURI(), EclipsePlugin.ID, t);
+			sources.add(null);
+		}
+		AudioFileInfo ainfo = (AudioFileInfo)afile.getInfo();
+		String album = null, artist = null, title = null;
+		if (ainfo != null) {
+			album = ainfo.getAlbum();
+			artist = ainfo.getArtist();
+			title = ainfo.getSongTitle();
+		}
+		String name = title;
+		if (name == null) 
+			name = FileSystemUtil.getFileNameWithoutExtension(file.getName());
+		else if (artist != null)
+			name = artist + " - " + name;
+		VirtualData data;
+		try { data = (VirtualData)db.addData(name, ContentType.getContentType(AudioContentType.AUDIO_TYPE), sources); }
+		catch (CoreException e) {
+			return null;
+		}
+		AudioDataType content = (AudioDataType)data.getContent();
+		AudioInfo i = (AudioInfo)content.getInfo();
+		AudioSourceInfo info = (AudioSourceInfo)i.setSource(AudioInfo.FILE_SOURCE, "file", "");
+		info.setAlbum(album);
+		if (artist != null)
+			info.setArtist(artist);
+		AudioSourceInfo.Track track = info.newTrack(title, ainfo != null ? ainfo.getDuration() : -1);
+		if (ainfo != null) {
+			if (ainfo.getYear() > 0)
+				info.setYear(ainfo.getYear());
+			String s = ainfo.getGenre();
+			if (s != null && s.length() > 0)
+				info.addGenre(s);
+			if (ainfo.getPictures() != null) {
+				ImageLoader img = new ImageLoader();
+				for (Picture pic : ainfo.getPictures()) {
+					switch (pic.type) {
+					case COVER_FRONT: 
+						try { content.saveCoverFront(img.load(new ByteArrayInputStream(pic.data))); }
+						catch (Throwable e) {}
+						break;
+					case COVER_BACK: 
+						try { content.saveCoverBack(img.load(new ByteArrayInputStream(pic.data))); }
+						catch (Throwable e) {}
+						break;
+					default:
+						String filename = saveImage(data, pic.data);
+						if (filename != null)
+							track.addImage(pic.description, filename);
+						break;
+					}
+				}
+			}
+			if (ainfo.getCDIdentifier() != null)
+				info.setMCDI(ainfo.getCDIdentifier());
+		}		
 		return data;
 	}
 	

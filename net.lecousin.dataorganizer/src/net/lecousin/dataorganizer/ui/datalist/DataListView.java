@@ -1,6 +1,7 @@
 package net.lecousin.dataorganizer.ui.datalist;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.LinkedList;
@@ -144,9 +145,12 @@ public class DataListView extends ViewPart {
 					if (sources.size() != 1) return;
 					DataSource source = sources.get(0);
 					if (source == null) return;
-					URI uri = source.ensurePresenceAndGetURI();
-					try { event.data = uri.toURL(); }
+					try { 
+						URI uri = source.ensurePresenceAndGetURI();
+						event.data = uri.toURL(); 
+					}
 					catch (MalformedURLException e) {}
+					catch (FileNotFoundException e) {}
 					return;
 				}
 				if (FileTransfer.getInstance().isSupportedType(event.dataType)) {
@@ -154,7 +158,8 @@ public class DataListView extends ViewPart {
 					for (Data d : data) {
 						for (DataSource s : d.getSources())
 							if (s != null)
-								list.add(new File(s.ensurePresenceAndGetURI()).getAbsolutePath());
+								try { list.add(new File(s.ensurePresenceAndGetURI()).getAbsolutePath()); }
+								catch (FileNotFoundException e){}
 					}
 					if (list.isEmpty()) return;
 					event.data = list.toArray(new String[list.size()]);

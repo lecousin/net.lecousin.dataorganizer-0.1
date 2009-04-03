@@ -18,6 +18,7 @@ import net.lecousin.framework.Pair;
 import net.lecousin.framework.eclipse.progress.ProgressMonitor_WorkProgressWrapper;
 import net.lecousin.framework.event.Event;
 import net.lecousin.framework.io.MyByteArrayOutputStream;
+import net.lecousin.framework.log.Log;
 import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.ui.eclipse.dialog.ErrorDlg;
 
@@ -189,7 +190,8 @@ public class DataLabels {
 			if (file.exists())
 				try { labeled.addAll(read(file.getContents())); }
 				catch (Throwable t) {
-					// TODO log the error
+					if (Log.error(this))
+						Log.error(this, "Unable to read labels content from folder " + folder.toString(), t);
 				}
 		}
 		private List<Data> read(InputStream stream) throws IOException {
@@ -200,7 +202,8 @@ public class DataLabels {
 					long id = str.readLong();
 					Data data = DataOrganizer.database().get(id);
 					if (data == null) {
-						// TODO log the error
+						if (Log.warning(this))
+							Log.warning(this, "Label " + folder.toString() + " is linked to data id " + id + " but this data doesn't exist!");
 					} else
 						result.add(data);
 				} catch (EOFException e) {
@@ -220,9 +223,11 @@ public class DataLabels {
 				else
 					file.setContents(source, true, false, null);
 			} catch (IOException e) {
-				// TODO
+				if (Log.error(this))
+					Log.error(this, "Unable to save label file in folder " + folder.toString(), e);
 			} catch (CoreException e) {
-				// TODO
+				if (Log.error(this))
+					Log.error(this, "Unable to save label file in folder " + folder.toString(), e);
 			}
 		}
 		private InputStream write() throws IOException {

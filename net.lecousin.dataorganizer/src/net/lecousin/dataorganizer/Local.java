@@ -98,6 +98,7 @@ public enum Local {
 	Extracting_files("Extracting files", "Extraction des fichiers"),
 	Files_and_folders_found("Files and folders found", "Fichiers et dossiers trouvés"),
 	Files_found("Files found", "Fichiers trouvés"),
+	files_found_as_missing("file(s) found as missing", "fichier(s) trouvé(s) comme manquant(s)"),
 	Files_not_detected("Files not detected", "Fichiers non détectés"),
 	Filter_files_already_linked("Filter files already linked", "Filtre les fichiers déjà liés"),
 	Folders_found("Folders found", "Dossiers trouvés"),
@@ -144,6 +145,7 @@ public enum Local {
 	Refreshing_database_content("Refreshing database content", "Rafraîchissement du contenu de la base de données"),
 	Refreshing_labels("Refreshing labels", "Rafraîchissement des étiquettes"),
 	Refresh_information_from__("Refresh information from %#1%", "Rafraîchir les informations de %#1%"),
+	Relocating_sources("Analyzing data base and file system to find moved files", "Analyse de la base de données et de l'ordinateur pour trouver les fichiers déplacés"),
 	Remove_data("Remove data", "Supprimer la donnée"),
 	Remove_data__s("Remove data", "Supprimer des données"),
 	Remove_from_database_and_filesystem("Remove from database and filesystem", "Supprimer de la base de données et de l'ordinateur"),
@@ -417,6 +419,21 @@ public enum Local {
 	MESSAGE_Add_Data_Continue_On_Amovible(
 		"You add data from an amovible disk (CD/DVD, USB key...).\r\nDo you want to continue with another amovible disk ?",
 		"Vous venez d'ajouter des données depuis un disque amovible (CD/DVD, clé USB...).\r\nSouhaitez-vous continuer avec un autre disque amovible ?"
+	),
+	
+	MESSAGE_RELOCATE_File_found(
+		"The data <a href=\"data\">%#1%</a> is linked to the following file which doesn't exist anymore:<br/>" +
+		"%#2%<br/>" +
+		"But a file which seems to have the same content has been found at the following location:<br/>" +
+		"%#3%<br/>" +
+		"Do you want to update the data to be linked to this new file ?<br/><br/>"+
+		"<b>Note:</b>In order to identify similar files, DataOrganizer uses <i>file signatures</i> to detect similar contents. Indeed, the original file doesn't exist anymore so it is not possible to compare the whole content! So check carefully that the new file really corresponds to the data.",
+		"La donnée <a href=\"data\">%#1%</a> est liée au fichier suivant qui n'existe plus:<br/>" +
+		"%#2%<br/>" +
+		"Cependant un fichier qui semble avoir le même contenu a été trouvé à l'emplacement suivant:<br/>" +
+		"%#3%<br/>" +
+		"Souhaitez-vous mettre à jour la donnée afin qu'elle soit liée au nouveau fichier ?<br/><br/>"+
+		"<b>Note:</b>Afin d'identifier des fichiers similaires, DataOrganizer utilise des <i>signatures de fichier</i> pour détecter des contenu similaires. En effet, le fichier initial n'existant plus il est impossible de comparer le contenu entier! Vérifier donc attentivement que le nouveau fichier corresponde vraiment à la donnée."
 	),
 	
 	;

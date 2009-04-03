@@ -136,5 +136,5 @@ public abstract class DataSource {
 	
 	public abstract String getFileName();
 	
-	public abstract URI ensurePresenceAndGetURI();
+	public abstract URI ensurePresenceAndGetURI() throws FileNotFoundException;
 }

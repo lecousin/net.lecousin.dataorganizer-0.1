@@ -48,7 +48,10 @@ public class DataLinkPopup {
 		createData(data, dlg);
 		dlg.setMaxWidth(700);
 		dlg.setMaxHeight(400);
-		dlg.show(ctrl, orientation, true);
+		if (ctrl != null && orientation != null)
+			dlg.show(ctrl, orientation, true);
+		else
+			dlg.show(ctrl, orientation, false);
 	}
 	
 	private static void createNoData(ContentType type, List<DataLink> links, FlatPopupMenu dlg) {

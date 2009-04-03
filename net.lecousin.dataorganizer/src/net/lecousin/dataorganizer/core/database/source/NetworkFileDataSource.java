@@ -1,6 +1,7 @@
 package net.lecousin.dataorganizer.core.database.source;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -75,9 +76,9 @@ public class NetworkFileDataSource extends FileDataSource {
 	}
 	
 	@Override
-	public URI ensurePresenceAndGetURI() {
+	public URI ensurePresenceAndGetURI() throws FileNotFoundException {
 		try { return new URI(uri); }
-		catch (URISyntaxException e) { return null; }
+		catch (URISyntaxException e) { throw new FileNotFoundException("Invalid URI: "+e.getMessage()); }
 	}
 	
 	@Override
