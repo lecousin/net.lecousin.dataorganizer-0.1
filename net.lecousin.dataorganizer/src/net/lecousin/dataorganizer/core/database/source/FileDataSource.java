@@ -61,7 +61,9 @@ public abstract class FileDataSource extends DataSource {
 			for (int i = 0; i < parts.length; ++i) {
 				parts[i] = new FilePart();
 				parts[i].offset = Long.parseLong(e_parts.get(i).getAttribute("offset"));
-				parts[i].data = StringUtil.decodeHexa(XmlUtil.get_inner_text(e_parts.get(i)));
+				String s = XmlUtil.get_inner_text(e_parts.get(i));
+				if (s != null && s.length() > 0)
+					parts[i].data = StringUtil.decodeHexa(s);
 			}
 		}
 	}
@@ -81,7 +83,8 @@ public abstract class FileDataSource extends DataSource {
 			for (int i = 0; i < parts.length; ++i) {
 				xml.openTag("part");
 				xml.addAttribute("offset", parts[i].offset);
-				xml.addText(StringUtil.encodeHexa(parts[i].data));
+				if (parts[i].data != null)
+					xml.addText(StringUtil.encodeHexa(parts[i].data));
 				xml.closeTag();
 			}
 		}
@@ -111,6 +114,9 @@ public abstract class FileDataSource extends DataSource {
 			if (parts.length != ds.parts.length) return false;
 			for (int i = 0; i < parts.length; ++i)
 				if (parts[i].offset != ds.parts[i].offset) return false;
+				else if (parts[i].data == null) {
+					if (ds.parts[i].data != null) return false;
+				}
 				else if (parts[i].data.length != ds.parts[i].data.length) return false;
 				else for (int j = 0; j < parts[i].data.length; ++j)
 					if (parts[i].data[j] != ds.parts[i].data[j]) return false;

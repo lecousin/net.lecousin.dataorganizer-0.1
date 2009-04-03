@@ -1,6 +1,8 @@
 package net.lecousin.dataorganizer.updater;
 
 import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
 
 import net.lecousin.framework.io.FileSystemUtil;
 import net.lecousin.framework.io.ZipUtil;
@@ -60,42 +62,69 @@ public class Updater {
 		File zipApp = new File(tmpDir, "application.zip");
 		File zipExtras = new File(tmpDir, "extras.zip");
 		File zipJRE = new File(tmpDir, "jre.zip");
+		List<File> plugins = new LinkedList<File>();
+		for (File f : tmpDir.listFiles()) {
+			if (f.isFile() && f.getName().startsWith("plugin_"))
+				plugins.add(f);
+		}
 
 		progress.setDescription("Installing DataOrganizer update...");
-		int stepUnzip = 40000;
-		int stepInstall = 40000;
-		int stepUnzipApp, stepUnzipExtras;
+		int stepUnzip;
+		int stepInstall;
+		int stepPlugins;
+		if (plugins.isEmpty()) {
+			stepUnzip = 40000;
+			stepInstall = 40000;
+			stepPlugins = 0;
+		} else {
+			stepPlugins = plugins.size()*1000;
+			if (stepPlugins > 20000) stepPlugins = 20000;
+			stepUnzip = 40000 - stepPlugins/2;
+			stepInstall = 80000 - stepUnzip - stepPlugins;
+		}
+		int stepUnzipApp = 0, stepUnzipExtras = 0;
 		int nbUnzip = (zipApp.exists() ? 1 : 0) + (zipExtras.exists() ? 1 : 0);
-		if (zipApp.exists()) {
-			stepUnzipApp = stepUnzip/nbUnzip--;
-			stepUnzip -= stepUnzipApp;
-		} else stepUnzipApp = 0;
-		if (zipExtras.exists()) {
-			stepUnzipExtras = stepUnzip/nbUnzip--;
-			stepUnzip -= stepUnzipExtras;
-		} else stepUnzipExtras = 0;
-		int stepInstallJRE, stepInstallExtras, stepInstallApp;
+		if (nbUnzip > 0) {
+			if (zipApp.exists()) {
+				stepUnzipApp = stepUnzip/nbUnzip--;
+				stepUnzip -= stepUnzipApp;
+			} else stepUnzipApp = 0;
+			if (zipExtras.exists()) {
+				stepUnzipExtras = stepUnzip/nbUnzip--;
+				stepUnzip -= stepUnzipExtras;
+			} else stepUnzipExtras = 0;
+		} else {
+			stepInstall += stepUnzip;
+			stepUnzip = 0;
+		}
+		
+		int stepInstallJRE = 0, stepInstallExtras = 0, stepInstallApp = 0;
 		int nbInstall = (zipApp.exists() ? 1 : 0) + (zipExtras.exists() ? 1 : 0) + (zipJRE.exists() ? 1 : 0);
-		if (zipApp.exists()) {
-			stepInstallApp = stepInstall/nbInstall--;
-			stepInstall -= stepInstallApp;
-		} else stepInstallApp = 0;
-		if (zipExtras.exists()) {
-			stepInstallExtras = stepInstall/nbInstall--;
-			stepInstall -= stepInstallExtras;
-		} else stepInstallExtras = 0;
-		if (zipJRE.exists()) {
-			stepInstallJRE = stepInstall/nbInstall--;
-			stepInstall -= stepInstallJRE;
-		} else stepInstallJRE = 0;
+		if (nbInstall > 0) {
+			if (zipApp.exists()) {
+				stepInstallApp = stepInstall/nbInstall--;
+				stepInstall -= stepInstallApp;
+			} else stepInstallApp = 0;
+			if (zipExtras.exists()) {
+				stepInstallExtras = stepInstall/nbInstall--;
+				stepInstall -= stepInstallExtras;
+			} else stepInstallExtras = 0;
+			if (zipJRE.exists()) {
+				stepInstallJRE = stepInstall/nbInstall--;
+				stepInstall -= stepInstallJRE;
+			} else stepInstallJRE = 0;
+		} else {
+			if (stepUnzip > 0) stepUnzip += stepInstall; else stepPlugins += stepInstall;
+			stepInstall = 0;
+		}
 		ProgressDlg progressDlg = new ProgressDlg(progress);
 
 		if (zipApp.exists()) {
 			try { ZipUtil.unzip(zipApp, tmpAppDir, progress, stepUnzipApp); }
 			catch (Throwable t) {
 				new ErrorDlg("Unable to extract update", t);
-				progress.setDescription("Restring backuped application...");
-				progress.reset("Restring backuped application...", 10000);
+				progress.setDescription("Restoring backuped application...");
+				progress.reset("Restoring backuped application...", 10000);
 				backup.restore(progress, 10000);
 				System.exit(1);
 			}
@@ -104,33 +133,46 @@ public class Updater {
 			try { ZipUtil.unzip(zipExtras, tmpExtrasDir, progress, stepUnzipExtras); }
 			catch (Throwable t) {
 				new ErrorDlg("Unable to extract update", t);
-				progress.setDescription("Restring backuped application...");
-				progress.reset("Restring backuped application...", 10000);
+				progress.setDescription("Restoring backuped application...");
+				progress.reset("Restoring backuped application...", 10000);
 				backup.restore(progress, 10000);
 				System.exit(1);
 			}
 		}
 		if (zipApp.exists())
 			if (!Installer.installApplication(appDir, tmpAppDir, progress, stepInstallApp)) {
-				progress.setDescription("Restring backuped application...");
-				progress.reset("Restring backuped application...", 10000);
+				progress.setDescription("Restoring backuped application...");
+				progress.reset("Restoring backuped application...", 10000);
 				backup.restore(progress, 10000);
 				System.exit(1);
 			}
 		if (zipExtras.exists())
 			if (!Installer.installExtras(extrasDir, tmpExtrasDir, progress, stepInstallExtras)) {
-				progress.setDescription("Restring backuped application...");
-				progress.reset("Restring backuped application...", 10000);
+				progress.setDescription("Restoring backuped application...");
+				progress.reset("Restoring backuped application...", 10000);
 				backup.restore(progress, 10000);
 				System.exit(1);
 			}
 		if (zipJRE.exists())
 			if (!Installer.installJRE(jreDir, tmpJREDir, progress, stepInstallJRE)) {
-				progress.setDescription("Restring backuped application...");
-				progress.reset("Restring backuped application...", 10000);
+				progress.setDescription("Restoring backuped application...");
+				progress.reset("Restoring backuped application...", 10000);
 				backup.restore(progress, 10000);
 				System.exit(1);
 			}
+		
+		int nb = plugins.size();
+		for (File file : plugins) {
+			int step = stepPlugins/nb--;
+			stepPlugins -= step;
+			if (!Installer.installPlugin(file, tmpDir, appDir, progress, step)) {
+				progress.setDescription("Restoring backuped application...");
+				progress.reset("Restoring backuped application...", 10000);
+				backup.restore(progress, 10000);
+				System.exit(1);
+			}
+		}
+		
 		progress.setDescription("Finalizing installation...");
 		InstallFinalizer.finalize(path);
 		backup.remove();

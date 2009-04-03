@@ -10,9 +10,8 @@ import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.List;
 
-import javax.swing.filechooser.FileSystemView;
-
 import net.lecousin.framework.Pair;
+import net.lecousin.framework.io.FileSystemUtil;
 import net.lecousin.framework.xml.XmlWriter;
 
 import org.eclipse.core.filesystem.EFS;
@@ -75,20 +74,15 @@ public abstract class DataSource {
 		return get(EFS.getStore(uri));
 	}
 	private static Pair<String,String> getAmovibleSubPaths(File f) {
-		File a = getAmovibleFile(f);
+		File a = FileSystemUtil.getAmovibleDrive(f);
 		if (a == null) return null;
 		String ap = a.getAbsolutePath();
 		String fp = f.getAbsolutePath().substring(ap.length());
-		if (fp.startsWith(File.pathSeparator))
-			fp = fp.substring(File.pathSeparator.length());
+		if (fp.startsWith(File.separator))
+			fp = fp.substring(File.separator.length());
+		if (ap.endsWith(File.separator))
+			ap = ap.substring(0, ap.length()-File.separator.length());
 		return new Pair<String,String>(ap, fp);
-	}
-	private static File getAmovibleFile(File f) {
-		if (FileSystemView.getFileSystemView().isFloppyDrive(f))
-			return f;
-		File p = f.getParentFile();
-		if (p == null) return null;
-		return getAmovibleFile(p);
 	}
 	
 	public boolean hasLink(IFileStore file) {

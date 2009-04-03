@@ -25,6 +25,7 @@ import net.lecousin.framework.event.Event.Listener;
 import net.lecousin.framework.files.FileType;
 import net.lecousin.framework.files.TypedFile;
 import net.lecousin.framework.files.TypedFolder;
+import net.lecousin.framework.io.FileSystemUtil;
 import net.lecousin.framework.log.Log;
 import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.ui.eclipse.UIUtil;
@@ -36,6 +37,7 @@ import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileInfo;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -207,6 +209,23 @@ public class AddData_Folder extends WizardPage implements AddData_Page {
 		
 		Search search = new Search(textFolder.getShell());
 		return search.run(rootURI, recurse, types, checkLinked);
+	}
+	public boolean finished() {
+		URI rootURI;
+		try { rootURI = new URI(textFolder.getText()); }
+		catch (URISyntaxException e) {
+			return true;
+		}
+		try {
+			IFileStore file = EFS.getStore(rootURI);
+			if (file == null) return true;
+			File f = file.toLocalFile(EFS.NONE, null);
+			if (f == null) return true;
+			if (!FileSystemUtil.isOnAmovibleDrive(f)) return true;
+			return !MessageDialog.openQuestion(textFolder.getShell(), Local.Add_data.toString(), Local.MESSAGE_Add_Data_Continue_On_Amovible.toString());
+		} catch (CoreException e) {
+			return true;
+		}
 	}
 	
 	private static class Search {

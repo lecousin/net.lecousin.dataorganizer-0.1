@@ -3,6 +3,19 @@
   <title>DataOrganizer - Free software to arrange you video, music and all your data</title>
   <meta name="keywords" content="dataorganizer, data, organize, sort, video, movie, music, album, media, free, open source, software, download">
   <meta name="Description" content="DataOrganizer is a free software to organize your videos and music, to retrieve information from Internet...">
+
+<script type="text/javascript">
+function content_ready() {
+	var i = this.location.search.lastIndexOf('?page=')
+	var page
+	if (i>=0) {
+		page = this.location.search.substring(i+6,this.location.search.length)
+	} else
+		page = "home.html"
+	this.content.location=page
+}
+</script>  
+
 </head>
 <frameset frameborder="0" framespacing="0" rows="40,*">
   <frame src="header.html" scrolling="no" noresize></frame>

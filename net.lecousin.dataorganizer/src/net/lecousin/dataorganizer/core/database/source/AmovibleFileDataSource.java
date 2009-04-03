@@ -8,11 +8,10 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.swing.filechooser.FileSystemView;
-
 import net.lecousin.dataorganizer.Local;
 import net.lecousin.framework.collections.CollectionUtil;
 import net.lecousin.framework.io.FileSystemUtil;
+import net.lecousin.framework.io.FileSystemUtil.Drive;
 import net.lecousin.framework.xml.XmlWriter;
 
 import org.eclipse.core.runtime.CoreException;
@@ -47,11 +46,10 @@ public class AmovibleFileDataSource extends FileDataSource {
 	}
 	
 	private File findFile() {
-		File f = new File(amovibleDrivePath + File.pathSeparator + fileSubPath);
+		File f = new File(amovibleDrivePath + File.separator + fileSubPath);
 		if (f.exists()) return f;
-		File[] roots = FileSystemView.getFileSystemView().getRoots();
-		for (File root : roots) {
-			f = new File(root, fileSubPath);
+		for (Drive drive : FileSystemUtil.getAmovibleDrives()) {
+			f = new File(drive.getRoot(), fileSubPath);
 			if (f.exists()) return f;
 		}
 		return null;

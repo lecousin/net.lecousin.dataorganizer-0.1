@@ -14,6 +14,8 @@
 			<file host="dataorganizer.webhop.net" port="80">/update/app-test.zip.part1</file>
 			<file host="dataorganizer.webhop.net" port="80">/update/app-test.zip.part2</file>
 		</application>
+		<plugin name="net.lecousin.framework" host="dataorganizer.webhop.net" port="80">/update/net.lecousin.framework-test.zip</plugin>
+		<plugin name="net.lecousin.framework.ui" host="dataorganizer.webhop.net" port="80">/update/net.lecousin.framework.ui-test.zip</plugin>
 	</update>
 	<jre version="99.99.99">
 		<file host="dataorganizer.webhop.net" port="80">/update/jre-test.zip</file>

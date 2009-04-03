@@ -102,4 +102,7 @@ public class AddVideosWizardPage extends WizardPage implements AddData_Page {
 		}
 		return result;
 	}
+	public boolean finished() {
+		return true;
+	}
 }

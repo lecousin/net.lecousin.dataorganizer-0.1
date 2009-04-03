@@ -5,8 +5,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.net.SocketFactory;
 
@@ -93,6 +95,20 @@ public class Updater {
 				extrasFiles = getFiles(getNode(root, "extras", newExtras));
 			updaterFiles = getFiles(XmlUtil.get_child_element(newNode, "updater"));
 			applicationFiles = getFiles(XmlUtil.get_child_element(newNode, "application"));
+			for (Element e : XmlUtil.get_childs_element(root, "plugin")) {
+				String name = e.getAttribute("name");
+				List<UpdateFile> list = plugins.get(name);
+				if (list == null) {
+					list = new LinkedList<UpdateFile>();
+					plugins.put(name, list);
+				}
+				UpdateFile file = new UpdateFile();
+				file.host = e.getAttribute("host");
+				try { file.port = Integer.parseInt(e.getAttribute("port")); }
+				catch (NumberFormatException ex) { file.port = 80; }
+				file.path = XmlUtil.get_inner_text(e);
+				list.add(file);
+			}
 		}
 		private Version currentVersion;
 		private Version newVersion;
@@ -101,6 +117,7 @@ public class Updater {
 		private List<UpdateFile> applicationFiles;
 		private List<UpdateFile> jreFiles;
 		private List<UpdateFile> extrasFiles;
+		private Map<String,List<UpdateFile>> plugins = new HashMap<String,List<UpdateFile>>();
 		
 		private Element getNode(Element root, String name, Version version) {
 			return XmlUtil.get_child_with_attr(root, name, "version", version.toString());
@@ -334,8 +351,8 @@ public class Updater {
 		
 		try {
 			File updateTmp = new File(Application.deployPath, "update-tmp");
-			//FileSystemUtil.deleteDirectory(updateTmp);
-			//updateTmp.mkdirs();
+			FileSystemUtil.deleteDirectory(updateTmp);
+			updateTmp.mkdirs();
 			progress.progress(20);
 			
 			if (update.updaterFiles == null || update.updaterFiles.isEmpty())
@@ -352,9 +369,10 @@ public class Updater {
 				nb += update.jreFiles.size();
 			if (update.extrasFiles != null)
 				nb += update.extrasFiles.size();
+			for (List<UpdateFile> list : update.plugins.values())
+				nb += list.size();
 			
 			int step;
-			/*
 			step = stepDownload*update.updaterFiles.size()/nb;
 			stepDownload -= step; nb -= update.updaterFiles.size();
 			downloadFile(update.updaterFiles, updateTmp, "updater.jar", progress, step);
@@ -368,10 +386,15 @@ public class Updater {
 				stepDownload -= step; nb -= update.extrasFiles.size();
 				downloadFile(update.extrasFiles, updateTmp, "extras.zip", progress, step);
 			}
+			for (Map.Entry<String, List<UpdateFile>> e : update.plugins.entrySet()) {
+				step = stepDownload*e.getValue().size()/nb;
+				stepDownload -= step; nb -= e.getValue().size();
+				downloadFile(e.getValue(), updateTmp, "plugin_"+e.getKey()+".zip", progress, step);
+			}
 			step = stepDownload;
 			stepDownload -= step; nb -= update.applicationFiles.size();
 			downloadFile(update.applicationFiles, updateTmp, "application.zip", progress, step);
-*/
+			
 			int stepJRE = stepFinalize*80/100;
 			int stepRun = stepFinalize - stepJRE;
 			try {

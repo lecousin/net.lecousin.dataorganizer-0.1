@@ -7,6 +7,7 @@ import java.util.Set;
 
 import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.core.database.Data;
+import net.lecousin.dataorganizer.core.database.content.DataContentType;
 import net.lecousin.dataorganizer.core.database.info.Info;
 import net.lecousin.dataorganizer.core.database.info.InfoRetriever;
 import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPlugin;
@@ -159,8 +160,19 @@ public class OverviewPanel extends Composite {
 	private Composite sourcesPanel;
 	private MenuButton buttonRetrieveInfo;
 	
+	private Listener<Data> dataChanged = new Listener<Data>() { public void fire(Data event) { refresh(event); } };
+	private Listener<DataContentType> dataContentChanged = new Listener<DataContentType>() { public void fire(DataContentType event) { refresh(event.getData()); } };
+	
 	public void refresh(Data data) {
+		if (this.data != null) {
+			this.data.modified().removeListener(dataChanged);
+			this.data.contentModified().removeListener(dataContentChanged);
+		}
 		this.data = data;
+		if (data != null) {
+			data.modified().addListener(dataChanged);
+			data.contentModified().addListener(dataContentChanged);
+		}
 		imageControl.setData(data);
 		labelsPanel.refresh(data);
 		textName.clear();

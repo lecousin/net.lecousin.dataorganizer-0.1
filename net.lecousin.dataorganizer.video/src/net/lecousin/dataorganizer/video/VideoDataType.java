@@ -261,6 +261,7 @@ public class VideoDataType extends DataContentType {
 			player.start();
 			if (duration < 0)
 				duration = media.getDuration();
+			previewImages = null;
 			takePreviewImages(visual, media, player, progress, work);
 			if (duration < 0)
 				duration = media.getDuration();

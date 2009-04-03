@@ -3,12 +3,25 @@
   <title>DataOrganizer - Logiciel gratuit pour organiser vos videos, votre musique et toutes vos données</title>
   <meta name="keywords" content="dataorganizer, donnée, organiser, trier, video, film, musique, album, media, gratuit, open source, logiciel, telecharger">
   <meta name="Description" content="DataOrganizer est un logiciel gratuit vous permettant d'organiser vos videos et votre musique, de recuperer des informations depuis internet...">
+  
+<script type="text/javascript">
+function content_ready() {
+	var i = this.location.search.lastIndexOf('?page=')
+	var page
+	if (i>=0) {
+		page = this.location.search.substring(i+6,this.location.search.length)
+	} else
+		page = "home.html"
+	this.content.location=page
+}
+</script>  
+ 
 </head>
 <frameset frameborder="0" framespacing="0" rows="40,*">
-  <frame src="header.html" scrolling="no" noresize></frame>
+  <frame src="header.html" scrolling="no" noresize name="header"></frame>
   <frameset frameborder="0" framespacing="0" cols="150,*,150">
     <frame src="left.html" scrolling="no" noresize/>
-    <frame src="home.html" scrolling="auto" name="content"/>
+    <frame src="default.html" scrolling="auto" name="content"/>
     <frame src="right.html" scrolling="no" noresize/>
   </frameset>
 </frameset>

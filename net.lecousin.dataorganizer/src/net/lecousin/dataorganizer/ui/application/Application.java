@@ -100,7 +100,7 @@ public class Application implements IApplication {
 		if (firstlaunch)
 			handleFirstLaunch();
 		
-		if (checkUpdate(display))
+		if (checkUpdate(display, firstlaunch))
 			return IApplication.EXIT_OK;
 
 		int returnCode = PlatformUI.createAndRunWorkbench(display, new ApplicationWorkbenchAdvisor());
@@ -131,12 +131,13 @@ public class Application implements IApplication {
 		});
 	}
 	
-	private boolean checkUpdate(Display display) {
+	private boolean checkUpdate(Display display, boolean firstLaunch) {
 		DataOrganizerConfig config = DataOrganizer.config();
 		if ((System.currentTimeMillis()-config.last_update_check)/((long)24*60*60*1000) < config.update_check_frequency) return false;
 
 		config.last_update_check = System.currentTimeMillis();
 		config.save();
+		if (firstLaunch) return false;
 		Shell shell = null;
 		try {
 			shell = new Shell(display, SWT.PRIMARY_MODAL/*SWT.APPLICATION_MODAL*/);

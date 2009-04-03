@@ -12,6 +12,7 @@ public interface AddData_Page extends IWizardPage {
 
 	public boolean canFinish();
 	public Result performFinish();
+	public boolean finished();
 	
 	public static class Result {
 		public VirtualDataBase db;

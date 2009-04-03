@@ -8,7 +8,10 @@ import java.util.Set;
 import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.core.DataOrganizer;
 import net.lecousin.dataorganizer.core.database.Data;
+import net.lecousin.dataorganizer.core.database.refresh.RefreshOptions;
+import net.lecousin.dataorganizer.core.database.refresh.Refresher;
 import net.lecousin.dataorganizer.internal.EclipsePlugin;
+import net.lecousin.dataorganizer.ui.dialog.RefreshDialog;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.ui.eclipse.dialog.ErrorDlg;
@@ -94,4 +97,10 @@ public class DataListActions {
 			delete(toRemove);
 	}
 	
+	public static void refresh(List<Data> data) {
+		RefreshDialog dlg = new RefreshDialog(MyDialog.getPlatformShell());
+		RefreshOptions options = dlg.open();
+		if (options == null) return;
+		Refresher.refresh(MyDialog.getPlatformShell(), DataOrganizer.database(), data, options);
+	}
 }

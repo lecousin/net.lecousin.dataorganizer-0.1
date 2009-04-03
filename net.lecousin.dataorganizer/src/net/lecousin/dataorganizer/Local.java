@@ -38,6 +38,7 @@ public enum Local {
 	Options("Options", "Options"),
 	Rate("Rate", "Note"),
 	Rating("Rating", "Notation"),
+	Refresh("Refresh", "Rafraîchir"),
 	Refreshing("Refreshing", "Rafraîchissement"),
 	Remove("Remove", "Supprimer"),
 	Rename("Rename", "Renommer"),
@@ -412,7 +413,11 @@ public enum Local {
 		"The file(s)<br/>%#1%has(ve) been removed from the file system but the data %#2% contains linked to this(ese) file(s).<br/>What do you want to do ?",
 		"Le(s) fichier(s)<br/>%#1%a(ont) été supprimé(s) de l'ordinateur mais la donnée %#2% contient des liens vers ce(s) fichier(s).<br/>Que souhaitez-vous faire ?"
 	),
-		
+
+	MESSAGE_Add_Data_Continue_On_Amovible(
+		"You add data from an amovible disk (CD/DVD, USB key...).\r\nDo you want to continue with another amovible disk ?",
+		"Vous venez d'ajouter des données depuis un disque amovible (CD/DVD, clé USB...).\r\nSouhaitez-vous continuer avec un autre disque amovible ?"
+	),
 	
 	;
 	private Local(String english, String french) {

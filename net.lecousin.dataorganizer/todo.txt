@@ -1,11 +1,13 @@
 Avant prochaine release:
 
 DataOrganizer
+ + check tous les TODO
  
 A tester:
  + MediaPlayer dans tous les sens (audio+video)
- + ajouter toutes mes donnees... 
- + amovible
+ + ajouter toutes mes donnees...
+ + install
+ + Git branches 
 
 Audio
  + MP3 single

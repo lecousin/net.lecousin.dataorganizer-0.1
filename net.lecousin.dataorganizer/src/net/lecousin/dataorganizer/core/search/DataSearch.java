@@ -11,6 +11,7 @@ import net.lecousin.dataorganizer.core.DataOrganizer;
 import net.lecousin.dataorganizer.core.DataLabels.Label;
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.content.ContentType;
+import net.lecousin.dataorganizer.core.database.content.DataContentType;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.event.Event;
 import net.lecousin.framework.event.Event.Listener;
@@ -98,6 +99,11 @@ public class DataSearch {
 		DataOrganizer.database().dataChanged().addListener(new Listener<Data>() {
 			public void fire(Data event) {
 				updateData(event);
+			}
+		});
+		DataOrganizer.database().dataContentChanged().addListener(new Listener<DataContentType>() {
+			public void fire(DataContentType event) {
+				updateData(event.getData());
 			}
 		});
 		DataOrganizer.database().dataRemoved().addListener(new Listener<Data>() {

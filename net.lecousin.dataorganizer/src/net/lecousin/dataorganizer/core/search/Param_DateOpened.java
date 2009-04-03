@@ -5,6 +5,7 @@ import java.util.Calendar;
 import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.core.DataOrganizer;
 import net.lecousin.dataorganizer.core.database.Data;
+import net.lecousin.dataorganizer.core.database.content.DataContentType;
 import net.lecousin.dataorganizer.core.search.DataSearch.ReversableParameter;
 import net.lecousin.framework.event.Event.Listener;
 import net.lecousin.framework.math.RangeLong;
@@ -53,10 +54,12 @@ public class Param_DateOpened extends ReversableParameter {
 		});
 		Events events = new Events(c);
 		DataOrganizer.database().dataChanged().addListener(events.dataChanged);
+		DataOrganizer.database().dataContentChanged().addListener(events.dataContentChanged);
 		DataOrganizer.database().dataRemoved().addListener(events.dataRemoved);
 		c.addDisposeListener(new DisposeListenerWithData<Events>(events) {
 			public void widgetDisposed(DisposeEvent e) {
 				DataOrganizer.database().dataChanged().removeListener(data().dataChanged);
+				DataOrganizer.database().dataContentChanged().removeListener(data().dataContentChanged);
 				DataOrganizer.database().dataRemoved().removeListener(data().dataRemoved);
 			}
 		});
@@ -81,6 +84,11 @@ public class Param_DateOpened extends ReversableParameter {
 			dataRemoved = new DataRemoved(panel);
 		}
 		DataChanged dataChanged;
+		Listener<DataContentType> dataContentChanged = new Listener<DataContentType>() {
+			public void fire(DataContentType event) {
+				dataChanged.fire(event.getData());
+			}
+		};
 		DataRemoved dataRemoved;
 	}
 	private class DataChanged implements Listener<Data> {

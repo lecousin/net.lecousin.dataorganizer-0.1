@@ -10,6 +10,7 @@ import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.core.DataOrganizer;
 import net.lecousin.dataorganizer.core.DataLabels.Label;
 import net.lecousin.dataorganizer.core.database.Data;
+import net.lecousin.dataorganizer.core.database.content.DataContentType;
 import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.dataorganizer.ui.DataOrganizerDND;
 import net.lecousin.dataorganizer.ui.control.DataImageControl;
@@ -18,6 +19,7 @@ import net.lecousin.dataorganizer.ui.control.RateControl;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.event.Event;
 import net.lecousin.framework.event.Event.Listener;
+import net.lecousin.framework.event.Event.ListenerData;
 import net.lecousin.framework.time.DateTimeUtil;
 import net.lecousin.framework.ui.eclipse.UIUtil;
 import net.lecousin.framework.ui.eclipse.control.list.AdvancedList;
@@ -69,6 +71,13 @@ public class DataListView extends ViewPart {
 		list = new AdvancedList<Data>(parent, SWT.MULTI, new TitleProvider(), new ContentProvider());
 		list.addContentChangedEvent(DataOrganizer.search().searchChanged());
 		list.addElementChangedEvent(DataOrganizer.database().dataChanged());
+		Event<Data> contentChanged = new Event<Data>();
+		DataOrganizer.database().dataContentChanged().addListener(new ListenerData<DataContentType,Event<Data>>(contentChanged) {
+			public void fire(DataContentType event) {
+				data().fire(event.getData());
+			}
+		});
+		list.addElementChangedEvent(contentChanged);
 		list.addElementChangedEvent(labellingChanged);
 		DataOrganizer.labels().labelAssigned().addListener(labellingListener);
 		DataOrganizer.labels().labelUnassigned().addListener(labellingListener);

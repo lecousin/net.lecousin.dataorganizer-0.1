@@ -91,6 +91,7 @@ public class AddDataWizard extends Wizard {
     		AddDataDialog dlg = new AddDataDialog(getShell(), result);
     		if (!dlg.open()) return false;
             getContainer().run(false, true, new AddData(getShell(), result));
+            return ((AddData_Page)page).finished();
         } catch (InterruptedException e) {
             return false;
         } catch (InvocationTargetException e) {
@@ -101,8 +102,6 @@ public class AddDataWizard extends Wizard {
         	if (result.db != null)
         		result.db.close();
         }
-		
-		return true;
 	}
 	
 	private static class AddData implements IRunnableWithProgress {
