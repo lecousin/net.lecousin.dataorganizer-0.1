@@ -9,6 +9,7 @@ import net.lecousin.dataorganizer.core.database.info.Info;
 import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPlugin;
 import net.lecousin.dataorganizer.video.VideoInfo;
 import net.lecousin.dataorganizer.video.VideoSourceInfo;
+import net.lecousin.framework.application.Application.Language;
 import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.ui.eclipse.EclipseImages;
 
@@ -29,7 +30,14 @@ public class AlloCineMovieRetriever implements InfoRetrieverPlugin {
 		return EclipseImages.getImage(EclipsePlugin.ID, "images/icon.gif");
 	}
 	public String getURLForSourceID(String id) {
-		return "http://www.allocine.fr/film/fichefilm_gen_cfilm=" + id + ".html";
+		return "http://"+AlloCineUtil.getHost()+"/film/fichefilm_gen_cfilm=" + id + ".html";
+	}
+	public boolean isSupportingLanguage(Language lang) {
+		switch (lang) {
+		case FRENCH:
+		case ENGLISH: return true;
+		}
+		return false;
 	}
 
 	public void retrieve(SearchResult search, Info info, WorkProgress progress, int work) {
@@ -47,16 +55,21 @@ public class AlloCineMovieRetriever implements InfoRetrieverPlugin {
 		int nb = 5;
 		int step = work/nb--;
 		work -= step;
+		if (progress.isCancelled()) return false;
 		success |= new Movie().retrieve(id, source, progress, step);
 		step = work/nb--;
 		work -= step;
+		if (progress.isCancelled()) return false;
 		success |= new Casting().retrieve(id, source, progress, step);
 		step = work/nb--;
 		work -= step;
+		if (progress.isCancelled()) return false;
 		success |= new Poster().retrieve(id, source, progress, step);
 		step = work/nb--;
 		work -= step;
+		if (progress.isCancelled()) return false;
 		success |= new PressCritik().retrieve(id, source, progress, step);
+		if (progress.isCancelled()) return false;
 		success |= new UsersCritik().retrieve(id, source, progress, work);
 		return success;
 	}

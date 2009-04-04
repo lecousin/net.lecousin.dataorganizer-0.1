@@ -10,7 +10,7 @@ Require-Bundle: org.eclipse.ui,
  net.lecousin.framework,
  net.lecousin.framework.media,
  net.lecousin.framework.ui,
- org.eclipse.ui.forms;bundle-version="3.3.101"
+ org.eclipse.ui.forms
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Export-Package: net.lecousin.dataorganizer.mediaplayer

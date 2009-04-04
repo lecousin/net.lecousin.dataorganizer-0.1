@@ -4,14 +4,16 @@
    <extension
          point="net.lecousin.dataorganizer.inforetriever">
       <retriever
+      		id="AlloCine"
             class="net.lecousin.dataorganizer.allocine.film.AlloCineMovieRetriever"
             content_type_id="video"
-            id="AlloCine">
+            >
       </retriever>
       <retriever
+      		id="AlloCine"
             class="net.lecousin.dataorganizer.allocine.personne.AlloCinePeopleRetriever"
             content_type_id="people"
-            id="AlloCine">
+            >
       </retriever>
    </extension>
 

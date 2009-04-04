@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.lecousin.dataorganizer.internal.EclipsePlugin;
+import net.lecousin.framework.application.Application;
 import net.lecousin.framework.eclipse.extension.EclipsePluginExtensionUtil;
 import net.lecousin.framework.log.Log;
 
@@ -23,7 +24,7 @@ public class InfoRetrieverPluginRegistry {
 		for (IConfigurationElement ext : getPlugins()) {
 			if (isContentType(ext, contentTypeID)) {
 				InfoRetrieverPlugin pi = getPlugin(ext);
-				if (pi != null)
+				if (pi != null && pi.isSupportingLanguage(Application.language))
 					plugins.add(pi);
 			}
 		}
@@ -64,6 +65,8 @@ public class InfoRetrieverPluginRegistry {
 			if (pi == null) return null;
 			map.put(contentTypeID, pi);
 		}
+		if (!pi.isSupportingLanguage(Application.language))
+			return null;
 		return pi;
 	}
 	private static InfoRetrieverPlugin getPlugin(IConfigurationElement cfg) {

@@ -9,15 +9,15 @@ Require-Bundle: org.eclipse.ui,
  net.lecousin.dataorganizer,
  net.lecousin.framework,
  net.lecousin.framework.ui,
- org.eclipse.core.filesystem;bundle-version="1.2.0",
- org.eclipse.ui.ide;bundle-version="3.4.1",
- org.eclipse.core.resources;bundle-version="3.4.1",
- org.eclipse.ui.forms;bundle-version="3.3.101",
+ org.eclipse.core.filesystem,
+ org.eclipse.ui.ide,
+ org.eclipse.core.resources,
+ org.eclipse.ui.forms,
  net.lecousin.framework.media,
  net.lecousin.dataorganizer.people,
  net.lecousin.dataorganizer.mediaplayer,
- net.lecousin.framework.files;bundle-version="0.1.0",
- net.lecousin.framework.files.video;bundle-version="0.1.0"
+ net.lecousin.framework.files,
+ net.lecousin.framework.files.video
 Eclipse-LazyStart: true
 Export-Package: net.lecousin.dataorganizer.video
 Bundle-Vendor: Guillaume LE COUSIN

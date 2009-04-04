@@ -3,6 +3,8 @@ package net.lecousin.dataorganizer.allocine.film;
 import java.io.ByteArrayInputStream;
 
 import net.lecousin.dataorganizer.allocine.AlloCinePage;
+import net.lecousin.dataorganizer.allocine.AlloCineUtil;
+import net.lecousin.dataorganizer.allocine.Local;
 import net.lecousin.dataorganizer.video.VideoSourceInfo;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.eclipse.resource.ResourceUtil;
@@ -28,7 +30,7 @@ public class Poster extends AlloCinePage<VideoSourceInfo> {
 	
 	@Override
 	protected String getDescription() {
-		return "Poster";
+		return Local.Poster.toString();
 	}
 	
 	@Override
@@ -64,7 +66,7 @@ public class Poster extends AlloCinePage<VideoSourceInfo> {
 			progress.progress(work);
 			return new Pair<String,Boolean>(null, false);
 		}
-		HttpRequest req = HttpRequest.fromURL(url, "www.allocine.fr", 80);
+		HttpRequest req = HttpRequest.fromURL(url, AlloCineUtil.getHost(), 80);
 		if (HttpUtil.retrieveFile(req, file.getLocation().toFile(), true, progress, work)) {
 			info.addPoster(url, "allocine/"+file.getName());
 		} else {

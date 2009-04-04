@@ -9,6 +9,7 @@ import java.util.List;
 import javax.net.SocketFactory;
 
 import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPlugin.SearchResult;
+import net.lecousin.framework.application.Application;
 import net.lecousin.framework.event.Event.Listener;
 import net.lecousin.framework.log.Log;
 import net.lecousin.framework.net.http.HttpURI;
@@ -50,7 +51,7 @@ public class Search {
 						if (image == null) {
 							try {
 								File file = File.createTempFile("allocine", "poster");
-								HttpRequest req = HttpRequest.fromURL(imageURL, "www.allocine.fr", 80);
+								HttpRequest req = HttpRequest.fromURL(imageURL, AlloCineUtil.getHost(), 80);
 								if (HttpUtil.retrieveFile(req, file, true, null, 0))
 									image = new Image(Display.getCurrent(), new FileInputStream(file));
 								file.delete();
@@ -67,7 +68,7 @@ public class Search {
 					if (image != null)
 						UIUtil.newImage(panel, image).setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
 					StringBuilder str = new StringBuilder();
-					str.append("<a href=\"http://www.allocine.fr").append(link).append("\">").append(title).append("</a>\n");
+					str.append("<a href=\"http://"+AlloCineUtil.getHost()).append(link).append("\">").append(title).append("</a>\n");
 					for (String info : information)
 						str.append(info).append("\n");
 					str.append("</form>");
@@ -79,7 +80,7 @@ public class Search {
 							BrowserWindow browser = new BrowserWindow("DataOrganizer [AlloCine]", null, true, true);
 							HttpURI uri = new HttpURI(href);
 							if (uri.getHost() == null) {
-								uri.setHost("www.allocine.fr");
+								uri.setHost(AlloCineUtil.getHost());
 								uri.setPort(80);
 								uri.setProtocol("http");
 							}
@@ -100,7 +101,7 @@ public class Search {
 		int pageIndex = 1;
 		String page;
 		do {
-			progress.setSubDescription("Page " + pageIndex);
+			progress.setSubDescription(Local.Page+" " + pageIndex);
 			page = getSearchPage(name, pageIndex, rub);
 			results.addAll(getResults(page, rub));
 		} while (hasPage(page, rub, ++pageIndex));
@@ -109,7 +110,7 @@ public class Search {
 	}
 	private static String getSearchPage(String name, int pageIndex, int rub) {
 		HttpClient client = new HttpClient(SocketFactory.getDefault());
-		HttpRequest req = new HttpRequest("www.allocine.fr", 80, "/recherche/");
+		HttpRequest req = new HttpRequest(AlloCineUtil.getHost(), 80, "/recherche/");
 		req.addParameter("motcle", name);
 		req.addParameter("rub", rub);
 		req.addParameter("page", pageIndex);
@@ -122,12 +123,31 @@ public class Search {
 			return null;
 		}
 	}
+	public enum STR {
+		NoResult("Sorry, no result", "on n'a pas trouvé"),
+		Start("You have searched for: <b>","Recherche : <b>"),
+		;
+		private STR(String english, String french) {
+			this.english = english;
+			this.french = french;
+		}
+		private String english;
+		private String french;
+		@Override
+		public java.lang.String toString() {
+			switch (Application.language) {
+			case FRENCH: return french;
+			default: return english;
+			}
+		}
+	}
+	
 	private static List<SearchResult> getResults(String page, int rub) {
 		List<SearchResult> results = new LinkedList<SearchResult>();
 		if (page == null) return results;
 
-		if (page.indexOf("on n'a pas trouvé") > 0) return results;
-		int i = page.indexOf("Recherche : <b>");
+		if (page.indexOf(STR.NoResult.toString()) > 0) return results;
+		int i = page.indexOf(STR.Start.toString());
 		if (i < 0) return results;
 		i = page.indexOf("SpBlocTitle", i);
 		if (i < 0) return results;

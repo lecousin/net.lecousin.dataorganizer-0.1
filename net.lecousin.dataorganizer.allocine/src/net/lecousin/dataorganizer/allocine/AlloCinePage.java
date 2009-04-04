@@ -42,19 +42,19 @@ public abstract class AlloCinePage<T extends SourceInfo> {
 		do {
 			step = work/10;
 			work -= step;
-			progress.setSubDescription(getDescription());
 			Pair<String,Boolean> result = parse(page, nextURL, info, progress, step);
 			nextURL = result.getValue1();
 			success |= result.getValue2();
 			if (nextURL != null)
 				page = loadPage(nextURL);
+			if (progress.isCancelled()) break;
 		} while (nextURL != null && page != null);
 		progress.progress(work);
 		return success;
 	}
 	
 	private String loadPage(String url) {
-		HttpRequest req = new HttpRequest("www.allocine.fr", 80, url);
+		HttpRequest req = new HttpRequest(AlloCineUtil.getHost(), 80, url);
 		HttpClient client = new HttpClient(SocketFactory.getDefault());
 		HttpResponse resp;
 		try { resp = client.send(req, true, null, 0); }

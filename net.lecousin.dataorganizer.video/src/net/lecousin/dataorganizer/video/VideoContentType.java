@@ -124,7 +124,7 @@ public class VideoContentType extends ContentType {
 	@Override
 	public void loadDataContent(Data data, Object context, WorkProgress progress, int work) {
 		LoadDataContentContext ctx = (LoadDataContentContext)context;
-		if (ctx.visual == null || ctx.player == null) {
+		if (ctx == null || ctx.visual == null || ctx.player == null) {
 			progress.progress(work);
 			return;
 		}

@@ -9,6 +9,7 @@ import net.lecousin.dataorganizer.core.database.info.Info;
 import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPlugin;
 import net.lecousin.dataorganizer.people.PeopleInfo;
 import net.lecousin.dataorganizer.people.PeopleSourceInfo;
+import net.lecousin.framework.application.Application.Language;
 import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.ui.eclipse.EclipseImages;
 
@@ -28,8 +29,15 @@ public class AlloCinePeopleRetriever implements InfoRetrieverPlugin {
 	public Image getIcon() {
 		return EclipseImages.getImage(EclipsePlugin.ID, "images/icon.gif");
 	}
+	public boolean isSupportingLanguage(Language lang) {
+		switch (lang) {
+		case FRENCH:
+		case ENGLISH: return true;
+		}
+		return false;
+	}
 	public String getURLForSourceID(String id) {
-		return "http://www.allocine.fr/personne/fichepersonne_gen_cpersonne=" + id + ".html";
+		return "http://"+AlloCineUtil.getHost()+"/personne/fichepersonne_gen_cpersonne=" + id + ".html";
 	}
 	
 	public List<SearchResult> search(String name, WorkProgress progress, int work) {
@@ -46,9 +54,11 @@ public class AlloCinePeopleRetriever implements InfoRetrieverPlugin {
 		int nb = 2;
 		int step = work/nb--;
 		work -= step;
+		if (progress.isCancelled()) return false;
 		success |= new People().retrieve(id, source, progress, step);
 		step = work/nb--;
 		work -= step;
+		if (progress.isCancelled()) return false;
 		success |= new Filmographie().retrieve(id, source, progress, step);
 		return success;
 	}

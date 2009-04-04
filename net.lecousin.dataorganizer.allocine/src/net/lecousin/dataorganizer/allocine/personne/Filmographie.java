@@ -2,16 +2,18 @@ package net.lecousin.dataorganizer.allocine.personne;
 
 import net.lecousin.dataorganizer.allocine.AlloCinePage;
 import net.lecousin.dataorganizer.allocine.AlloCineUtil;
+import net.lecousin.dataorganizer.allocine.Local;
 import net.lecousin.dataorganizer.core.database.info.Info.DataLink;
 import net.lecousin.dataorganizer.people.PeopleSourceInfo;
 import net.lecousin.dataorganizer.video.VideoContentType;
 import net.lecousin.framework.Pair;
+import net.lecousin.framework.application.Application;
 import net.lecousin.framework.progress.WorkProgress;
 
 public class Filmographie extends AlloCinePage<PeopleSourceInfo> {
 
 	@Override
-	protected String getDescription() { return "Activities"; }
+	protected String getDescription() { return Local.Activities.toString(); }
 	@Override
 	protected String getCategory() { return "personne"; }
 	@Override
@@ -21,9 +23,28 @@ public class Filmographie extends AlloCinePage<PeopleSourceInfo> {
 	protected String firstPageToReload(String page, String url) {
 		return null;
 	}
+	
+	public enum STR {
+		Start("<b>Filmography</b>", "<b>Filmographie</b>"),
+		;
+		private STR(String english, String french) {
+			this.english = english;
+			this.french = french;
+		}
+		private String english;
+		private String french;
+		@Override
+		public java.lang.String toString() {
+			switch (Application.language) {
+			case FRENCH: return french;
+			default: return english;
+			}
+		}
+	}	
+	
 	@Override
 	protected Pair<String,Boolean> parse(String page, String pageURL, PeopleSourceInfo info, WorkProgress progress, int work) {
-		int i = page.indexOf("<b>Filmographie</b>");
+		int i = page.indexOf(STR.Start.toString());
 		if (i < 0) { progress.progress(work); return new Pair<String,Boolean>(null, false); }
 
 		Pair<String,Integer> sectionP = getSection(page, "<table", "</table>", i);

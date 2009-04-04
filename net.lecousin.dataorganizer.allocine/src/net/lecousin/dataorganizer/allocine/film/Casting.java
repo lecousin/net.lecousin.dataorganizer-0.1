@@ -5,10 +5,12 @@ import java.util.List;
 
 import net.lecousin.dataorganizer.allocine.AlloCinePage;
 import net.lecousin.dataorganizer.allocine.AlloCineUtil;
+import net.lecousin.dataorganizer.allocine.Local;
 import net.lecousin.dataorganizer.core.database.info.Info;
 import net.lecousin.dataorganizer.people.PeopleContentType;
 import net.lecousin.dataorganizer.video.VideoSourceInfo;
 import net.lecousin.framework.Pair;
+import net.lecousin.framework.application.Application;
 import net.lecousin.framework.progress.WorkProgress;
 
 public class Casting extends AlloCinePage<VideoSourceInfo> {
@@ -24,12 +26,32 @@ public class Casting extends AlloCinePage<VideoSourceInfo> {
 
 	@Override
 	protected String getDescription() {
-		return "Casting";
+		return Local.Casting.toString();
 	}
 	
 	@Override
 	protected String firstPageToReload(String page, String pageURL) {
 		return null;
+	}
+	public enum STR {
+		Directors("Director", "Réalisation"),
+		Actors("Actor(s)", "Acteurs"),
+		Producers("Producer", "Production"),
+		Writers("Writer", "Scénario"),
+		;
+		private STR(String english, String french) {
+			this.english = english;
+			this.french = french;
+		}
+		private String english;
+		private String french;
+		@Override
+		public java.lang.String toString() {
+			switch (Application.language) {
+			case FRENCH: return french;
+			default: return english;
+			}
+		}
 	}
 	@Override
 	protected Pair<String,Boolean> parse(String page, String pageURL, VideoSourceInfo info, WorkProgress progress, int work) {
@@ -40,7 +62,7 @@ public class Casting extends AlloCinePage<VideoSourceInfo> {
 		
 		step = work/nb--;
 		work -= step;
-		list = getList(page, "Réalisation");
+		list = getList(page, STR.Directors.toString());
 		if (list != null) {
 			info.setDirectors(list);
 			success = true;
@@ -49,7 +71,7 @@ public class Casting extends AlloCinePage<VideoSourceInfo> {
 		
 		step = work/nb--;
 		work -= step;
-		list = getList(page, "Acteurs");
+		list = getList(page, STR.Actors.toString());
 		if (list != null) {
 			info.setActors(list);
 			success = true;
@@ -58,7 +80,7 @@ public class Casting extends AlloCinePage<VideoSourceInfo> {
 		
 		step = work/nb--;
 		work -= step;
-		list = getList(page, "Production");
+		list = getList(page, STR.Producers.toString());
 		if (list != null) {
 			info.setProductors(list);
 			success = true;
@@ -67,7 +89,7 @@ public class Casting extends AlloCinePage<VideoSourceInfo> {
 		
 		step = work/nb--;
 		work -= step;
-		list = getList(page, "Scénario");
+		list = getList(page, STR.Writers.toString());
 		if (list != null) {
 			info.setScenaristes(list);
 			success = true;

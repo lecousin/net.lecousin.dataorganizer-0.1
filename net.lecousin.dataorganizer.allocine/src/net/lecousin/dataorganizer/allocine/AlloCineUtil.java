@@ -1,5 +1,7 @@
 package net.lecousin.dataorganizer.allocine;
 
+import net.lecousin.framework.application.Application;
+
 
 public class AlloCineUtil {
 
@@ -19,4 +21,11 @@ public class AlloCineUtil {
 		return url.substring(i+1,j);
 	}
 	
+	public static String getHost() {
+		switch (Application.language) {
+		default:
+		case ENGLISH: return "www.screenrush.co.uk";
+		case FRENCH: return "www.allocine.fr";
+		}
+	}
 }

@@ -20,13 +20,20 @@
    <launcher name="DataOrganizer">
       <solaris/>
       <win useIco="false">
-         <bmp/>
+         <ico path="/net.lecousin.dataorganizer/launcher/icon.ico"/>
+         <bmp
+            winSmallHigh="/net.lecousin.dataorganizer/launcher/icon_16_32.bmp"
+            winSmallLow="/net.lecousin.dataorganizer/launcher/icon_16_8.bmp"
+            winMediumHigh="/net.lecousin.dataorganizer/launcher/icon_32_32.bmp"
+            winMediumLow="/net.lecousin.dataorganizer/launcher/icon_32_8.bmp"
+            winLargeHigh="/net.lecousin.dataorganizer/launcher/icon_48_32.bmp"
+            winLargeLow="/net.lecousin.dataorganizer/launcher/icon_48_8.bmp"/>
       </win>
    </launcher>
 
 
    <vm>
-      <windows>org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jre1.5.0_10</windows>
+      <windows>org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.5.0_10</windows>
    </vm>
 
    <plugins>
@@ -51,6 +58,7 @@
       <plugin id="net.lecousin.framework.ui.eclipse.browser"/>
       <plugin id="net.lecousin.media.jsound"/>
       <plugin id="net.lecousin.media.jsound.mp3"/>
+      <plugin id="net.lecousin.media.jsound.wav"/>
       <plugin id="net.lecousin.media.jvlc.client"/>
       <plugin id="net.lecousin.media.jvlc.common"/>
       <plugin id="net.lecousin.media.mp3"/>

@@ -8,9 +8,11 @@ import java.util.List;
 
 import net.lecousin.dataorganizer.allocine.AlloCinePage;
 import net.lecousin.dataorganizer.allocine.AlloCineUtil;
+import net.lecousin.dataorganizer.allocine.Local;
 import net.lecousin.dataorganizer.video.VideoSourceInfo;
 import net.lecousin.dataorganizer.video.VideoSourceInfo.Genre;
 import net.lecousin.framework.Pair;
+import net.lecousin.framework.application.Application;
 import net.lecousin.framework.log.Log;
 import net.lecousin.framework.progress.WorkProgress;
 
@@ -27,14 +29,33 @@ public class Movie extends AlloCinePage<VideoSourceInfo> {
 	
 	@Override
 	protected String getDescription() {
-		return "Movie information";
+		return Local.Movie_information.toString();
 	}
 	
 	@Override
 	protected String firstPageToReload(String page, String pageURL) {
 		return null;
 	}
-	@Override
+	public enum STR {
+		Genre("Genre:", "Genre :"),
+		ReleaseDate("Release date", "Date de sortie"),
+		DateFormat("MMMM dd, yyyy", "dd MMMM yyyy"),
+		Resume("Synopsis", "Synopsis"),
+		;
+		private STR(String english, String french) {
+			this.english = english;
+			this.french = french;
+		}
+		private String english;
+		private String french;
+		@Override
+		public java.lang.String toString() {
+			switch (Application.language) {
+			case FRENCH: return french;
+			default: return english;
+			}
+		}
+	}	@Override
 	protected Pair<String,Boolean> parse(String page, String pageURL, VideoSourceInfo info, WorkProgress progress, int work) {
 		int nb = 3;
 		int step;
@@ -51,7 +72,7 @@ public class Movie extends AlloCinePage<VideoSourceInfo> {
 		
 		step = work/nb--;
 		work -= step;
-		List<Pair<String,String>> genres = getInfoLinkedList(page, "Genre :", "</div>");
+		List<Pair<String,String>> genres = getInfoLinkedList(page, STR.Genre.toString(), "</div>");
 		if (genres != null) {
 			success = true;
 			for (Pair<String,String> p : genres) {
@@ -110,10 +131,10 @@ public class Movie extends AlloCinePage<VideoSourceInfo> {
 	}
 	
 	private long getReleaseDate(String page) {
-		String str = getInfoBoldFrom(page, "Date de sortie");
+		String str = getInfoBoldFrom(page, STR.ReleaseDate.toString());
 		if (str != null) str = str.trim();
 		if (str == null || str.length() == 0) return 0;
-		DateFormat format = new SimpleDateFormat("dd MMMM yyyy");
+		DateFormat format = new SimpleDateFormat(STR.DateFormat.toString());
 		try { 
 			Date date = format.parse(str);
 			return date.getTime();
@@ -155,7 +176,7 @@ public class Movie extends AlloCinePage<VideoSourceInfo> {
 	}*/
 	
 	private String getResume(String page) {
-		int i = page.indexOf("Synopsis");
+		int i = page.indexOf(STR.Resume.toString());
 		if (i < 0) return "";
 		int start = page.indexOf("<h4>", i);
 		if (start < 0) return "";

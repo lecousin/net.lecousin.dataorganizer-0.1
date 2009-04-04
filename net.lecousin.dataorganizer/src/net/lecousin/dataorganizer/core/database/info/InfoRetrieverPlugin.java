@@ -2,6 +2,7 @@ package net.lecousin.dataorganizer.core.database.info;
 
 import java.util.List;
 
+import net.lecousin.framework.application.Application;
 import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.ui.eclipse.control.ControlProvider;
 
@@ -12,6 +13,7 @@ public interface InfoRetrieverPlugin {
 	public String getName();
 	public String getSourceID();
 	public Image getIcon();
+	public boolean isSupportingLanguage(Application.Language lang);
 	
 	public String getURLForSourceID(String id);
 	

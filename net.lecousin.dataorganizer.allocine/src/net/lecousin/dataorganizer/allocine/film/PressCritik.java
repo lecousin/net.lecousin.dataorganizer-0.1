@@ -1,8 +1,10 @@
 package net.lecousin.dataorganizer.allocine.film;
 
 import net.lecousin.dataorganizer.allocine.AlloCinePage;
+import net.lecousin.dataorganizer.allocine.Local;
 import net.lecousin.dataorganizer.video.VideoSourceInfo;
 import net.lecousin.framework.Pair;
+import net.lecousin.framework.application.Application;
 import net.lecousin.framework.progress.WorkProgress;
 
 public class PressCritik extends AlloCinePage<VideoSourceInfo> {
@@ -18,13 +20,32 @@ public class PressCritik extends AlloCinePage<VideoSourceInfo> {
 
 	@Override
 	protected String getDescription() {
-		return "Press reviews";
+		return Local.Press_reviews.toString();
 	}
 	
 	@Override
 	protected String firstPageToReload(String page, String pageURL) {
 		return null;
 	}
+	
+	public enum STR {
+		Header("<b>Reviews</b>", "<b>Critiques Presse</b>"),
+		Footer("<b>All reviews", "<b>Toutes les critiques"),
+		;
+		private STR(String english, String french) {
+			this.english = english;
+			this.french = french;
+		}
+		private String english;
+		private String french;
+		@Override
+		public java.lang.String toString() {
+			switch (Application.language) {
+			case FRENCH: return french;
+			default: return english;
+			}
+		}
+	}	
 	@Override
 	protected Pair<String,Boolean> parse(String page, String pageURL, VideoSourceInfo info, WorkProgress progress, int work) {
 		int pageIndex = 1;
@@ -43,12 +64,28 @@ public class PressCritik extends AlloCinePage<VideoSourceInfo> {
 			if (page.indexOf(url) > 0)
 				nextURL = url;
 		}
-		progress.setSubDescription(progress.getSubDescription()+" (Page " + pageIndex+")");
+		int nbPages = -1;
+		if (pageIndex > 1) {
+			int j = 0;
+			while ((j = page.indexOf(pageURL.substring(0,i)+"&page=", j)) > 0) {
+				int k = page.indexOf(".html", j);
+				if (k > 0) {
+					int num = -1;
+					try { num = Integer.parseInt(page.substring(j+i+6, k)); }
+					catch (NumberFormatException e){}
+					if (num > 0 && num > nbPages)
+						nbPages = num;
+				}
+				j++;
+			}
+		}
+		if (nbPages < pageIndex) nbPages = -1;
+		progress.setSubDescription(getDescription()+" ("+Local.Page+" " + pageIndex+(nbPages>0?"/"+nbPages:"")+")");
 
 		
-		i = page.indexOf("<b>Critiques Presse</b>");
+		i = page.indexOf(STR.Header.toString());
 		if (i < 0) { progress.progress(work); return new Pair<String,Boolean>(null, false); }
-		int j = page.indexOf("<b>Toutes les critiques", i);
+		int j = page.indexOf(STR.Footer.toString(), i);
 		if (j < 0) { progress.progress(work); return new Pair<String,Boolean>(null, false); }
 		String section = page.substring(i, j);
 		
@@ -77,6 +114,7 @@ public class PressCritik extends AlloCinePage<VideoSourceInfo> {
 			info.setPressReview(name.getValue1(), critik.getValue1(), noteI);
 		} while (true);
 		
+		progress.progress(work);
 		if (i == 0) return new Pair<String,Boolean>(null, true); // no review
 		return new Pair<String,Boolean>(nextURL, true);
 	}
