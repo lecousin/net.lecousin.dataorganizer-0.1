@@ -6,6 +6,7 @@ import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPluginRegistry
 import net.lecousin.dataorganizer.video.VideoContentType;
 import net.lecousin.dataorganizer.video.VideoDataType;
 import net.lecousin.dataorganizer.video.VideoInfo;
+import net.lecousin.dataorganizer.video.VideoSourceInfo;
 import net.lecousin.framework.ui.eclipse.UIUtil;
 import net.lecousin.framework.ui.eclipse.control.text.lcml.LCMLText;
 
@@ -22,8 +23,13 @@ public class DescriptionPanel {
 		if (i == null) return;
 		Set<String> sources = i.getSources();
 		boolean hasResume = false;
-		for (String source : sources)
-			if (i.getSourceInfo(source).getResume().length() > 0) { hasResume = true; break; }
+		for (String source : sources) {
+			VideoSourceInfo vsi = i.getSourceInfo(source);
+			if (vsi != null) {
+				String s = vsi.getResume();
+				if (s != null && s.length() > 0) { hasResume = true; break; }
+			}
+		}
 		if (hasResume) {
 			GridLayout layout = UIUtil.gridLayout(parent, 1);
 			layout.marginHeight = layout.marginWidth = 0;

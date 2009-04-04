@@ -15,7 +15,7 @@ import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPluginRegistry
 import net.lecousin.dataorganizer.core.database.info.SourceInfo;
 import net.lecousin.dataorganizer.core.database.info.SourceInfo.Review;
 import net.lecousin.dataorganizer.ui.control.DataImageControl;
-import net.lecousin.dataorganizer.ui.control.RateControl;
+import net.lecousin.dataorganizer.ui.control.RateDataControl;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.collections.SelfMap;
 import net.lecousin.framework.event.Event.Listener;
@@ -100,7 +100,7 @@ public class OverviewPanel extends Composite {
 		// - note
 		tmpPanel = UIUtil.newGridComposite(infoPanel, 0, 0, 2);
 		UIUtil.newLabel(tmpPanel, Local.Rate+":", true, false);
-		barRate = new RateControl(tmpPanel, null, true);
+		barRate = new RateDataControl(tmpPanel, null, true);
 		// - added
 		tmpPanel = UIUtil.newGridComposite(infoPanel, 0, 0, 2);
 		UIUtil.newLabel(tmpPanel, Local.Added+":", true, false);
@@ -154,7 +154,7 @@ public class OverviewPanel extends Composite {
 	private Composite contentTypePanel;
 	private Composite reviewsPanel;
 	private Composite contentDescriptionPanel;
-	private RateControl barRate;
+	private RateDataControl barRate;
 	private Text comment;
 	private Label labelOpened, labelLastOpen, labelAdded;
 	private Composite sourcesPanel;

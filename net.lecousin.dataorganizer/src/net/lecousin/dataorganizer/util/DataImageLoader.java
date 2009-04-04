@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.lecousin.dataorganizer.core.database.Data;
-import net.lecousin.framework.Pair;
+import net.lecousin.framework.Triple;
 import net.lecousin.framework.event.ProcessListener;
 import net.lecousin.framework.log.Log;
 import net.lecousin.framework.thread.BackgroundTemporaryWorkThreading;
@@ -49,20 +49,27 @@ public class DataImageLoader {
 				FileInputStream in;
 				try { in = new FileInputStream(file); }
 				catch (IOException e) { continue; }
-				Pair<InputStream,Image> p = new Pair<InputStream,Image>(in,null);
-				Display.getDefault().syncExec(new RunnableWithData<Pair<InputStream,Image>>(p) {
+				Triple<InputStream,Image,File> p = new Triple<InputStream,Image,File>(in,null,file);
+				Display.getDefault().syncExec(new RunnableWithData<Triple<InputStream,Image,File>>(p) {
 					public void run() {
-						Image img = new Image(Display.getCurrent(), data().getValue1());
-						data().setValue2(img);
+						try {
+							Image img = new Image(Display.getCurrent(), data().getValue1());
+							data().setValue2(img);
+						} catch (Throwable t) {
+							if (Log.warning(this))
+								Log.warning(this, "Unable to load data image "+data().getValue3().getAbsolutePath(), t);
+						}
 					}
 				});
 				try { in.close(); }
 				catch (IOException e) {}
 				Image img = p.getValue2();
-				synchronized (listeners) {
-					images.add(img);
-					for (ProcessListener<Image> l : listeners)
-						l.fire(img);
+				if (img != null) {
+					synchronized (listeners) {
+						images.add(img);
+						for (ProcessListener<Image> l : listeners)
+							l.fire(img);
+					}
 				}
 			}
 			synchronized (listeners) {

@@ -1,24 +1,16 @@
 Avant prochaine release:
 
-DataOrganizer
- 
 A tester:
- + MediaPlayer dans tous les sens (audio+video)
- + ajouter toutes mes donnees...
  + install
- + Git branches 
-
-Audio
 
 Video
  + DVD, Video CD
- + AlloCine: public reviews ne marche plus
- + AlloCine: image DVD
 
 ---------------------------------------------------------------------
 Moins urgent:
 
 DataOrganizer
++ LCTable optimize:layout and create on demand
  + Bug LCTable: ne plus utiliser ScrolledComposite a cause de MouseWhell, mais mettre la horizontal scroll bar manuellement
  + Add data: from internet, single audio
  + DataOverview: meilleure gestion du scrolling
@@ -29,7 +21,6 @@ DataOrganizer
  + Table: select columns... by type (video duration)...
  + Mosaic: ameliorer: sort + key down/up + ...
  + BUG: PreviewTaker: attendre que l'image change avant de prendre reellement... (permet d'etre sur que la video est prete)
- + LCTable columns: optimize:layout and create on demand
  + AdvancedList: gerer la limitation du nombre d'éléments
  + Localisation: boutons de wizard
  + Data opened menu: + ergonomique pour traiter plusieurs en meme temps???
@@ -68,6 +59,7 @@ Picture
 
 Video
  + continuer les types
+ + AlloCine: image DVD
  + Wikipedia?
  + IMDb
  + cinemovies.fr

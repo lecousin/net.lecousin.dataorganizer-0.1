@@ -9,7 +9,7 @@ import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.dataorganizer.ui.DataOrganizerDND;
 import net.lecousin.dataorganizer.ui.control.DataImageControl;
-import net.lecousin.dataorganizer.ui.control.RateControl;
+import net.lecousin.dataorganizer.ui.control.RateDataControl;
 import net.lecousin.dataorganizer.ui.dialog.DataLinkPopup;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.Triple;
@@ -119,7 +119,7 @@ public class DataOrganizerPlayList extends PlayList {
 		label.setText(data.getName());
 		label.setBackground(panel.getBackground());
 		label.setForeground(ColorUtil.getYellow());
-		RateControl rate = new RateControl(panel, data, true);
+		RateDataControl rate = new RateDataControl(panel, data, true);
 		BorderStyle.attach(rate, new BorderStyle.SimpleLine(ColorUtil.get(150, 150, 255), 1), 0);
 		UIUtil.newLink(panel, Local.Show_details.toString(), new ListenerData<HyperlinkEvent,Data>(data) {
 			public void fire(HyperlinkEvent event) {

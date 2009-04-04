@@ -27,7 +27,26 @@ public class PressCritik extends AlloCinePage<VideoSourceInfo> {
 	}
 	@Override
 	protected Pair<String,Boolean> parse(String page, String pageURL, VideoSourceInfo info, WorkProgress progress, int work) {
-		int i = page.indexOf("<b>Critiques Presse</b>");
+		int pageIndex = 1;
+		String nextURL = null;
+		int i = pageURL.indexOf("&page=");
+		if (i > 0) {
+			int j = pageURL.indexOf(".html", i);
+			if (j > 0) {
+				try { pageIndex = Integer.parseInt(pageURL.substring(i+6,j)); }
+				catch (NumberFormatException e) {}
+			}
+		} else
+			i = pageURL.indexOf(".html");
+		if (i > 0) {
+			String url = pageURL.substring(0, i) + "&page=" + (pageIndex+1) + ".html";
+			if (page.indexOf(url) > 0)
+				nextURL = url;
+		}
+		progress.setSubDescription(progress.getSubDescription()+" (Page " + pageIndex+")");
+
+		
+		i = page.indexOf("<b>Critiques Presse</b>");
 		if (i < 0) { progress.progress(work); return new Pair<String,Boolean>(null, false); }
 		int j = page.indexOf("<b>Toutes les critiques", i);
 		if (j < 0) { progress.progress(work); return new Pair<String,Boolean>(null, false); }
@@ -59,22 +78,7 @@ public class PressCritik extends AlloCinePage<VideoSourceInfo> {
 		} while (true);
 		
 		if (i == 0) return new Pair<String,Boolean>(null, true); // no review
-		int pageIndex = 1;
-		i = pageURL.indexOf("&page=");
-		if (i > 0) {
-			j = pageURL.indexOf(".html", i);
-			if (j > 0) {
-				try { pageIndex = Integer.parseInt(pageURL.substring(i+6,j)); }
-				catch (NumberFormatException e) {}
-			}
-		} else
-			i = pageURL.indexOf(".html");
-		if (i > 0) {
-			String url = pageURL.substring(0, i) + "&page=" + (pageIndex+1) + ".html";
-			if (page.indexOf(url) > 0)
-				return new Pair<String,Boolean>(url, true);
-		}
-		return new Pair<String,Boolean>(null, true);
+		return new Pair<String,Boolean>(nextURL, true);
 	}
 	
 }

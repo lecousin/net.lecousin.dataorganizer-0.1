@@ -157,7 +157,7 @@ public class AddDataWizard extends Wizard {
     		RefreshDialog rd = new RefreshDialog(shell, options);
     		if (rd.open() != null)
     			Refresher.refresh(shell, DataOrganizer.database(), added, options);
-    		MessageDialog.openInformation(shell, Local.Add_data.toString(), ""+result.toAdd.size()+Local.data_successfully_added);
+    		MessageDialog.openInformation(shell, Local.Add_data.toString(), ""+result.toAdd.size()+" "+Local.data_successfully_added);
     	}
 	}
 }

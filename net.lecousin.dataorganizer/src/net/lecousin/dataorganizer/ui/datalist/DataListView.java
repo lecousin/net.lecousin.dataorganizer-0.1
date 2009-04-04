@@ -16,7 +16,7 @@ import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.dataorganizer.ui.DataOrganizerDND;
 import net.lecousin.dataorganizer.ui.control.DataImageControl;
 import net.lecousin.dataorganizer.ui.control.LabelsControl;
-import net.lecousin.dataorganizer.ui.control.RateControl;
+import net.lecousin.dataorganizer.ui.control.RateDataControl;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.event.Event;
 import net.lecousin.framework.event.Event.Listener;
@@ -238,7 +238,7 @@ public class DataListView extends ViewPart {
 		public String getTitle() { return Local.Rate.toString(); }
 		public int getDefaultWidth() { return 68; }
 		public int getAlignment() { return SWT.CENTER; }
-		public Control getControl(Composite parent, Data element) { return new RateControl(parent, element, true); }
+		public Control getControl(Composite parent, Data element) { return new RateDataControl(parent, element, true); }
 		public int compare(Data element1, Data element2) { return element1.getRate() - element2.getRate(); }
 	}
 	private class ColumnLabels implements ColumnProviderControl<Data> {

@@ -22,6 +22,7 @@ import net.lecousin.framework.log.Log;
 import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.strings.StringUtil;
 import net.lecousin.framework.thread.RunnableWithData;
+import net.lecousin.framework.ui.eclipse.UIUtil;
 import net.lecousin.framework.ui.eclipse.dialog.QuestionDlg;
 import net.lecousin.framework.ui.eclipse.dialog.QuestionDlg.Answer;
 import net.lecousin.framework.ui.eclipse.dialog.QuestionDlg.AnswerSimple;
@@ -34,6 +35,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 public abstract class DataBase {
@@ -161,18 +163,35 @@ public abstract class DataBase {
 
 	synchronized void internal_removeData(Data data) {
 		this.data.remove(data);
-		try {
-			IFile file = getFile(data.id);
-			if (file != null && file.exists()) file.delete(true, null);
-			IFolder folder = getFolder(data.id);
-			if (folder != null && folder.exists()) folder.delete(true, null);
-			removeIfEmpty(file.getParent());
-		} catch (CoreException e) {
-			if (Log.error(this))
-				Log.error(this, "Unable to remove data cleanly: some files may stay in the database. A clean database should be launched.");
+		dataRemoved.fire(data);
+		try { removeDataFiles(data.id); }
+		catch (CoreException e) {
+			UIUtil.runPendingEvents(Display.getDefault());
+			try { Thread.sleep(200); } catch (InterruptedException ex) {}
+			UIUtil.runPendingEvents(Display.getDefault());
+			try { removeDataFiles(data.id); }
+			catch (CoreException e2) {
+				UIUtil.runPendingEvents(Display.getDefault());
+				try { Thread.sleep(200); } catch (InterruptedException ex) {}
+				UIUtil.runPendingEvents(Display.getDefault());
+				try { removeDataFiles(data.id); }
+				catch (CoreException e3) {
+					UIUtil.runPendingEvents(Display.getDefault());
+					try { Thread.sleep(200); } catch (InterruptedException ex) {}
+					UIUtil.runPendingEvents(Display.getDefault());
+					if (Log.error(this))
+						Log.error(this, "Unable to remove data cleanly: some files may stay in the database. A clean database should be launched.");
+				}
+			}
 		}
 		ids.free(data.id);
-		dataRemoved.fire(data);
+	}
+	private void removeDataFiles(long id) throws CoreException {
+		IFile file = getFile(id);
+		if (file != null && file.exists()) file.delete(true, null);
+		IFolder folder = getFolder(id);
+		if (folder != null && folder.exists()) folder.delete(true, null);
+		removeIfEmpty(file.getParent());
 	}
 	
 	public final synchronized Data getDataFromInfoSourceID(ContentType type, String source, String id) {

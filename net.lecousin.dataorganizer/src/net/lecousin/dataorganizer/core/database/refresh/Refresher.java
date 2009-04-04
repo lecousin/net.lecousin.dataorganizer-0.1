@@ -86,7 +86,7 @@ public class Refresher {
 		if (needDataContent(data, options)) totalAmount += dataContentAmount;
 		if (options.retrieveInfoFromInternet) totalAmount += infoFromInternet;
 		progress.setSubDescription(Local.Refreshing+" " + data.getName());
-		WorkProgress p = progress.addSubWork(null, amount, totalAmount);
+		WorkProgress p = progress.addSubWork(Local.Refreshing+" " + data.getName(), amount, totalAmount);
 		
 		if (options.cleanName)
 			cleanName(data, p, cleanNameAmount);
@@ -95,6 +95,7 @@ public class Refresher {
 		if (options.retrieveInfoFromInternet)
 			retrieveFromInternet(shell, data, p, infoFromInternet);
 		p.done();
+		progress.mergeSubWork(p);
 	}
 	
 	private static boolean needDataContent(Data data, RefreshOptions options) {

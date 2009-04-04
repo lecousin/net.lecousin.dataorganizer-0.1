@@ -42,6 +42,7 @@ public abstract class AlloCinePage<T extends SourceInfo> {
 		do {
 			step = work/10;
 			work -= step;
+			progress.setSubDescription(getDescription());
 			Pair<String,Boolean> result = parse(page, nextURL, info, progress, step);
 			nextURL = result.getValue1();
 			success |= result.getValue2();
