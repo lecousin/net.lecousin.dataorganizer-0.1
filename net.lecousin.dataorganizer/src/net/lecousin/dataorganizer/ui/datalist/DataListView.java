@@ -258,6 +258,7 @@ public class DataListView extends ViewPart {
 			return c;
 		}
 		public Control refreshImageControl(Data element, Control current) {
+			((DataImageControl)current).setData(element);
 			return current;
 		}
 	}
