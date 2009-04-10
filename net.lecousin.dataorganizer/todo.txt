@@ -1,7 +1,4 @@
-Avant prochaine release:
-
-A tester:
- + install
+0.1.2: net.lecousin.media.jvlc.client
 
 Video
  + DVD, Video CD
