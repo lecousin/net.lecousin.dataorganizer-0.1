@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.lecousin.dataorganizer.core.database.Data;
+import net.lecousin.framework.Pair;
 import net.lecousin.framework.Triple;
 import net.lecousin.framework.event.ProcessListener;
 import net.lecousin.framework.log.Log;
@@ -34,52 +35,52 @@ public class DataImageLoader {
 		Object instance;
 		String key;
 		FileProvider provider;
-		List<ProcessListener<Image>> listeners = new LinkedList<ProcessListener<Image>>();
-		List<Image> images = null;
+		List<ProcessListener<Pair<Image,String>>> listeners = new LinkedList<ProcessListener<Pair<Image,String>>>();
+		List<Pair<Image,String>> images = null;
 		
 		public void run() {
 			synchronized (listeners) {
-				for (ProcessListener<Image> l : listeners)
+				for (ProcessListener<Pair<Image,String>> l : listeners)
 					l.started();
-				images = new LinkedList<Image>();
+				images = new LinkedList<Pair<Image,String>>();
 			}
 			while (provider.hasNext()) {
-				File file = provider.next();
+				Pair<File,String> file = provider.next();
 				if (file == null) continue;
 				FileInputStream in;
-				try { in = new FileInputStream(file); }
+				try { in = new FileInputStream(file.getValue1()); }
 				catch (IOException e) { continue; }
-				Triple<InputStream,Image,File> p = new Triple<InputStream,Image,File>(in,null,file);
-				Display.getDefault().syncExec(new RunnableWithData<Triple<InputStream,Image,File>>(p) {
+				Triple<InputStream,Pair<Image,String>,Pair<File,String>> p = new Triple<InputStream,Pair<Image,String>,Pair<File,String>>(in,null,file);
+				Display.getDefault().syncExec(new RunnableWithData<Triple<InputStream,Pair<Image,String>,Pair<File,String>>>(p) {
 					public void run() {
 						try {
 							Image img = new Image(Display.getCurrent(), data().getValue1());
-							data().setValue2(img);
+							data().setValue2(new Pair<Image,String>(img,data().getValue3().getValue2()));
 						} catch (Throwable t) {
 							if (Log.warning(this))
-								Log.warning(this, "Unable to load data image "+data().getValue3().getAbsolutePath(), t);
+								Log.warning(this, "Unable to load data image "+data().getValue3().getValue1().getAbsolutePath(), t);
 						}
 					}
 				});
 				try { in.close(); }
 				catch (IOException e) {}
-				Image img = p.getValue2();
+				Pair<Image,String> img = p.getValue2();
 				if (img != null) {
 					synchronized (listeners) {
 						images.add(img);
-						for (ProcessListener<Image> l : listeners)
+						for (ProcessListener<Pair<Image,String>> l : listeners)
 							l.fire(img);
 					}
 				}
 			}
 			synchronized (listeners) {
-				for (ProcessListener<Image> l : listeners)
+				for (ProcessListener<Pair<Image,String>> l : listeners)
 					l.done();
 			}
 		}
 	}
 	
-	public static void load(Object instance, String key, FileProvider provider, ProcessListener<Image> listener) {
+	public static void load(Object instance, String key, FileProvider provider, ProcessListener<Pair<Image,String>> listener) {
 		Requester requester;
 		synchronized (requesters) {
 			boolean found = false;
@@ -89,7 +90,7 @@ public class DataImageLoader {
 						r.listeners.add(listener);
 						if (r.images != null) {
 							listener.started();
-							for (Image i : r.images)
+							for (Pair<Image,String> i : r.images)
 								listener.fire(i);
 						}
 					}
@@ -121,7 +122,7 @@ public class DataImageLoader {
 	
 	public static interface FileProvider {
 		public boolean hasNext();
-		public File next();
+		public Pair<File,String> next();
 	}
 	
 	public static class FileProvider_FromDataPath implements FileProvider {
@@ -132,34 +133,36 @@ public class DataImageLoader {
 		private Data data;
 		Iterator<String> it;
 		public boolean hasNext() { return it.hasNext(); }
-		public File next() {
+		public Pair<File,String> next() {
 			String path = it.next();
 			try { 
 				IFolder folder = data.getFolder();
 				IFile file = folder.getFile(new Path(path));
-				return file.getLocation().toFile();
+				return new Pair<File,String>(file.getLocation().toFile(), path);
 			} catch (CoreException e) { return null; }
 		}
 	}
 	
 	public static class FileProvider_ListStartWith implements FileProvider {
-		public FileProvider_ListStartWith(IFolder folder, String start) {
+		public FileProvider_ListStartWith(IFolder folder, String start, String folderPath) {
 			this.folder = folder;
+			this.folderPath = folderPath;
 			this.start = start;
 			initNext();
 		}
 		private IFolder folder;
+		private String folderPath;
 		private String start;
 		private int index = 0;
 		private IFile next;
 		public boolean hasNext() { 
 			return next != null; 
 		}
-		public File next() {
+		public Pair<File,String> next() {
 			File file = next.getLocation().toFile();
 			index++;
 			initNext();
-			return file;
+			return new Pair<File,String>(file,folderPath+'/'+file.getName());
 		}
 		
 		private void initNext() {

@@ -2,6 +2,7 @@ package net.lecousin.dataorganizer.audio;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,7 +17,8 @@ import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
 import net.lecousin.dataorganizer.util.DataImageLoader;
 import net.lecousin.dataorganizer.util.DataImageLoader.FileProvider;
-import net.lecousin.framework.Triple;
+import net.lecousin.framework.Pair;
+import net.lecousin.framework.collections.CollectionUtil;
 import net.lecousin.framework.eclipse.resource.ResourceUtil;
 import net.lecousin.framework.event.ProcessListener;
 import net.lecousin.framework.event.SplitProcessListener;
@@ -33,6 +35,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.w3c.dom.Element;
 
 public class AudioDataType extends DataContentType {
@@ -87,77 +90,86 @@ public class AudioDataType extends DataContentType {
 		return false;
 	}
 
-	private List<Image> coverFront = null; 
-	private List<Image> coverBack = null; 
-	private List<Image> otherImages = null; 
-	
+	private List<Pair<Image,String>> coverFront = null; 
+	private List<Pair<Image,String>> coverBack = null; 
+	private List<Pair<Image,String>> otherImages = null; 
+
+	private static final DataImageCategory[] categories = new DataImageCategory[] {
+		new DataImageCategory("cover.front", Local.Cover_front_pictures.toString(), 10),
+		new DataImageCategory("cover.back", Local.Cover_back_pictures.toString(), 50),
+		new DataImageCategory("others", Local.Other_album_pictures.toString(), 200),
+	};
 	@Override
-	public void getImages(ProcessListener<Triple<String, Image, Integer>> listener) {
-		SplitProcessListener<Triple<String, Image, Integer>> split = new SplitProcessListener<Triple<String, Image, Integer>>(listener);
-		ProcessListener<Triple<String, Image, Integer>> frontListener = split.newListener();
-		ProcessListener<Triple<String, Image, Integer>> backListener = split.newListener();
-		ProcessListener<Triple<String, Image, Integer>> othersListener = split.newListener();
+	public List<DataImageCategory> getImagesCategories() { return CollectionUtil.list(categories); }
+	@Override
+	public void getImages(ProcessListener<DataImageLoaded> listener) {
+		SplitProcessListener<DataImageLoaded> split = new SplitProcessListener<DataImageLoaded>(listener);
+		ProcessListener<DataImageLoaded> frontListener = split.newListener();
+		ProcessListener<DataImageLoaded> backListener = split.newListener();
+		ProcessListener<DataImageLoaded> othersListener = split.newListener();
 		loadCoverFronts(frontListener);
 		loadCoverBacks(backListener);
 		loadOtherImages(othersListener);
 	}
 	
-	private void loadCoverFronts(ProcessListener<Triple<String, Image, Integer>> listener) {
-		load(listener, new CoverFrontProvider(), "cover_front_", Local.Cover_front_picture.toString(), 10);
+	private void loadCoverFronts(ProcessListener<DataImageLoaded> listener) {
+		load(listener, new CoverFrontProvider(), "cover_front_", Local.Cover_front_picture.toString(), "cover.front");
 	}
-	private void loadCoverBacks(ProcessListener<Triple<String, Image, Integer>> listener) {
-		load(listener, new CoverBackProvider(), "cover_back_", Local.Cover_back_picture.toString(), 50);
+	private void loadCoverBacks(ProcessListener<DataImageLoaded> listener) {
+		load(listener, new CoverBackProvider(), "cover_back_", Local.Cover_back_picture.toString(), "cover.back");
 	}
-	private void loadOtherImages(ProcessListener<Triple<String, Image, Integer>> listener) {
-		load(listener, new OtherImagesProvider(), "image_", Local.Other_album_picture.toString(), 200);
+	private void loadOtherImages(ProcessListener<DataImageLoaded> listener) {
+		load(listener, new OtherImagesProvider(), "image_", Local.Other_album_picture.toString(), "others");
 	}
 	private static interface ImageListProvider {
-		public List<Image> get();
-		public void set(List<Image> images);
+		public List<Pair<Image,String>> get();
+		public void set(List<Pair<Image,String>> images);
 	}
 	private class CoverFrontProvider implements ImageListProvider {
-		public List<Image> get() { return coverFront; }
-		public void set(List<Image> images) { coverFront = images; } 
+		public List<Pair<Image,String>> get() { return coverFront; }
+		public void set(List<Pair<Image,String>> images) { coverFront = images; } 
 	}
 	private class CoverBackProvider implements ImageListProvider {
-		public List<Image> get() { return coverBack; }
-		public void set(List<Image> images) { coverBack = images; } 
+		public List<Pair<Image,String>> get() { return coverBack; }
+		public void set(List<Pair<Image,String>> images) { coverBack = images; } 
 	}
 	private class OtherImagesProvider implements ImageListProvider {
-		public List<Image> get() { return otherImages; }
-		public void set(List<Image> images) { otherImages = images; } 
+		public List<Pair<Image,String>> get() { return otherImages; }
+		public void set(List<Pair<Image,String>> images) { otherImages = images; } 
 	}
 	
-	private void load(ProcessListener<Triple<String, Image, Integer>> listener, ImageListProvider provider, String prefix, String name, int priority) {
+	private void load(ProcessListener<DataImageLoaded> listener, ImageListProvider provider, String prefix, String name, String categoryID) {
 		synchronized (this) {
-			List<Image> images = provider.get();
+			List<Pair<Image,String>> images = provider.get();
 			if (images != null) {
 				listener.started();
-				for (int i = 0; i < images.size(); ++i)
-					listener.fire(new Triple<String, Image, Integer>(name+" " + (i+1), images.get(i), priority));
+				for (int i = 0; i < images.size(); ++i) {
+					Pair<Image,String> p = images.get(i);
+					listener.fire(new DataImageLoaded(categoryID, name+" " + (i+1), p.getValue1(), p.getValue2()));
+				}
 				listener.done();
 				return;
 			}
 		}
-		class Listener implements ProcessListener<Image> {
-			Listener(ProcessListener<Triple<String, Image, Integer>> listener, ImageListProvider provider, String prefix, String name, int priority) {
+		class Listener implements ProcessListener<Pair<Image,String>> {
+			Listener(ProcessListener<DataImageLoaded> listener, ImageListProvider provider, String prefix, String name, String categoryID) {
 				this.listener = listener;
 				this.provider = provider;
 				this.prefix = prefix;
 				this.name = name;
-				this.priority = priority;
+				this.categoryID = categoryID;
 			}
-			private ProcessListener<Triple<String, Image, Integer>> listener;
+			private ProcessListener<DataImageLoaded> listener;
 			private ImageListProvider provider;
 			private String prefix;
 			private String name;
-			private int priority;
-			private List<Image> images = new LinkedList<Image>();
+			private String categoryID;
+			private List<Pair<Image,String>> images = new LinkedList<Pair<Image,String>>();
 			public void started() {
 				listener.started();
 			}
-			public void fire(Image image) {
-				listener.fire(new Triple<String,Image,Integer>(name+" " + (images.size()+1), image, priority));
+			public void fire(Pair<Image,String> image) {
+				listener.fire(new DataImageLoaded(categoryID, name+" " + (images.size()+1), image.getValue1(), image.getValue2()));
 				images.add(image);
 			}
 			public void done() {
@@ -168,7 +180,7 @@ public class AudioDataType extends DataContentType {
 				}
 			}
 		}
-		DataImageLoader.load(this, prefix, new FileProvider_Prefix(prefix), new Listener(listener, provider, prefix, name, priority));
+		DataImageLoader.load(this, prefix, new FileProvider_Prefix(prefix), new Listener(listener, provider, prefix, name, categoryID));
 	}
 	private class FileProvider_Prefix implements FileProvider {
 		public FileProvider_Prefix(String prefix) {
@@ -190,11 +202,11 @@ public class AudioDataType extends DataContentType {
 			if (index >= members.length) return false;
 			return true;
 		}
-		public File next() {
+		public Pair<File,String> next() {
 			File file = members[index].getLocation().toFile();
 			index++;
 			goToNext();
-			return file;
+			return new Pair<File,String>(file,"audio/"+file.getName());
 		}
 		private void goToNext() {
 			while (index < members.length) {
@@ -256,6 +268,48 @@ public class AudioDataType extends DataContentType {
 		return ".jpeg"; // TODO???
 	}
 
+	@Override
+	public Control createImageCategoryControls(Composite parent) {
+		return null;
+	}
+	
+	@Override
+	public void removeImage(DataImageLoaded image) {
+		synchronized (this) {
+			if (image.getCategoryID().equals("cover.front"))
+				for (Iterator<Pair<Image,String>> it = coverFront.iterator(); it.hasNext(); ) {
+					Pair<Image,String> p = it.next();
+					if (p.getValue1() == image.getImage()) {
+						it.remove();
+						break;
+					}
+				}
+			else if (image.getCategoryID().equals("cover.back"))
+				for (Iterator<Pair<Image,String>> it = coverBack.iterator(); it.hasNext(); ) {
+					Pair<Image,String> p = it.next();
+					if (p.getValue1() == image.getImage()) {
+						it.remove();
+						break;
+					}
+				}
+			else
+				for (Iterator<Pair<Image,String>> it = otherImages.iterator(); it.hasNext(); ) {
+					Pair<Image,String> p = it.next();
+					if (p.getValue1() == image.getImage()) {
+						it.remove();
+						break;
+					}
+				}
+			try {
+				IFile file = getFile(image.getFileName());
+				file.delete(true, null);
+			} catch (CoreException e) {
+				if (Log.error(this))
+					Log.error(this, "Unable to remove image file '" + image.getFileName() + "' for data ID " + getData().getID());
+			}
+		}
+	}
+	
 	@Override
 	public boolean isContentAvailable() {
 		// TODO Auto-generated method stub

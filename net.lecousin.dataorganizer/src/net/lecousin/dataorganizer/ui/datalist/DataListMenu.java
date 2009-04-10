@@ -82,6 +82,13 @@ public class DataListMenu {
 			if (data.size() > 1 || menuAdded)
 				new FlatPopupMenu.Separator(menu);
 		}
+		if (data.size() == 1) {
+			new FlatPopupMenu.Menu(menu, Local.Sources_information.toString(), SharedImages.getImage(SharedImages.icons.x16.file.FILE), false, false, new RunnableWithData<Data>(data.get(0)) {
+				public void run() {
+					DataListActions.sourcesInfo(data());
+				}
+			});
+		}
 		if (addDataListManagementActions) {
 			String str = Local.Delete.toString();
 			if (data.size() > 1) str = str + " " + data.size() + " " + Local.data__s;
@@ -123,6 +130,11 @@ public class DataListMenu {
 			}
 		if (menuAdded)
 			UIUtil.newSeparator(bar, false, false);
+		UIUtil.newImageButton(bar, SharedImages.getImage(SharedImages.icons.x16.file.FILE), new Listener<Data>() {
+			public void fire(Data event) {
+				DataListActions.sourcesInfo(event);
+			}
+		}, data).setToolTipText(Local.Sources_information.toString());
 		if (addDataListManagementActions) {
 			String str = Local.Delete.toString();
 			UIUtil.newImageButton(bar, SharedImages.getImage(SharedImages.icons.x16.basic.DEL), new Listener<Data>() {

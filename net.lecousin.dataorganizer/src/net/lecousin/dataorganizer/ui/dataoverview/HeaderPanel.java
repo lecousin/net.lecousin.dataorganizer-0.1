@@ -16,6 +16,8 @@ import net.lecousin.framework.ui.eclipse.control.UIControlUtil;
 import net.lecousin.framework.ui.eclipse.dialog.FlatPopupMenu;
 import net.lecousin.framework.ui.eclipse.graphics.ColorUtil;
 
+import org.eclipse.jface.viewers.ITreeViewerListener;
+import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -126,6 +128,14 @@ public class HeaderPanel extends Composite {
 				else
 					event.getValue1().removeData(data);
 				refresh(data);
+			}
+		});
+		tree.addTreeListener(new ITreeViewerListener() {
+			public void treeCollapsed(TreeExpansionEvent event) {
+				addMenu.resize();
+			}
+			public void treeExpanded(TreeExpansionEvent event) {
+				addMenu.resize();
 			}
 		});
 		GridData gd = new GridData();

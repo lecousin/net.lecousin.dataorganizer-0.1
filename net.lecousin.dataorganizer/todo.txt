@@ -1,16 +1,8 @@
 0.1.2: net.lecousin.media.jvlc.client
 
-Video
- + DVD, Video CD
-
 ---------------------------------------------------------------------
-Moins urgent:
-
 DataOrganizer
-+ Edit images (del...)
-+ Label dialog (Plus): resizer...
-+ Dialog sources info (fichiers...)
-+ LCTable optimize:layout and create on demand
+ + LCTable optimize:layout and create on demand
  + Bug LCTable: ne plus utiliser ScrolledComposite a cause de MouseWhell, mais mettre la horizontal scroll bar manuellement
  + Add data: from internet, single audio
  + DataOverview: meilleure gestion du scrolling
@@ -58,6 +50,7 @@ Picture
  + tout
 
 Video
+ + DVD, Video CD
  + continuer les types
  + AlloCine: image DVD
  + Wikipedia?

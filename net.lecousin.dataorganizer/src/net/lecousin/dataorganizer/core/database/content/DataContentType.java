@@ -12,7 +12,6 @@ import net.lecousin.dataorganizer.core.database.info.SourceInfo;
 import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
 import net.lecousin.framework.Pair;
-import net.lecousin.framework.Triple;
 import net.lecousin.framework.collections.SelfMap;
 import net.lecousin.framework.eclipse.resource.ResourceUtil;
 import net.lecousin.framework.event.ProcessListener;
@@ -24,8 +23,10 @@ import net.lecousin.framework.xml.XmlWriter;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.w3c.dom.Element;
 
 public abstract class DataContentType implements SelfMap.Entry<Long> {
@@ -73,7 +74,33 @@ public abstract class DataContentType implements SelfMap.Entry<Long> {
 	
 	public abstract boolean isContentAvailable();
 	
-	public abstract void getImages(ProcessListener<Triple<String,Image,Integer>> listener);
+	public static final class DataImageCategory {
+		public DataImageCategory(String id, String name, int priority)
+		{ this.id = id; this.name = name; this.priority = priority; }
+		private String id;
+		private String name;
+		private int priority;
+		public String getID() { return id; }
+		public String getName() { return name; }
+		public int getPriority() { return priority; }
+	}
+	public static final class DataImageLoaded {
+		public DataImageLoaded(String catID, String name, Image image, String filename)
+		{ this.categoryID = catID; this.name = name; this.image = image; this.filename = filename; }
+		private String categoryID;
+		private String name;
+		private Image image;
+		private String filename;
+		public String getCategoryID() { return categoryID; }
+		public String getName() { return name; }
+		public Image getImage() { return image; }
+		public String getFileName() { return filename; }
+	}
+	public abstract List<DataImageCategory> getImagesCategories();
+	public abstract void getImages(ProcessListener<DataImageLoaded> listener);
+	public abstract void removeImage(DataImageLoaded image);
+	public abstract Control createImageCategoryControls(Composite parent);
+	
 	public abstract void createOverviewPanel(Composite panel, SourceInfo sourceInfo);
 	public abstract void createDescriptionPanel(Composite panel);
 	public abstract boolean isOverviewPanelSupprotingSourceMerge();
@@ -108,6 +135,9 @@ public abstract class DataContentType implements SelfMap.Entry<Long> {
 	
 	public IFolder getFolder(String name) throws CoreException {
 		return data.getFolder().getFolder(name);
+	}
+	public IFile getFile(String name) throws CoreException {
+		return data.getFolder().getFile(new Path(name));
 	}
 	
 	public void signalModification() {

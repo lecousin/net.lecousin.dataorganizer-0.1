@@ -49,6 +49,12 @@ public abstract class DataBase {
 	
 	private void load_openProject(WorkProgress progress, int amount) throws InitializationException {
 		progress.progress(amount*2/100);
+		try {
+			if (!project.isOpen())
+				project.open(null);
+			progress.progress(amount*15/100);
+		} catch (CoreException e) {
+		}
 		if (!project.exists()) {
 			progress.setSubDescription(Local.No_database_exist + ": " + Local.creation);
 			try { 
@@ -63,7 +69,6 @@ public abstract class DataBase {
 		try { 
 			if (!project.isOpen())
 				project.open(null);
-			progress.progress(amount*15/100);
 			progress.setSubDescription(Local.Refreshing_database_content.toString());
 			project.refreshLocal(IResource.DEPTH_INFINITE, new ProgressMonitor_WorkProgressWrapper(progress.addSubWork(null, progress.getRemainingWork(), 100)));
 		}

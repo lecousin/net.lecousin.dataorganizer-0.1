@@ -12,11 +12,13 @@ import java.util.List;
 
 import net.lecousin.framework.collections.CollectionUtil;
 import net.lecousin.framework.io.FileSystemUtil;
+import net.lecousin.framework.ui.eclipse.SharedImages;
 import net.lecousin.framework.xml.XmlWriter;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.swt.graphics.Image;
 import org.w3c.dom.Element;
 
 public class NetworkFileDataSource extends FileDataSource {
@@ -85,6 +87,16 @@ public class NetworkFileDataSource extends FileDataSource {
 	public String getFileName() {
 		try { return FileSystemUtil.getFileName(new URI(uri).getPath()); }
 		catch (URISyntaxException e) { return FileSystemUtil.getFileName(uri); }
+	}
+	@Override
+	public String getPathToDisplay() { return FileSystemUtil.getPath(uri); }
+	@Override
+	public long getSize() {
+		return -1;
+	}
+	@Override
+	public Image getIcon() {
+		return SharedImages.getImage(SharedImages.icons.x16.file.NETWORK_DRIVE);
 	}
 	
 	@Override

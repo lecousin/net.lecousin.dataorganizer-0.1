@@ -13,10 +13,12 @@ import net.lecousin.dataorganizer.Local;
 import net.lecousin.framework.collections.CollectionUtil;
 import net.lecousin.framework.io.FileSystemUtil;
 import net.lecousin.framework.io.FileSystemUtil.Drive;
+import net.lecousin.framework.ui.eclipse.SharedImages;
 import net.lecousin.framework.xml.XmlWriter;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.graphics.Image;
 import org.w3c.dom.Element;
 
 public class AmovibleFileDataSource extends FileDataSource {
@@ -100,6 +102,18 @@ public class AmovibleFileDataSource extends FileDataSource {
 	@Override
 	public String getFileName() {
 		return FileSystemUtil.getFileName(fileSubPath);
+	}
+	@Override
+	public String getPathToDisplay() { return FileSystemUtil.getPath(fileSubPath); }
+	@Override
+	public long getSize() {
+		File f = findFile();
+		if (f == null) return -1;
+		return f.length();
+	}
+	@Override
+	public Image getIcon() {
+		return SharedImages.getImage(SharedImages.icons.x16.file.AMOVIBLE_DRIVE);
 	}
 	
 	@Override

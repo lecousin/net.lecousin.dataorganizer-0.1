@@ -11,9 +11,11 @@ import java.util.List;
 import net.lecousin.dataorganizer.Local;
 import net.lecousin.framework.collections.CollectionUtil;
 import net.lecousin.framework.io.FileSystemUtil;
+import net.lecousin.framework.ui.eclipse.SharedImages;
 import net.lecousin.framework.xml.XmlWriter;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.swt.graphics.Image;
 import org.w3c.dom.Element;
 
 public class LocalFileDataSource extends FileDataSource {
@@ -79,6 +81,18 @@ public class LocalFileDataSource extends FileDataSource {
 	@Override
 	public String getFileName() {
 		return FileSystemUtil.getFileName(path);
+	}
+	@Override
+	public String getPathToDisplay() { return FileSystemUtil.getPath(path); }
+	@Override
+	public long getSize() {
+		File f = new File(path);
+		if (!f.exists()) return -1;
+		return f.length();
+	}
+	@Override
+	public Image getIcon() {
+		return SharedImages.getImage(SharedImages.icons.x16.file.HARD_DRIVE);
 	}
 	
 	@Override

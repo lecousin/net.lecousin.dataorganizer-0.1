@@ -1,6 +1,7 @@
 package net.lecousin.dataorganizer.people;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -14,13 +15,18 @@ import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
 import net.lecousin.dataorganizer.people.ui.OverviewPanel;
 import net.lecousin.dataorganizer.util.DataImageLoader;
 import net.lecousin.dataorganizer.util.DataImageLoader.FileProvider_FromDataPath;
-import net.lecousin.framework.Triple;
+import net.lecousin.framework.Pair;
+import net.lecousin.framework.collections.CollectionUtil;
 import net.lecousin.framework.event.ProcessListener;
 import net.lecousin.framework.event.SplitProcessListener;
+import net.lecousin.framework.log.Log;
 import net.lecousin.framework.xml.XmlWriter;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.w3c.dom.Element;
 
 public class PeopleDataType extends DataContentType {
@@ -94,20 +100,25 @@ public class PeopleDataType extends DataContentType {
 	public void createDescriptionPanel(Composite panel) {
 	}
 
-	private List<Image> photos = null;
+	private List<Pair<Image,String>> photos = null;
 	
 	void signalNewPhoto() {
 		photos = null;
 	}
 	
+	private static final DataImageCategory[] categories = new DataImageCategory[] {
+		new DataImageCategory("photos", Local.Photos.toString(), 10),
+	};
 	@Override
-	public void getImages(ProcessListener<Triple<String, Image, Integer>> listener) {
-		SplitProcessListener<Triple<String, Image, Integer>> split = new SplitProcessListener<Triple<String, Image, Integer>>(listener);
-		ProcessListener<Triple<String, Image, Integer>> posterListener = split.newListener();
+	public List<DataImageCategory> getImagesCategories() { return CollectionUtil.list(categories); }
+	@Override
+	public void getImages(ProcessListener<DataImageLoaded> listener) {
+		SplitProcessListener<DataImageLoaded> split = new SplitProcessListener<DataImageLoaded>(listener);
+		ProcessListener<DataImageLoaded> posterListener = split.newListener();
 		loadPosters(posterListener);
 	}
 	
-	private void loadPosters(ProcessListener<Triple<String, Image, Integer>> listener) {
+	private void loadPosters(ProcessListener<DataImageLoaded> listener) {
 		PeopleInfo info = (PeopleInfo)getInfo();
 		if (info == null) {
 			listener.started();
@@ -117,8 +128,10 @@ public class PeopleDataType extends DataContentType {
 		synchronized (this) {
 			if (photos != null) {
 				listener.started();
-				for (int i = 0; i < photos.size(); ++i)
-					listener.fire(new Triple<String, Image, Integer>(Local.Photo+" " + (i+1), photos.get(i), 10));
+				for (int i = 0; i < photos.size(); ++i) {
+					Pair<Image,String> p = photos.get(i);
+					listener.fire(new DataImageLoaded("photos", Local.Photo+" " + (i+1), p.getValue1(), p.getValue2()));
+				}
 				listener.done();
 				return;
 			}
@@ -129,23 +142,23 @@ public class PeopleDataType extends DataContentType {
 				paths.addAll(info.getSourceInfo(source).getPhotosPaths());
 		if (paths.isEmpty()) {
 			synchronized (this) {
-				photos = new LinkedList<Image>();
+				photos = new LinkedList<Pair<Image,String>>();
 			}
 			listener.started();
 			listener.done();
 			return;
 		}
-		class Listener implements ProcessListener<Image> {
-			Listener(ProcessListener<Triple<String, Image, Integer>> listener) {
+		class Listener implements ProcessListener<Pair<Image,String>> {
+			Listener(ProcessListener<DataImageLoaded> listener) {
 				this.listener = listener;
 			}
-			private ProcessListener<Triple<String, Image, Integer>> listener;
-			private List<Image> images = new LinkedList<Image>();
+			private ProcessListener<DataImageLoaded> listener;
+			private List<Pair<Image,String>> images = new LinkedList<Pair<Image,String>>();
 			public void started() {
 				listener.started();
 			}
-			public void fire(Image image) {
-				listener.fire(new Triple<String,Image, Integer>(Local.Photo+" " + (images.size()+1), image, 10));
+			public void fire(Pair<Image,String> image) {
+				listener.fire(new DataImageLoaded("photos", Local.Photo+" " + (images.size()+1), image.getValue1(), image.getValue2()));
 				images.add(image);
 			}
 			public void done() {
@@ -159,4 +172,28 @@ public class PeopleDataType extends DataContentType {
 		DataImageLoader.load(this, "photos", new FileProvider_FromDataPath(getData(), paths), new Listener(listener));
 	}
 
+	@Override
+	public Control createImageCategoryControls(Composite parent) {
+		return null;
+	}
+	
+	@Override
+	public void removeImage(DataImageLoaded image) {
+		synchronized (this) {
+			for (Iterator<Pair<Image,String>> it = photos.iterator(); it.hasNext(); ) {
+				Pair<Image,String> p = it.next();
+				if (p.getValue1() == image.getImage()) {
+					it.remove();
+					break;
+				}
+			}
+			try {
+				IFile file = getFile(image.getFileName());
+				file.delete(true, null);
+			} catch (CoreException e) {
+				if (Log.error(this))
+					Log.error(this, "Unable to remove image file '" + image.getFileName() + "' for data ID " + getData().getID());
+			}
+		}
+	}
 }

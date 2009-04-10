@@ -10,7 +10,8 @@ Require-Bundle: org.eclipse.ui,
  net.lecousin.framework,
  net.lecousin.framework.ui,
  org.eclipse.core.filesystem,
- net.lecousin.framework.files
+ net.lecousin.framework.files,
+ org.eclipse.core.resources
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Export-Package: net.lecousin.dataorganizer.people

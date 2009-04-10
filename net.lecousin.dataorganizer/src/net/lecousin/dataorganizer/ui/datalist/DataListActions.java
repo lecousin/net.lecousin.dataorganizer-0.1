@@ -12,6 +12,7 @@ import net.lecousin.dataorganizer.core.database.refresh.RefreshOptions;
 import net.lecousin.dataorganizer.core.database.refresh.Refresher;
 import net.lecousin.dataorganizer.internal.EclipsePlugin;
 import net.lecousin.dataorganizer.ui.dialog.RefreshDialog;
+import net.lecousin.dataorganizer.ui.dialog.SourcesInfoDialog;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.ui.eclipse.dialog.ErrorDlg;
@@ -102,5 +103,9 @@ public class DataListActions {
 		RefreshOptions options = dlg.open();
 		if (options == null) return;
 		Refresher.refresh(MyDialog.getPlatformShell(), DataOrganizer.database(), data, options);
+	}
+	
+	public static void sourcesInfo(Data data) {
+		SourcesInfoDialog.open(data);
 	}
 }

@@ -17,6 +17,7 @@ import net.lecousin.framework.xml.XmlWriter;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.swt.graphics.Image;
 import org.w3c.dom.Element;
 
 public abstract class DataSource {
@@ -135,6 +136,9 @@ public abstract class DataSource {
 	public abstract List<File> getLinkedFiles();
 	
 	public abstract String getFileName();
+	public abstract String getPathToDisplay();
+	public abstract long getSize();
+	public abstract Image getIcon();
 	
 	public abstract URI ensurePresenceAndGetURI() throws FileNotFoundException;
 }

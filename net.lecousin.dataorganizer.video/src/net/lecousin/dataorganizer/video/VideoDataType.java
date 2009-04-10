@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.net.URI;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -20,7 +21,8 @@ import net.lecousin.dataorganizer.util.DataImageLoader.FileProvider_FromDataPath
 import net.lecousin.dataorganizer.util.DataImageLoader.FileProvider_ListStartWith;
 import net.lecousin.dataorganizer.video.ui.DescriptionPanel;
 import net.lecousin.dataorganizer.video.ui.OverviewPanel;
-import net.lecousin.framework.Triple;
+import net.lecousin.framework.Pair;
+import net.lecousin.framework.collections.CollectionUtil;
 import net.lecousin.framework.eclipse.resource.ResourceUtil;
 import net.lecousin.framework.event.ProcessListener;
 import net.lecousin.framework.event.SplitProcessListener;
@@ -44,6 +46,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.w3c.dom.Element;
 
 public class VideoDataType extends DataContentType {
@@ -84,23 +87,29 @@ public class VideoDataType extends DataContentType {
 		return dimension;
 	}
 	
-	private List<Image> previewImages = null;
-	private List<Image> posterImages = null;
+	private List<Pair<Image,String>> previewImages = null;
+	private List<Pair<Image,String>> posterImages = null;
 	
 	void signalNewPoster() {
 		posterImages = null;
 	}
 	
+	private static final DataImageCategory[] categories = new DataImageCategory[] {
+		new DataImageCategory("posters", Local.Posters.toString(), 10),
+		new DataImageCategory("previews", Local.Previews.toString(), 500),
+	};
 	@Override
-	public void getImages(ProcessListener<Triple<String, Image, Integer>> listener) {
-		SplitProcessListener<Triple<String, Image, Integer>> split = new SplitProcessListener<Triple<String, Image, Integer>>(listener);
-		ProcessListener<Triple<String, Image, Integer>> posterListener = split.newListener();
-		ProcessListener<Triple<String, Image, Integer>> previewListener = split.newListener();
+	public List<DataImageCategory> getImagesCategories() { return CollectionUtil.list(categories); }
+	@Override
+	public void getImages(ProcessListener<DataImageLoaded> listener) {
+		SplitProcessListener<DataImageLoaded> split = new SplitProcessListener<DataImageLoaded>(listener);
+		ProcessListener<DataImageLoaded> posterListener = split.newListener();
+		ProcessListener<DataImageLoaded> previewListener = split.newListener();
 		loadPosters(posterListener);
 		loadPreviews(previewListener);
 	}
 	
-	private void loadPosters(ProcessListener<Triple<String, Image, Integer>> listener) {
+	private void loadPosters(ProcessListener<DataImageLoaded> listener) {
 		VideoInfo info = (VideoInfo)getInfo();
 		if (info == null) {
 			listener.started();
@@ -110,8 +119,10 @@ public class VideoDataType extends DataContentType {
 		synchronized (this) {
 			if (posterImages != null) {
 				listener.started();
-				for (int i = 0; i < posterImages.size(); ++i)
-					listener.fire(new Triple<String, Image, Integer>(Local.Poster+" " + (i+1), posterImages.get(i), 10));
+				for (int i = 0; i < posterImages.size(); ++i) {
+					Pair<Image,String> p = posterImages.get(i);
+					listener.fire(new DataImageLoaded("posters", Local.Poster+" " + (i+1), p.getValue1(), p.getValue2()));
+				}
 				listener.done();
 				return;
 			}
@@ -124,23 +135,23 @@ public class VideoDataType extends DataContentType {
 		}
 		if (paths.isEmpty()) {
 			synchronized (this) {
-				posterImages = new LinkedList<Image>();
+				posterImages = new LinkedList<Pair<Image,String>>();
 			}
 			listener.started();
 			listener.done();
 			return;
 		}
-		class Listener implements ProcessListener<Image> {
-			Listener(ProcessListener<Triple<String, Image, Integer>> listener) {
+		class Listener implements ProcessListener<Pair<Image,String>> {
+			Listener(ProcessListener<DataImageLoaded> listener) {
 				this.listener = listener;
 			}
-			private ProcessListener<Triple<String, Image, Integer>> listener;
-			private List<Image> images = new LinkedList<Image>();
+			private ProcessListener<DataImageLoaded> listener;
+			private List<Pair<Image,String>> images = new LinkedList<Pair<Image,String>>();
 			public void started() {
 				listener.started();
 			}
-			public void fire(Image image) {
-				listener.fire(new Triple<String,Image,Integer>(Local.Poster+" " + (images.size()+1), image, 10));
+			public void fire(Pair<Image,String> image) {
+				listener.fire(new DataImageLoaded("posters", Local.Poster+" " + (images.size()+1), image.getValue1(), image.getValue2()));
 				images.add(image);
 			}
 			public void done() {
@@ -153,27 +164,29 @@ public class VideoDataType extends DataContentType {
 		}
 		DataImageLoader.load(this, "posters", new FileProvider_FromDataPath(getData(), paths), new Listener(listener));
 	}
-	private void loadPreviews(ProcessListener<Triple<String, Image, Integer>> listener) {
+	private void loadPreviews(ProcessListener<DataImageLoaded> listener) {
 		synchronized (this) {
 			if (previewImages != null) {
 				listener.started();
-				for (int i = 0; i < previewImages.size(); ++i)
-					listener.fire(new Triple<String, Image, Integer>(Local.Preview+" " + (i+1), previewImages.get(i), 100));
+				for (int i = 0; i < previewImages.size(); ++i) {
+					Pair<Image,String> p = previewImages.get(i);
+					listener.fire(new DataImageLoaded("previews", Local.Preview+" " + (i+1), p.getValue1(), p.getValue2()));
+				}
 				listener.done();
 				return;
 			}
 		}
-		class Listener implements ProcessListener<Image> {
-			Listener(ProcessListener<Triple<String, Image, Integer>> listener) {
+		class Listener implements ProcessListener<Pair<Image,String>> {
+			Listener(ProcessListener<DataImageLoaded> listener) {
 				this.listener = listener;
 			}
-			private ProcessListener<Triple<String, Image, Integer>> listener;
-			private List<Image> images = new LinkedList<Image>();
+			private ProcessListener<DataImageLoaded> listener;
+			private List<Pair<Image,String>> images = new LinkedList<Pair<Image,String>>();
 			public void started() {
 				listener.started();
 			}
-			public void fire(Image image) {
-				listener.fire(new Triple<String,Image, Integer>(Local.Preview+" " + (images.size()+1), image, 100));
+			public void fire(Pair<Image,String> image) {
+				listener.fire(new DataImageLoaded("previews", Local.Preview+" " + (images.size()+1), image.getValue1(), image.getValue2()));
 				images.add(image);
 			}
 			public void done() {
@@ -184,7 +197,7 @@ public class VideoDataType extends DataContentType {
 				}
 			}
 		}
-		try { DataImageLoader.load(this, "previews", new FileProvider_ListStartWith(getFolder("video"), "preview_"), new Listener(listener)); }
+		try { DataImageLoader.load(this, "previews", new FileProvider_ListStartWith(getFolder("video"), "preview_", "video"), new Listener(listener)); }
 		catch (CoreException e) {
 			listener.started();
 			listener.done();
@@ -296,5 +309,39 @@ public class VideoDataType extends DataContentType {
 	@Override
 	public boolean isSame(Info info) {
 		return false;
+	}
+	
+	@Override
+	public Control createImageCategoryControls(Composite parent) {
+		return null;
+	}
+	
+	@Override
+	public void removeImage(DataImageLoaded image) {
+		synchronized (this) {
+			if (image.getCategoryID().equals("posters"))
+				for (Iterator<Pair<Image,String>> it = posterImages.iterator(); it.hasNext(); ) {
+					Pair<Image,String> p = it.next();
+					if (p.getValue1() == image.getImage()) {
+						it.remove();
+						break;
+					}
+				}
+			else
+				for (Iterator<Pair<Image,String>> it = previewImages.iterator(); it.hasNext(); ) {
+					Pair<Image,String> p = it.next();
+					if (p.getValue1() == image.getImage()) {
+						it.remove();
+						break;
+					}
+				}
+			try {
+				IFile file = getFile(image.getFileName());
+				file.delete(true, null);
+			} catch (CoreException e) {
+				if (Log.error(this))
+					Log.error(this, "Unable to remove image file '" + image.getFileName() + "' for data ID " + getData().getID());
+			}
+		}
 	}
 }

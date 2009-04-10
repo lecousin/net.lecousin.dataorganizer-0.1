@@ -9,6 +9,7 @@ public enum Local {
 	Born_at("Born at", "Né(e) à"),
 	People("People", "Personne"),
 	Photo("Photo", "Photo"),
+	Photos("Photos", "Photos"),
 	
 	;
 	
