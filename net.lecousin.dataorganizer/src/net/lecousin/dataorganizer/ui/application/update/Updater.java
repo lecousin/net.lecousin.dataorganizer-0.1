@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,6 +17,7 @@ import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.internal.EclipsePlugin;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.application.Application;
+import net.lecousin.framework.collections.SortedListTree;
 import net.lecousin.framework.io.FileSystemUtil;
 import net.lecousin.framework.io.IOUtil;
 import net.lecousin.framework.io.ZipUtil;
@@ -81,36 +83,91 @@ public class Updater {
 	}
 	
 	public static class Update {
-		private Update(
-				Element currentNode, Version currentVersion, Version currentJRE, Version currentExtras,
-				Element newNode, Version newVersion, Version newJRE, Version newExtras, 
-				Element root, WorkProgress progress) {
-			this.newVersion = newVersion;
+		private Update(Version currentVersion) {
 			this.currentVersion = currentVersion;
-			progress.reset(Local.A_new_version_has_been_found__Retrieving_information_about_this_version.toString(), 10000);
-			news = getNews(root, currentVersion, newVersion, progress, 10000);
+		}
+		private void newNode(Element node) {
+			if (!node.hasAttribute("version")) {
+				if (Log.error(Updater.class))
+					Log.error(Updater.class, "update.xml contains an invalid update node: missing attribute 'version'.");
+				return;
+			}
+			String version = node.getAttribute("version");
+			if (version.equals("DEBUG")) {
+				if (!Application.isDebugEnabled || !isMySelf())
+					return;
+				version = node.getAttribute("simulated");
+			}
+			Version v = new Version(version);
+			if (!node.hasAttribute("jre")) {
+				if (Log.error(Updater.class))
+					Log.error(Updater.class, "update.xml contains an invalid update node: missing attribute 'jre'.");
+				return;
+			}
+			Version jre = new Version(node.getAttribute("jre"));
+			if (!node.hasAttribute("extras")) {
+				if (Log.error(Updater.class))
+					Log.error(Updater.class, "update.xml contains an invalid update node: missing attribute 'extras'.");
+				return;
+			}
+			Version extras = new Version(node.getAttribute("extras"));
+			if (v.compareTo(currentVersion)<0) return; // older version: skip
+			if (v.compareTo(currentVersion) == 0) {
+				currentJRE = jre;
+				currentExtras = extras;
+				return;
+			}
+			// new version
+			newVersions.add(new Pair<Version,Element>(v, node));
+		}
+		
+		private boolean end(Element root, WorkProgress progress) {
+			if (newVersions.isEmpty()) return false;
+			Element latest = null;
+			for (Pair<Version,Element> p : newVersions) {
+				newVersion = p.getValue1();
+				latest = p.getValue2();
+				Element app = XmlUtil.get_child_element(latest, "application"); 
+				if (app != null) {
+					applicationFiles = getFiles(app);
+					plugins.clear();
+				} else {
+					for (Element e : XmlUtil.get_childs_element(latest, "plugin")) {
+						String name = e.getAttribute("name");
+						List<UpdateFile> list = plugins.get(name);
+						if (list == null) {
+							list = new LinkedList<UpdateFile>();
+							plugins.put(name, list);
+						}
+						UpdateFile file = new UpdateFile();
+						file.host = e.getAttribute("host");
+						try { file.port = Integer.parseInt(e.getAttribute("port")); }
+						catch (NumberFormatException ex) { file.port = 80; }
+						file.path = XmlUtil.get_inner_text(e);
+						list.add(file);
+					}
+				}
+			}
+			Version newJRE = new Version(latest.getAttribute("jre"));
+			Version newExtras = new Version(latest.getAttribute("extras"));
 			if (currentJRE == null || newJRE.compareTo(currentJRE)>0)
 				jreFiles = getFiles(getNode(root, "jre", newJRE));
 			if (currentExtras == null || newExtras.compareTo(currentExtras)>0)
 				extrasFiles = getFiles(getNode(root, "extras", newExtras));
-			updaterFiles = getFiles(XmlUtil.get_child_element(newNode, "updater"));
-			applicationFiles = getFiles(XmlUtil.get_child_element(newNode, "application"));
-			for (Element e : XmlUtil.get_childs_element(root, "plugin")) {
-				String name = e.getAttribute("name");
-				List<UpdateFile> list = plugins.get(name);
-				if (list == null) {
-					list = new LinkedList<UpdateFile>();
-					plugins.put(name, list);
-				}
-				UpdateFile file = new UpdateFile();
-				file.host = e.getAttribute("host");
-				try { file.port = Integer.parseInt(e.getAttribute("port")); }
-				catch (NumberFormatException ex) { file.port = 80; }
-				file.path = XmlUtil.get_inner_text(e);
-				list.add(file);
-			}
+			updaterFiles = getFiles(XmlUtil.get_child_element(latest, "updater"));
+			progress.reset(Local.A_new_version_has_been_found__Retrieving_information_about_this_version.toString(), 10000);
+			news = getNews(root, currentVersion, newVersion, progress, 10000);
+			return true;
 		}
+
 		private Version currentVersion;
+		private Version currentJRE;
+		private Version currentExtras;
+		private SortedListTree<Pair<Version,Element>> newVersions = new SortedListTree<Pair<Version,Element>>(new Comparator<Pair<Version,Element>>() {
+			public int compare(Pair<Version, Element> o1, Pair<Version, Element> o2) {
+				return o1.getValue1().compareTo(o2.getValue1());
+			}
+		});
 		private Version newVersion;
 		private String news;
 		private List<UpdateFile> updaterFiles;
@@ -205,64 +262,14 @@ public class Updater {
 				throw new UpdateException(Local.ERROR_UPDATE_WEB_SITE.toString());
 			}
 			
-			Version latest = null;
-			Element updateNode = null;
-			Version latestJRE = null;
-			Version latestExtras = null;
-			Element currentNode = null;
-			Version currentJRE = null;
-			Version currentExtras = null;
 			Version current = getCurrentVersion();
-			for (Element e : XmlUtil.get_childs_element(root, "update")) {
-				if (!e.hasAttribute("version")) {
-					if (Log.error(Updater.class))
-						Log.error(Updater.class, "update.xml contains an invalid update node: missing attribute 'version'.");
-					continue;
-				}
-				String version = e.getAttribute("version");
-				if (version.equals("DEBUG")) {
-					if (!Application.isDebugEnabled || !isMySelf())
-						continue;
-					version = e.getAttribute("simulated");
-				}
-				Version v = new Version(version);
-				if (!e.hasAttribute("jre")) {
-					if (Log.error(Updater.class))
-						Log.error(Updater.class, "update.xml contains an invalid update node: missing attribute 'jre'.");
-					continue;
-				}
-				Version jre = new Version(e.getAttribute("jre"));
-				if (!e.hasAttribute("extras")) {
-					if (Log.error(Updater.class))
-						Log.error(Updater.class, "update.xml contains an invalid update node: missing attribute 'extras'.");
-					continue;
-				}
-				Version extras = new Version(e.getAttribute("extras"));
-				if (latest == null || v.compareTo(latest) > 0) {
-					latest = v;
-					updateNode = e;
-					latestJRE = jre;
-					latestExtras = extras;
-				}
-				if (v.compareTo(current)==0) {
-					currentNode = e;
-					currentJRE = jre;
-					currentExtras = extras;
-				}
-			}
+			Update update = new Update(current);
+			for (Element e : XmlUtil.get_childs_element(root, "update"))
+				update.newNode(e);
 			progress.progress(50);
-				
-			if (latest == null) {
-				if (Log.error(Updater.class))
-					Log.error(Updater.class, "Invalid update.xml file: no valid update node.");
-				throw new UpdateException(Local.ERROR_UPDATE_WEB_SITE.toString());
-			}
-			
-			if (Log.debug(Updater.class))
-				Log.debug(Updater.class, "update.xml found: version=" + latest.toString());
-			
-			if (latest.compareTo(current)<=0) return null;
-			return new Update(currentNode, current, currentJRE, currentExtras, updateNode, latest, latestJRE, latestExtras, root, progress);
+
+			if (!update.end(root, progress)) return null;
+			return update;
 		} finally {
 			dlg.close();
 		}

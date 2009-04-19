@@ -18,3 +18,5 @@ Integrated Media Player provided.
 http://cloud.github.com/downloads/lecousin/net.lecousin.dataorganizer/DataOrganizer-Install.exe
 
 http://dataorganizer.webhop.net/pad.xml
+
+http://dataorganizer.webhop.net/en/screenshots/main_screen.gif

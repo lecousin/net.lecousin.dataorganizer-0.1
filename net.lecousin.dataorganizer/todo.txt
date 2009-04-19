@@ -1,8 +1,15 @@
 0.1.2: net.lecousin.media.jvlc.client
 
+0.2: net.lecousin.dataorganizer
+0.2: net.lecousin.dataorganizer.audio
+0.2: net.lecousin.dataorganizer.people
+0.2: net.lecousin.dataorganizer.video
+0.2: net.lecousin.framework
+0.2: net.lecousin.framework.ui
+0.2: net.lecousin.media.jvlc.client
+
 ---------------------------------------------------------------------
 DataOrganizer
- + LCTable optimize:layout and create on demand
  + Bug LCTable: ne plus utiliser ScrolledComposite a cause de MouseWhell, mais mettre la horizontal scroll bar manuellement
  + Add data: from internet, single audio
  + DataOverview: meilleure gestion du scrolling
@@ -14,7 +21,6 @@ DataOrganizer
  + Mosaic: ameliorer: sort + key down/up + ...
  + BUG: PreviewTaker: attendre que l'image change avant de prendre reellement... (permet d'etre sur que la video est prete)
  + AdvancedList: gerer la limitation du nombre d'éléments
- + Localisation: boutons de wizard
  + Data opened menu: + ergonomique pour traiter plusieurs en meme temps???
  + ReviewsDialog: filtre par note
  + Pouvoir se creer des listes (genre selection...)
@@ -25,9 +31,6 @@ DataOrganizer
  
 Install/Update
  + Updater
- + InstallFinalizer
- + jre, extras, application...
- + penser a garder les fichiers de config (recentWorkspaces.xml...)
 
 9Box Media Center:
  + drag'n'drop
@@ -56,3 +59,4 @@ Video
  + Wikipedia?
  + IMDb
  + cinemovies.fr
+ + moviecovers.com
