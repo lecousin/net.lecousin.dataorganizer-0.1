@@ -26,14 +26,19 @@ import net.lecousin.framework.io.FileSystemUtil;
 import net.lecousin.framework.log.Log;
 import net.lecousin.framework.media.MediaPlayer;
 import net.lecousin.framework.progress.WorkProgress;
+import net.lecousin.framework.time.DateTimeUtil;
 import net.lecousin.framework.ui.eclipse.EclipseImages;
 import net.lecousin.framework.ui.eclipse.SharedImages;
 import net.lecousin.framework.ui.eclipse.UIUtil;
+import net.lecousin.framework.ui.eclipse.control.list.LCTable.ColumnProvider;
+import net.lecousin.framework.ui.eclipse.control.list.LCTable.ColumnProviderText;
 import net.lecousin.framework.ui.eclipse.control.text.lcml.LCMLText;
+import net.lecousin.framework.ui.eclipse.dialog.MyDialog;
 import net.lecousin.framework.version.Version;
 
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridLayout;
@@ -142,6 +147,64 @@ public class VideoContentType extends ContentType {
 		list.add(new Param_Duration());
 		list.add(new Param_Casting());
 		return list;
+	}
+	
+	@Override
+	public List<ColumnProvider<Data>> getColumns() {
+		if (dateFont == null)
+			dateFont = UIUtil.increaseFontSize(MyDialog.getPlatformShell().getFont(), -2);
+		List<ColumnProvider<Data>> list = new LinkedList<ColumnProvider<Data>>();
+		list.add(new ColumnDuration());
+		list.add(new ColumnReleaseDate());
+		return list;
+	}
+	private static Font dateFont = null;
+	private static class ColumnReleaseDate implements ColumnProviderText<Data> {
+		public String getTitle() { return Local.Video.toString()+':'+Local.Release.toString(); }
+		public int getDefaultWidth() { return 65; }
+		public int getAlignment() { return SWT.RIGHT; }
+		public Font getFont(Data element) { return dateFont; }
+		public String getText(Data element) {
+			if (!element.getContentType().getID().equals(VIDEO_TYPE)) return "";
+			VideoDataType content = (VideoDataType)element.getContent();
+			VideoInfo info = (VideoInfo)content.getInfo();
+			if (info == null) return "";
+			VideoSourceInfo i = (VideoSourceInfo)info.getMergedInfo(info.getSources());
+			long date = i.getReleaseDate();
+			if (date <= 0) return "";
+			return DateTimeUtil.getDateString(date);
+		}
+		public Image getImage(Data element) { return null; }
+		public int compare(Data element1, String text1, Data element2, String text2) {
+			if (text1.length() == 0)
+				return text2.length() == 0 ? 0 : 1;
+			if (text2.length() == 0) return -1;
+			long date1 = DateTimeUtil.getDateFromString(text1);
+			long date2 = DateTimeUtil.getDateFromString(text2);
+			return date1 < date2 ? -1 : date1 > date2 ? 1 : 0;
+		}
+	}
+	private static class ColumnDuration implements ColumnProviderText<Data> {
+		public String getTitle() { return Local.Video.toString()+':'+Local.Duration.toString(); }
+		public int getDefaultWidth() { return 65; }
+		public int getAlignment() { return SWT.RIGHT; }
+		public Font getFont(Data element) { return null; }
+		public String getText(Data element) {
+			if (!element.getContentType().getID().equals(VIDEO_TYPE)) return "";
+			VideoDataType content = (VideoDataType)element.getContent();
+			long duration = content.getDuration();
+			if (duration <= 0) return "";
+			return DateTimeUtil.getTimeMinimalString(duration);
+		}
+		public Image getImage(Data element) { return null; }
+		public int compare(Data element1, String text1, Data element2, String text2) {
+			if (text1.length() == 0)
+				return text2.length() == 0 ? 0 : 1;
+			if (text2.length() == 0) return -1;
+			long date1 = DateTimeUtil.getTimeFromMinimalString(text1);
+			long date2 = DateTimeUtil.getTimeFromMinimalString(text2);
+			return date1 < date2 ? -1 : date1 > date2 ? 1 : 0;
+		}
 	}
 	
 	private static final FileType[] filetypes = new FileType[] { VideoFile.FILE_TYPE };

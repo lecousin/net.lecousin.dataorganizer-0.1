@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: DataOrganizer - Data Lists
+Bundle-SymbolicName: net.lecousin.dataorganizer.datalist;singleton:=true
+Bundle-Version: 0.1.0
+Bundle-Activator: net.lecousin.dataorganizer.datalist.internal.EclipsePlugin
+Bundle-Vendor: Guillaume LE COUSIN
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ net.lecousin.framework;bundle-version="0.2.0",
+ net.lecousin.framework.ui;bundle-version="0.2.0",
+ net.lecousin.dataorganizer;bundle-version="0.2.0",
+ org.eclipse.core.resources;bundle-version="3.4.1"
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ActivationPolicy: lazy
+Export-Package: net.lecousin.dataorganizer.datalist

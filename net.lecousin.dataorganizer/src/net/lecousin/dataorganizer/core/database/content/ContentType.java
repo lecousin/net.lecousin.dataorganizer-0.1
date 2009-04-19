@@ -21,6 +21,7 @@ import net.lecousin.framework.files.TypedFile;
 import net.lecousin.framework.files.TypedFolder;
 import net.lecousin.framework.log.Log;
 import net.lecousin.framework.progress.WorkProgress;
+import net.lecousin.framework.ui.eclipse.control.list.LCTable.ColumnProvider;
 import net.lecousin.framework.version.Version;
 
 import org.eclipse.core.filesystem.IFileStore;
@@ -49,6 +50,7 @@ public abstract class ContentType {
 	public abstract AddData_Page createAddDataWizardPage();
 	
 	public List<DataSearch.Parameter> createSearchParameters() { return null; }
+	public List<ColumnProvider<Data>> getColumns() { return null; }
 	
 	public abstract DataContentType loadContent(Data data, Element elt);
 	public abstract DataContentType loadContent(Data data, Element elt, ContentTypeLoader loader);

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            allowMultiple="false"
+            class="net.lecousin.dataorganizer.datalist.View"
+            icon="images/list.gif"
+            id="net.lecousin.dataorganizer.datalist"
+            name="Data List"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="net.lecousin.dataorganizer.contenttype_action">
+      <action
+            content_type_id="*"
+            provider="net.lecousin.dataorganizer.datalist.DataListActionProvider">
+      </action>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="toolbar:Normal">
+         <dynamic
+               class="net.lecousin.dataorganizer.datalist.BarContribution"
+               id="net.lecousin.dataorganizer.datalist.bar">
+         </dynamic>
+      </menuContribution>
+   </extension>
+
+</plugin>

@@ -11,6 +11,7 @@ import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.core.DataOrganizer;
 import net.lecousin.dataorganizer.core.DataLabels.Label;
 import net.lecousin.dataorganizer.core.database.Data;
+import net.lecousin.dataorganizer.core.database.content.ContentType;
 import net.lecousin.dataorganizer.core.database.content.DataContentType;
 import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.dataorganizer.ui.DataOrganizerDND;
@@ -123,7 +124,7 @@ public class DataListView extends ViewPart {
 		TableConfig tableConfig = new TableConfig();
 		tableConfig.multiSelection = true;
 		tableConfig.fixedRowHeight = 18;
-		list.addTableView(Local.Table.toString(), getTableColumns(), tableConfig);
+		list.addTableView(Local.Table.toString(), tableConfig, getAllTableColumns(), getTableColumnsShown());
 		MosaicConfig mosaicConfig = new MosaicConfig();
 		mosaicConfig.multiSelection = true;
 		list.addMosaicView(Local.Mosaic.toString(), new Mosaic(), mosaicConfig);
@@ -183,11 +184,32 @@ public class DataListView extends ViewPart {
 			return DataOrganizer.search().getResult();
 		}
 	}
-	@SuppressWarnings("unchecked")
-	private ColumnProvider<Data>[] getTableColumns() {
-		return new ColumnProvider[] {
-			new ColumnName(), new ColumnRate(), new ColumnViews(), new ColumnLastOpened(), new ColumnDateAdded(), new ColumnLabels()
-		};
+	private List<Pair<String,List<ColumnProvider<Data>>>> getAllTableColumns() {
+		List<Pair<String,List<ColumnProvider<Data>>>> result = new LinkedList<Pair<String,List<ColumnProvider<Data>>>>();
+		List<ColumnProvider<Data>> list = new LinkedList<ColumnProvider<Data>>();
+		list.add(new ColumnName());
+		list.add(new ColumnRate());
+		list.add(new ColumnViews());
+		list.add(new ColumnLastOpened());
+		list.add(new ColumnDateAdded());
+		list.add(new ColumnLabels());
+		result.add(new Pair<String,List<ColumnProvider<Data>>>(Local.Main_data_information.toString(), list));
+		for (ContentType type : ContentType.getAvailableTypes()) {
+			list = type.getColumns();
+			if (list == null || list.isEmpty()) continue;
+			result.add(new Pair<String,List<ColumnProvider<Data>>>(type.getName(), list));
+		}
+		return result;
+	}
+	private List<String> getTableColumnsShown() {
+		List<String> list = new LinkedList<String>();
+		list.add(Local.Name.toString());
+		list.add(Local.Rate.toString());
+		list.add(Local.Views.toString());
+		list.add(Local.Last_open.toString());
+		list.add(Local.Added.toString());
+		list.add(Local.Labels.toString());
+		return list;
 	}
 	private class ColumnName implements ColumnProviderText<Data> {
 		public String getTitle() { return Local.Name.toString(); }
@@ -196,7 +218,7 @@ public class DataListView extends ViewPart {
 		public Font getFont(Data element) { return null; }
 		public String getText(Data element) { return element.getName(); }
 		public Image getImage(Data element) { return element.getContentType().getIcon(); }
-		public int compare(Data element1, String text1, Data element2, String text2) { return text1.compareTo(text2); }
+		public int compare(Data element1, String text1, Data element2, String text2) { return text1.compareToIgnoreCase(text2); }
 	}
 	private class ColumnViews implements ColumnProviderText<Data> {
 		public String getTitle() { return Local.Views.toString(); }

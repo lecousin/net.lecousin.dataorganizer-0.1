@@ -14,6 +14,7 @@ import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.xml.XmlUtil;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.w3c.dom.Element;
@@ -99,5 +100,35 @@ public class DataOrganizer {
 				Log.error(DataOrganizer.class, "Unable to load configuration file DataOrganizer.xml", t);
 			config = new DataOrganizerConfig();
 		}
+	}
+	
+	public static IProject getProject(String pluginID) {
+		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(pluginID);
+		try {
+			if (!project.isOpen())
+				project.open(null);
+		} catch (CoreException e) {
+		}
+		if (!project.exists()) {
+			try { 
+				project.create(null); 
+			}
+			catch (CoreException e) {
+				if (Log.error(DataOrganizer.class))
+					Log.error(DataOrganizer.class, "Unable to create project for plugin " + pluginID + " in the workspace.", e);
+				return null;
+			}
+		}
+		try { 
+			if (!project.isOpen())
+				project.open(null);
+			project.refreshLocal(IResource.DEPTH_INFINITE, null);
+		}
+		catch (CoreException e) {
+			if (Log.error(DataOrganizer.class))
+				Log.error(DataOrganizer.class, "Error while opening project for plugin " + pluginID + ".", e);
+			return null;
+		}
+		return project;
 	}
 }

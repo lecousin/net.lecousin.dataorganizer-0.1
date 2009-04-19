@@ -123,6 +123,7 @@ public enum Local {
 	Loading_labels("Loading labels", "Chargement des étiquettes"),
 	Loading_workspace("Loading workspace", "Chargement de l'espace de travail"),
 	Main_criteria("Main criteria", "Critères principaux"),
+	Main_data_information("Main data information", "Informations principales des données"),
 	Move_labels("Move labels", "Déplacer des étiquettes"),
 	New_label("New label", "Nouvelle étiquette"),
 	No_database_exist("No database exist", "Pas de base de données existante"),

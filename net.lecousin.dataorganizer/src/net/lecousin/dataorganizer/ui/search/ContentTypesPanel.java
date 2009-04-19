@@ -15,6 +15,7 @@ public class ContentTypesPanel extends Composite {
 
 	public ContentTypesPanel(Composite parent) {
 		super(parent, SWT.NONE);
+		setBackground(parent.getBackground());
 		RowLayout layout = new RowLayout(SWT.HORIZONTAL);
 		layout.wrap = true;
 		setLayout(layout);
@@ -44,6 +45,7 @@ public class ContentTypesPanel extends Composite {
 //			if (done.contains(type)) continue;
 //			if (!DataOrganizer.search().containsContentType(type)) continue;
 			Button button = new Button(this, SWT.CHECK);
+			button.setBackground(getBackground());
 			button.setText(type.getName());
 			button.setData(type.getID());
 			button.setSelection(DataOrganizer.search().getContentTypes().getContentTypes().contains(type.getID()));

@@ -68,7 +68,7 @@ public abstract class Info {
 	public String getSourceName(String source) { Triple<String,String,SourceInfo> t = sources.get(source); if (t == null) return null; return t.getValue2(); }
 	public SourceInfo getSourceInfo(String source) { Triple<String,String,SourceInfo> t = sources.get(source); if (t == null) return null; return t.getValue3(); }
 	
-	public SourceInfo getMergedInfo(List<String> sources) {
+	public SourceInfo getMergedInfo(Iterable<String> sources) {
 		SourceInfo result = createSourceInfo(null);
 		for (String source : sources) {
 			Triple<String,String,SourceInfo> t = this.sources.get(source);

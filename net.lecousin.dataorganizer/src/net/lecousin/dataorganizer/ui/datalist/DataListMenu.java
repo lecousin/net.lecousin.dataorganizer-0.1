@@ -82,6 +82,17 @@ public class DataListMenu {
 			if (data.size() > 1 || menuAdded)
 				new FlatPopupMenu.Separator(menu);
 		}
+		List<ActionProvider> listProviders = ActionProviderManager.getProviders("*");
+		boolean menuAdded = false;
+		for (ActionProvider provider : listProviders)
+			for (Action action : provider.getActions(data)) {
+				if (action.getType().equals(Type.LIST_MANAGEMENT) && !addDataListManagementActions)
+					continue;
+				new FlatPopupMenu.Menu(menu, action.getText(), action.getIcon(), action.isSame(defaultAction), false, action);
+				menuAdded = true;
+			}
+		if (menuAdded)
+			new FlatPopupMenu.Separator(menu);
 		if (data.size() == 1) {
 			new FlatPopupMenu.Menu(menu, Local.Sources_information.toString(), SharedImages.getImage(SharedImages.icons.x16.file.FILE), false, false, new RunnableWithData<Data>(data.get(0)) {
 				public void run() {
@@ -116,6 +127,8 @@ public class DataListMenu {
 		List<ActionProvider> listProviders = ActionProviderManager.getProviders(data.getContentType().getID());
 		if (listProviders != null)
 			providers.addAll(listProviders);
+		listProviders = ActionProviderManager.getProviders("*");
+		providers.addAll(listProviders);
 		boolean menuAdded = false;
 		for (ActionProvider provider : providers)
 			for (Action action : provider.getActions(CollectionUtil.single_element_list(data))) {

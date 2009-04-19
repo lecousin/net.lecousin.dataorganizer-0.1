@@ -12,5 +12,11 @@
             provider="net.lecousin.dataorganizer.neufbox.mediacenter.MediaCenterActionProvider_Audio">
       </action>
    </extension>
+   <extension
+         point="net.lecousin.neufbox.mediacenter.tree">
+      <drop
+            class="net.lecousin.dataorganizer.neufbox.mediacenter.DropManager.DropPlugin">
+      </drop>
+   </extension>
 
 </plugin>

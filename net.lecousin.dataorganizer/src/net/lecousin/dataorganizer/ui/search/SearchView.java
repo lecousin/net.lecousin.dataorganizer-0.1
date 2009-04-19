@@ -44,6 +44,7 @@ public class SearchView extends ViewPart {
 		item.setText(Local.Main_criteria.toString());
 		item.setControl(c);
 		item.setExpanded(true);
+		item.setHeight(c.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
 		register(c, item);
 
 		ContentTypesPanel contentTypesPanel = new ContentTypesPanel(panel);
