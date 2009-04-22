@@ -6,7 +6,7 @@ public class InstallFinalizer {
 		/*
 		 * TODO
 		 * 
-		 * 1. update DataOrganizer.ini to replace %CD% by the correct deploy path
+		 * 1. update DataOrganizer.ini to put an 'updated' flag...
 		 * 2. Remove myself (to do in application?)
 		 */
 	}

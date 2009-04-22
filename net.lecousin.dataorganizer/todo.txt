@@ -7,8 +7,12 @@
 0.2: net.lecousin.dataorganizer.neufbox
 0.2: net.lecousin.framework
 0.2: net.lecousin.framework.ui
+0.2: net.lecousin.framework.files.audio
+0.2: net.lecousin.framework.media (0.1.1)
 0.2: net.lecousin.media.jvlc.client
 0.2: neufbox
+new: net.lecousin.framework.files.container
+new: net.lecousin.dataorganizer.datalist
 
 ---------------------------------------------------------------------
 DataOrganizer
@@ -24,7 +28,6 @@ DataOrganizer
  + AdvancedList: gerer la limitation du nombre d'éléments
  + Data opened menu: + ergonomique pour traiter plusieurs en meme temps???
  + ReviewsDialog: filtre par note
- + DataList: drag'n'drop
  + Gestion des prets...
  + Add data from internet => use InfoRetriever.search...
  + Clean names
@@ -33,9 +36,6 @@ DataOrganizer
 Install/Update
  + Updater
 
-9Box Media Center:
- + sauvegarder la liste
- 
 Media Player
  + playlist : deplacer les elements par drag'n'drop
  

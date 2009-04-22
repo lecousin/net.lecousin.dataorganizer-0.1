@@ -6,30 +6,65 @@
 		<content language="ENGLISH" url="/update/news-0.1.0-en.html"/>
 	</news>
 	
-	<update version="DEBUG" simulated="99.99.99" jre="99.99.99" extras="99.99.99">
+	<update version="DEBUG" simulated="99.99.99" jre="1.5.10" extras="0.1.0">
 		<updater>
 			<file host="dataorganizer.webhop.net" port="80">/update/updater.zip</file>
 		</updater>
-		<application>
-			<file host="dataorganizer.webhop.net" port="80">/update/app-test.zip.part1</file>
-			<file host="dataorganizer.webhop.net" port="80">/update/app-test.zip.part2</file>
+		<application less_than="0.2.0">
+			<file host="dataorganizer.webhop.net" port="80">/update/application-0.2.0.zip</file>
 		</application>
-		<plugin name="net.lecousin.framework" host="dataorganizer.webhop.net" port="80">/update/net.lecousin.framework-test.zip</plugin>
-		<plugin name="net.lecousin.framework.ui" host="dataorganizer.webhop.net" port="80">/update/net.lecousin.framework.ui-test.zip</plugin>
+		<plugin name="net.lecousin.dataorganizer" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.dataorganizer.zip</plugin>
+		<plugin name="net.lecousin.dataorganizer.audio" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.dataorganizer.audio.zip</plugin>
+		<plugin name="net.lecousin.dataorganizer.datalist" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.dataorganizer.datalist.zip</plugin>
+		<plugin name="net.lecousin.dataorganizer.neufbox.mediacenter" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.dataorganizer.neufbox.mediacenter.zip</plugin>
+		<plugin name="net.lecousin.dataorganizer.people" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.dataorganizer.people.zip</plugin>
+		<plugin name="net.lecousin.dataorganizer.video" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.dataorganizer.video.zip</plugin>
+		<plugin name="net.lecousin.framework" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.framework.zip</plugin>
+		<plugin name="net.lecousin.framework.ui" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.framework.ui.zip</plugin>
+		<plugin name="net.lecousin.framework.files.audio" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.framework.files.audio.zip</plugin>
+		<plugin name="net.lecousin.framework.files.container" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.framework.files.container.zip</plugin>
+		<plugin name="net.lecousin.framework.media" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.framework.media.zip</plugin>
+		<plugin name="net.lecousin.media.jvlc.client" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.media.jvlc.client.zip</plugin>
+		<plugin name="net.lecousin.neufbox.mediacenter" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.neufbox.mediacenter.zip</plugin>
 	</update>
-	<jre version="99.99.99">
+
+	<update version="0.2.0" jre="1.5.10" extras="0.1.0">
+		<updater>
+			<file host="dataorganizer.webhop.net" port="80">/update/updater.zip</file>
+		</updater>
+		<application less_than="0.2.0">
+			<file host="dataorganizer.webhop.net" port="80">/update/application-0.2.0.zip</file>
+		</application>
+		<plugin name="net.lecousin.dataorganizer" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.dataorganizer.zip</plugin>
+		<plugin name="net.lecousin.dataorganizer.audio" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.dataorganizer.audio.zip</plugin>
+		<plugin name="net.lecousin.dataorganizer.datalist" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.dataorganizer.datalist.zip</plugin>
+		<plugin name="net.lecousin.dataorganizer.neufbox.mediacenter" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.dataorganizer.neufbox.mediacenter.zip</plugin>
+		<plugin name="net.lecousin.dataorganizer.people" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.dataorganizer.people.zip</plugin>
+		<plugin name="net.lecousin.dataorganizer.video" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.dataorganizer.video.zip</plugin>
+		<plugin name="net.lecousin.framework" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.framework.zip</plugin>
+		<plugin name="net.lecousin.framework.ui" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.framework.ui.zip</plugin>
+		<plugin name="net.lecousin.framework.files.audio" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.framework.files.audio.zip</plugin>
+		<plugin name="net.lecousin.framework.files.container" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.framework.files.container.zip</plugin>
+		<plugin name="net.lecousin.framework.media" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.framework.media.zip</plugin>
+		<plugin name="net.lecousin.media.jvlc.client" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.media.jvlc.client.zip</plugin>
+		<plugin name="net.lecousin.neufbox.mediacenter" host="dataorganizer.webhop.net" port="80">/update/plugin_net.lecousin.neufbox.mediacenter.zip</plugin>
+	</update>
+
+<!-- 	<jre version="99.99.99">
 		<file host="dataorganizer.webhop.net" port="80">/update/jre-test.zip</file>
 	</jre>
 	<extras version="99.99.99">
 		<file host="dataorganizer.webhop.net" port="80">/update/extras-test.zip.part1</file>
 		<file host="dataorganizer.webhop.net" port="80">/update/extras-test.zip.part2</file>
 	</extras>
-	<news version="99.99.98">
-		<content language="FRENCH" url="/update/news-test1-fr.html"/>
-		<content language="ENGLISH" url="/update/news-test1-en.html"/>
-	</news>
+	 -->
 	<news version="99.99.99">
-		<content language="FRENCH" url="/update/news-test2-fr.html"/>
-		<content language="ENGLISH" url="/update/news-test2-en.html"/>
+		<content language="FRENCH" url="/update/news-0.2.0-fr.html"/>
+		<content language="ENGLISH" url="/update/news-0.2.0-en.html"/>
+	</news>
+
+	<news version="0.2.0">
+		<content language="FRENCH" url="/update/news-0.2.0-fr.html"/>
+		<content language="ENGLISH" url="/update/news-0.2.0-en.html"/>
 	</news>
 </dataorganizer>

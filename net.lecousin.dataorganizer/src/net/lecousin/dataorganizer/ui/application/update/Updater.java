@@ -128,7 +128,7 @@ public class Updater {
 				newVersion = p.getValue1();
 				latest = p.getValue2();
 				Element app = XmlUtil.get_child_element(latest, "application"); 
-				if (app != null) {
+				if (app != null && isValid(app)) {
 					applicationFiles = getFiles(app);
 					plugins.clear();
 				} else {
@@ -157,6 +157,15 @@ public class Updater {
 			updaterFiles = getFiles(XmlUtil.get_child_element(latest, "updater"));
 			progress.reset(Local.A_new_version_has_been_found__Retrieving_information_about_this_version.toString(), 10000);
 			news = getNews(root, currentVersion, newVersion, progress, 10000);
+			return true;
+		}
+		private boolean isValid(Element appNode) {
+			if (appNode.hasAttribute("less_than")) {
+				Version v = new Version(appNode.getAttribute("less_than"));
+				if (currentVersion.compareTo(v) < 0)
+					return true;
+				return false;
+			}
 			return true;
 		}
 
@@ -364,7 +373,7 @@ public class Updater {
 			
 			if (update.updaterFiles == null || update.updaterFiles.isEmpty())
 				throw new UpdateException(Local.ERROR_UPDATE_INTERNAL.toString());
-			if (update.applicationFiles == null || update.applicationFiles.isEmpty())
+			if (update.applicationFiles != null || update.applicationFiles.isEmpty())
 				throw new UpdateException(Local.ERROR_UPDATE_INTERNAL.toString());
 			if (update.jreFiles != null && update.jreFiles.isEmpty())
 				throw new UpdateException(Local.ERROR_UPDATE_INTERNAL.toString());

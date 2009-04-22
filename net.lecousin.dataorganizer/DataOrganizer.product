@@ -3,7 +3,6 @@
 
 <product name="DataOrganizer" id="net.lecousin.dataorganizer.product" application="net.lecousin.dataorganizer.application" version="0.1.0" useFeatures="false">
 
-
    <configIni use="default">
    </configIni>
 
@@ -15,7 +14,6 @@
    </launcherArgs>
 
    <windowImages i16="/net.lecousin.dataorganizer/icons/icon.gif"/>
-
 
    <launcher name="DataOrganizer">
       <solaris/>
@@ -31,7 +29,6 @@
       </win>
    </launcher>
 
-
    <vm>
       <windows>org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.5.0_10</windows>
    </vm>
@@ -41,6 +38,7 @@
       <plugin id="net.lecousin.dataorganizer"/>
       <plugin id="net.lecousin.dataorganizer.allocine"/>
       <plugin id="net.lecousin.dataorganizer.audio"/>
+      <plugin id="net.lecousin.dataorganizer.datalist"/>
       <plugin id="net.lecousin.dataorganizer.mediaplayer"/>
       <plugin id="net.lecousin.dataorganizer.neufbox.mediacenter"/>
       <plugin id="net.lecousin.dataorganizer.people"/>
@@ -48,6 +46,7 @@
       <plugin id="net.lecousin.framework"/>
       <plugin id="net.lecousin.framework.files"/>
       <plugin id="net.lecousin.framework.files.audio"/>
+      <plugin id="net.lecousin.framework.files.container"/>
       <plugin id="net.lecousin.framework.files.image"/>
       <plugin id="net.lecousin.framework.files.playlist"/>
       <plugin id="net.lecousin.framework.files.video"/>

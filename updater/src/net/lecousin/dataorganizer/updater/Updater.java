@@ -1,6 +1,7 @@
 package net.lecousin.dataorganizer.updater;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -50,7 +51,12 @@ public class Updater {
 		if (!WaitDataOrganizerToBeClose.waitClose()) System.exit(1);
 
 		WorkProgress progress = new WorkProgress("Building backup...", 100000, false);
-		Backup backup = new Backup(path, progress, 20000);
+		ProgressDlg progressDlg = new ProgressDlg(progress);
+		Backup backup = null;
+		try { backup = new Backup(path, progress, 20000); }
+		catch (IOException e) {
+			new ErrorDlg("Warning: we are unable to correctly create a backup of the application. It means if the update fails, you will need to uninstall your current version, and then install the latest version manually.", e);
+		}
 		
 		File appDir = new File(path);
 		File extrasDir = new File(appDir, "extras");
@@ -117,7 +123,6 @@ public class Updater {
 			if (stepUnzip > 0) stepUnzip += stepInstall; else stepPlugins += stepInstall;
 			stepInstall = 0;
 		}
-		ProgressDlg progressDlg = new ProgressDlg(progress);
 
 		if (zipApp.exists()) {
 			try { ZipUtil.unzip(zipApp, tmpAppDir, progress, stepUnzipApp); }
@@ -125,7 +130,7 @@ public class Updater {
 				new ErrorDlg("Unable to extract update", t);
 				progress.setDescription("Restoring backuped application...");
 				progress.reset("Restoring backuped application...", 10000);
-				backup.restore(progress, 10000);
+				if (backup != null) backup.restore(progress, 10000);
 				System.exit(1);
 			}
 		}
@@ -135,7 +140,7 @@ public class Updater {
 				new ErrorDlg("Unable to extract update", t);
 				progress.setDescription("Restoring backuped application...");
 				progress.reset("Restoring backuped application...", 10000);
-				backup.restore(progress, 10000);
+				if (backup != null) backup.restore(progress, 10000);
 				System.exit(1);
 			}
 		}
@@ -143,21 +148,21 @@ public class Updater {
 			if (!Installer.installApplication(appDir, tmpAppDir, progress, stepInstallApp)) {
 				progress.setDescription("Restoring backuped application...");
 				progress.reset("Restoring backuped application...", 10000);
-				backup.restore(progress, 10000);
+				if (backup != null) backup.restore(progress, 10000);
 				System.exit(1);
 			}
 		if (zipExtras.exists())
 			if (!Installer.installExtras(extrasDir, tmpExtrasDir, progress, stepInstallExtras)) {
 				progress.setDescription("Restoring backuped application...");
 				progress.reset("Restoring backuped application...", 10000);
-				backup.restore(progress, 10000);
+				if (backup != null) backup.restore(progress, 10000);
 				System.exit(1);
 			}
 		if (zipJRE.exists())
 			if (!Installer.installJRE(jreDir, tmpJREDir, progress, stepInstallJRE)) {
 				progress.setDescription("Restoring backuped application...");
 				progress.reset("Restoring backuped application...", 10000);
-				backup.restore(progress, 10000);
+				if (backup != null) backup.restore(progress, 10000);
 				System.exit(1);
 			}
 		
@@ -168,14 +173,14 @@ public class Updater {
 			if (!Installer.installPlugin(file, tmpDir, appDir, progress, step)) {
 				progress.setDescription("Restoring backuped application...");
 				progress.reset("Restoring backuped application...", 10000);
-				backup.restore(progress, 10000);
+				if (backup != null) backup.restore(progress, 10000);
 				System.exit(1);
 			}
 		}
 		
 		progress.setDescription("Finalizing installation...");
 		InstallFinalizer.finalize(path);
-		backup.remove();
+		if (backup != null) backup.remove();
 		FileSystemUtil.deleteDirectory(tmpDir);
 		launchDataOrganizer(path);
 		progressDlg.close();
@@ -183,6 +188,7 @@ public class Updater {
 	}
 
 	static void launchDataOrganizer(String path) {
-		// TODO
+		try { Runtime.getRuntime().exec("\""+path+"\\DataOrganizer.exe\""); }
+		catch (IOException e) {}
 	}
 }

@@ -18,5 +18,11 @@
             class="net.lecousin.dataorganizer.neufbox.mediacenter.DropManager.DropPlugin">
       </drop>
    </extension>
+   <extension
+         point="net.lecousin.neufbox.mediacenter.plugin">
+      <listener
+            class="net.lecousin.dataorganizer.neufbox.mediacenter.MCListener">
+      </listener>
+   </extension>
 
 </plugin>

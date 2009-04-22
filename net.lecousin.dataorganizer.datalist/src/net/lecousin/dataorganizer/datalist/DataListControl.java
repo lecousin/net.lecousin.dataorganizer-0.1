@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.lecousin.dataorganizer.core.DataOrganizer;
 import net.lecousin.dataorganizer.core.database.Data;
+import net.lecousin.dataorganizer.ui.DataOrganizerDND;
 import net.lecousin.framework.event.Event;
 import net.lecousin.framework.event.Event.Listener;
 import net.lecousin.framework.ui.eclipse.UIUtil;
@@ -15,6 +16,12 @@ import net.lecousin.framework.ui.eclipse.control.list.LCTable.ColumnProviderText
 import net.lecousin.framework.ui.eclipse.control.list.LCTable.TableConfig;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.DropTargetListener;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
@@ -26,8 +33,47 @@ public class DataListControl extends Composite {
 		UIUtil.gridLayout(this, 1);
 		this.list = list;
 		table = new LCTable<Data>(this, new ContentProvider(), getColumns(), getConfig());
+		table.getControl().setLayoutData(UIUtil.gridData(1, true, 1, true));
 		table.addAddElementEvent(dataAdded);
 		table.addRemoveElementEvent(dataRemoved);
+		table.addDropSupport(DND.DROP_LINK, new Transfer[] { TextTransfer.getInstance() }, new DropTargetListener() {
+			public void dragEnter(DropTargetEvent event) {
+				TransferData support = null;
+				if (TextTransfer.getInstance().isSupportedType(event.currentDataType))
+					support = event.currentDataType;
+				else {
+					for (TransferData d : event.dataTypes)
+						if (TextTransfer.getInstance().isSupportedType(d)) {
+							support = d;
+							break;
+						}
+				}
+				if (support != null) {
+					event.currentDataType = support;
+					event.detail = DND.DROP_LINK;
+					return;
+				}
+				event.detail = DND.DROP_NONE;
+			}
+			public void dragLeave(DropTargetEvent event) {
+			}
+			public void dragOperationChanged(DropTargetEvent event) {
+				dragEnter(event);
+			}
+			public void dragOver(DropTargetEvent event) {
+			}
+			public void drop(DropTargetEvent event) {
+				if (!TextTransfer.getInstance().isSupportedType(event.currentDataType))
+					return;
+				String str = (String)event.data;
+				if (!DataOrganizerDND.isData(str))
+					return;
+				List<Data> data = DataOrganizerDND.getDataDNDFromString(str);
+				DataListControl.this.list.addData(data);
+			}
+			public void dropAccept(DropTargetEvent event) {
+			}
+		});
 		list.dataAdded.addListener(new Listener<Long>() {
 			public void fire(Long event) {
 				Data d = DataOrganizer.database().get(event);

@@ -40,7 +40,6 @@ public class ActionProvider implements net.lecousin.dataorganizer.ui.plugin.Acti
 
 	private void getActionsForSingleVideo(Data data, List<Action> actions) {
 		actions.add(new ActionOpenInMediaPlayer(data));
-		actions.add(new ActionOpenInSystemApplication(data));
 		actions.add(new ActionAddInMediaPlayer(data));
 	}
 

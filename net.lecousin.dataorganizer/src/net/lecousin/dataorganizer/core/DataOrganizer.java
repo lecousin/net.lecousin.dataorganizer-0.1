@@ -9,6 +9,7 @@ import net.lecousin.dataorganizer.core.search.DataSearch;
 import net.lecousin.dataorganizer.internal.MemoryMonitor;
 import net.lecousin.framework.application.Application;
 import net.lecousin.framework.event.Event;
+import net.lecousin.framework.io.FileSystemUtil;
 import net.lecousin.framework.log.Log;
 import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.xml.XmlUtil;
@@ -25,6 +26,7 @@ public class DataOrganizer {
 		instance = this;
 		Application.setName("DataOrganizer");
 		Application.getMonitor().newWork(new MemoryMonitor(), (long)5*60*1000);
+		FileSystemUtil.deleteDirectory(new File(Application.deployPath, "update-tmp"));
 		new AutoSaver();
 		
 		int stepLabels = amount * 10 / 100;
