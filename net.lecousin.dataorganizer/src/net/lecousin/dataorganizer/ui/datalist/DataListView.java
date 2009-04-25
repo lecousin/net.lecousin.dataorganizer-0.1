@@ -254,7 +254,7 @@ public class DataListView extends ViewPart {
 		public Font getFont(Data element) { return dateFont; }
 		public String getText(Data element) { return DateTimeUtil.getDateString(element.getDateAdded()); }
 		public Image getImage(Data element) { return null; }
-		public int compare(Data element1, String text1, Data element2, String text2) { return (int)(element1.getDateAdded() - element2.getDateAdded()); }
+		public int compare(Data element1, String text1, Data element2, String text2) { return element1.getDateAdded() < element2.getDateAdded() ? -1 : element1.getDateAdded() > element2.getDateAdded() ? 1 : 0; }
 	}
 	private class ColumnRate implements ColumnProviderControl<Data> {
 		public String getTitle() { return Local.Rate.toString(); }

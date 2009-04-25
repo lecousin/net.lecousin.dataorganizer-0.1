@@ -1,18 +1,15 @@
-0.1.2: net.lecousin.media.jvlc.client
-
-0.2: net.lecousin.dataorganizer
-0.2: net.lecousin.dataorganizer.audio
-0.2: net.lecousin.dataorganizer.people
-0.2: net.lecousin.dataorganizer.video
-0.2: net.lecousin.dataorganizer.neufbox
-0.2: net.lecousin.framework
-0.2: net.lecousin.framework.ui
-0.2: net.lecousin.framework.files.audio
-0.2: net.lecousin.framework.media (0.1.1)
-0.2: net.lecousin.media.jvlc.client
-0.2: neufbox
-new: net.lecousin.framework.files.container
-new: net.lecousin.dataorganizer.datalist
+0.3:
+dataorganizer
+dataorganizer.people
+dataorganizer.video
+(dataorganizer.retriever.allocine)
+framework
+framework.net.mime [fix]
+framework.ui [fix]
+new:
+(dataorganizer.retriever.allocine)
+dataorganizer.retriever.allcdcovers
+dataorganizer.retriever.cinefil
 
 ---------------------------------------------------------------------
 DataOrganizer
@@ -30,21 +27,26 @@ DataOrganizer
  + ReviewsDialog: filtre par note
  + Gestion des prets...
  + Add data from internet => use InfoRetriever.search...
- + Clean names
  + Import all/Refresh all sur DataLink list (utiliser aussi le ListDialog qui gere les pages, filtres... ?? ou une table ??)
+ + DataList: menu on right click, drag...
+ + Blink: pas base sur le temsp mais sur les sleep...
  
-Install/Update
- + Updater
-
+ + Continuer de tester AlloCine+CineFil
+    + bug quand merge liste des acteurs: le meme apparait plusieurs fois (merge de sources)
+    + pouvoir merger les données (et le détecter quand retrieve=>meme source=>merge)
+ + Continuer encodeXML
+ 
 Media Player
  + playlist : deplacer les elements par drag'n'drop
+ 
+Update
+ + really improve the system so even if there is a bug we can show message/update the soft
  
 Audio
  + Lecteur: CDA???
  + essayer avec tous mes CD audios
  + d'autres types supportes
  + PLS +...
- + Internet: CDDB + FreeDB.org + ??? + allcdcovers.com, lyricsreg.com
  + DataOverview: gerer les sources, source FILE... tracks order...
  + UI: genres
  + tous les TODO...
@@ -56,8 +58,17 @@ Picture
 Video
  + DVD, Video CD
  + continuer les types
+ 
+Internet plugins:
  + AlloCine: image DVD
- + Wikipedia?
- + IMDb
- + cinemovies.fr
- + moviecovers.com
+ + cinefil.com (video, french)
+ + freedb.org (audio, english?)
+ + allcdcovers.com (video+audio)
+ + lyricsreg.com (audio)
+ + cddb.org (audio, ?)
+ + google.com/musicsearch
+ (+ google.com/movies)
+ + cinemovies.fr (?? semble pareil que allocine)
+ + moviecovers.com ?? (comparer a allcdcovers.com)
+ + imdb.org (video, english)
+ + wikipedia ???

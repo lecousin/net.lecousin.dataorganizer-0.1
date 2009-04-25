@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: DataOrganizer - People
 Bundle-SymbolicName: net.lecousin.dataorganizer.people;singleton:=true
-Bundle-Version: 0.2.0
+Bundle-Version: 0.3.0
 Bundle-Activator: net.lecousin.dataorganizer.people.internal.EclipsePlugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,

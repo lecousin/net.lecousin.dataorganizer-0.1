@@ -296,7 +296,17 @@ public class VideoSourceInfo extends SourceInfo {
 		ArtsMartiaux("Martial arts", "Arts Martiaux"),
 		Espionnage("Spy", "Espionnage"),
 		Famille("Family", "Famille"),
-		Experimental("Experimental", "Expérimental");
+		Experimental("Experimental", "Expérimental"),
+		Catastrophe("Disaster", "Catastrophe"),
+		ComedieRomantique("Romantic comedy", "Comédie romantique"),
+		ConferenceFilmee("Conference", "Conference"),
+		DessinAnimeAdulte("Adult Cartoon", "Dessin animé adulte"),
+		DramePsychologique("Psychologic drama", "Drame psychologique"),
+		Noir("Film noir", "Film noir"),
+		GrandSpectacle("Big show", "Grand spectacle"),
+		Politique("Political", "Politique"),
+		Porno("Porno", "Porno"),
+		;
 		
 		Genre(String english, String french) 
 		{ this.english = english; this.french = french; }

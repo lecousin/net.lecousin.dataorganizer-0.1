@@ -38,7 +38,7 @@ public class DescriptionPanel {
 			UIUtil.gridDataHorizFill(folder);
 			for (String source : sources) {
 				String resume = i.getSourceInfo(source).getResume();
-				if (resume.length() == 0) continue;
+				if (resume == null || resume.length() == 0) continue;
 				TabItem item = new TabItem(folder, SWT.NONE);
 				item.setText(InfoRetrieverPluginRegistry.getNameForSource(source, VideoContentType.VIDEO_TYPE));
 				item.setImage(InfoRetrieverPluginRegistry.getIconForSource(source, VideoContentType.VIDEO_TYPE));

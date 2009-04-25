@@ -26,4 +26,6 @@ public interface InfoRetrieverPlugin {
 	public void retrieve(SearchResult result, Info info, WorkProgress progress, int work);
 	
 	public boolean retrieve(String id, String name, Info info, WorkProgress progress, int work);
+	
+	public int getMaxThreads();
 }

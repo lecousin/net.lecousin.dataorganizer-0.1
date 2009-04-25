@@ -10,6 +10,7 @@ import net.lecousin.dataorganizer.core.database.info.SourceInfo;
 import net.lecousin.dataorganizer.core.database.info.Info.DataLink;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.collections.SelfMap;
+import net.lecousin.framework.collections.SelfMapLinkedList;
 import net.lecousin.framework.xml.XmlWriter;
 
 import org.w3c.dom.Element;
@@ -24,8 +25,10 @@ public class PeopleSourceInfo extends SourceInfo {
 		super(parent);
 		birthDay = loader.getBirthDay(elt);
 		birthPlace = loader.getBirthPlace(elt);
+		description = loader.getDescription(elt);
 		activities = loader.getActivities(elt);
 		photos = loader.getPhotos(elt);
+		publicReviews = loader.getPublicReviews(this, elt);
 	}
 
 	@Override
@@ -33,6 +36,8 @@ public class PeopleSourceInfo extends SourceInfo {
 		xml.addAttribute("birthDay", birthDay);
 		if (birthPlace != null)
 			xml.addAttribute("birthPlace", birthPlace);
+		if (description != null)
+			xml.openTag("description").addText(description).closeTag();
 		for (String s : activities.keySet()) {
 			Pair<List<String>,List<List<DataLink>>> activity = activities.get(s);
 			xml.openTag("activity").addAttribute("name", s);
@@ -51,16 +56,20 @@ public class PeopleSourceInfo extends SourceInfo {
 		}
 		for (String s : photos.keySet())
 			xml.openTag("photo").addAttribute("source", s).addAttribute("local", photos.get(s)).closeTag();
+		saveCritiks(publicReviews, "publicReview", xml);
 	}
 
 	private long birthDay = 0;
 	private String birthPlace = null;
+	private String description = null;
 	/** photos <SourceURL,File_relative_to_data.getFolder()> */
 	private Map<String,String> photos = new HashMap<String,String>();
 	/**
 	 * Activity: Map(Name, Pair( FreeTexts, Links ))
 	 */
 	private Map<String,Pair<List<String>,List<List<DataLink>>>> activities = new HashMap<String,Pair<List<String>,List<List<DataLink>>>>();
+	/** public reviews */
+	private SelfMap<String,Review> publicReviews = new SelfMapLinkedList<String,Review>(5);
 	
 	public static abstract class Activity {
 		Map<String,List<String>> details = new HashMap<String,List<String>>();
@@ -81,6 +90,13 @@ public class PeopleSourceInfo extends SourceInfo {
 		if (place == null || place.length() == 0) return;
 		if (place.equals(birthPlace)) return;
 		birthPlace = place;
+		signalModification();
+	}
+	
+	public String getDescription() { return description; }
+	public void setDescription(String descr) {
+		if (descr == null || descr.length() == 0) return;
+		description = descr;
 		signalModification();
 	}
 	
@@ -131,8 +147,14 @@ public class PeopleSourceInfo extends SourceInfo {
 	
 	@Override
 	public SelfMap<String, Review> getReviews(String type) {
+		if (type.equals(Local.Public.toString())) return publicReviews;
 		return null;
 	}
+
+	public void setPublicReview(String author, String review, Integer note) {
+		setReview(publicReviews, author, review, note);
+	}
+	
 	
 	@Override
 	public void merge(SourceInfo info) {
@@ -143,6 +165,7 @@ public class PeopleSourceInfo extends SourceInfo {
 			if (photos.containsKey(url)) continue;
 			addPhoto(url, i.photos.get(url));
 		}
+		if (description == null || description.length() == 0) setDescription(i.getDescription());
 		boolean changed = false;
 		for (String activity : i.activities.keySet()) {
 			Pair<List<String>,List<List<DataLink>>> oldA = activities.get(activity);
@@ -175,5 +198,6 @@ public class PeopleSourceInfo extends SourceInfo {
 			}
 		}
 		if (changed) signalModification();
+		merge(publicReviews, i.publicReviews);
 	}
 }

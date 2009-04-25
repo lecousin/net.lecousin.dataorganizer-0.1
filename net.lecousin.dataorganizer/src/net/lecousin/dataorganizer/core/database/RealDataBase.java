@@ -208,7 +208,7 @@ public class RealDataBase extends DataBase {
 		return new RealData(this, id, name, type, sources);
 	}
 	
-	public synchronized void refresh(Shell shell) {
+	public void refresh(Shell shell) {
 		RefreshDialog dlg = new RefreshDialog(shell);
 		RefreshOptions options = dlg.open();
 		if (options == null) return;

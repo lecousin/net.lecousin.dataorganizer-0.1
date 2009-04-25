@@ -12,6 +12,7 @@ import net.lecousin.dataorganizer.core.database.content.DataContentType;
 import net.lecousin.dataorganizer.core.database.info.Info;
 import net.lecousin.dataorganizer.core.database.info.SourceInfo;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
+import net.lecousin.dataorganizer.people.ui.DescriptionPanel;
 import net.lecousin.dataorganizer.people.ui.OverviewPanel;
 import net.lecousin.dataorganizer.util.DataImageLoader;
 import net.lecousin.dataorganizer.util.DataImageLoader.FileProvider_FromDataPath;
@@ -98,6 +99,7 @@ public class PeopleDataType extends DataContentType {
 	}
 	@Override
 	public void createDescriptionPanel(Composite panel) {
+		DescriptionPanel.create(this, panel);
 	}
 
 	private List<Pair<Image,String>> photos = null;

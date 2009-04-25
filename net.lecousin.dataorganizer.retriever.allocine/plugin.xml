@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension
+         point="net.lecousin.dataorganizer.inforetriever">
+      <retriever
+      		id="AlloCine"
+            class="net.lecousin.dataorganizer.retriever.allocine.film.AlloCineMovieRetriever"
+            content_type_id="video"
+            >
+      </retriever>
+      <retriever
+      		id="AlloCine"
+            class="net.lecousin.dataorganizer.retriever.allocine.personne.AlloCinePeopleRetriever"
+            content_type_id="people"
+            >
+      </retriever>
+   </extension>
+
+</plugin>

@@ -10,6 +10,7 @@ public enum Local {
 	People("People", "Personne"),
 	Photo("Photo", "Photo"),
 	Photos("Photos", "Photos"),
+	Public("Public", "Public"),
 	
 	;
 	

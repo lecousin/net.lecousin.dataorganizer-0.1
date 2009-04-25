@@ -5,9 +5,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.lecousin.dataorganizer.core.database.info.SourceInfo;
 import net.lecousin.dataorganizer.core.database.info.Info.DataLink;
+import net.lecousin.dataorganizer.core.database.info.SourceInfo.Review;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader_0_1_0;
 import net.lecousin.framework.Pair;
+import net.lecousin.framework.collections.SelfMap;
 import net.lecousin.framework.version.Version;
 import net.lecousin.framework.xml.XmlUtil;
 
@@ -26,6 +29,12 @@ public class Loader_0_1_0 extends ContentTypeLoader_0_1_0 implements Loader {
 		if (root.hasAttribute("birthPlace"))
 			return root.getAttribute("birthPlace");
 		return null;
+	}
+	
+	public String getDescription(Element root) {
+		Element e = XmlUtil.get_child_element(root, "description");
+		if (e == null) return null;
+		return XmlUtil.get_inner_text(e);
 	}
 	
 	public Map<String,Pair<List<String>,List<List<DataLink>>>> getActivities(Element root) {
@@ -55,4 +64,7 @@ public class Loader_0_1_0 extends ContentTypeLoader_0_1_0 implements Loader {
 		return photos;
 	}
 
+	public SelfMap<String,Review> getPublicReviews(SourceInfo source, Element root) {
+		return loadReviews(source, "publicReview", root);
+	}
 }

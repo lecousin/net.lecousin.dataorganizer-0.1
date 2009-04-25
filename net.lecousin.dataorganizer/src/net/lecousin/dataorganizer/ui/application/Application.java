@@ -65,8 +65,8 @@ public class Application implements IApplication {
 			if (!chooseWorkspace(instance, display))
 				return IApplication.EXIT_OK;
 		} else {
-			//net.lecousin.framework.application.Application.language = net.lecousin.framework.application.Application.Language.FRENCH;
-			net.lecousin.framework.application.Application.language = net.lecousin.framework.application.Application.Language.ENGLISH;
+			net.lecousin.framework.application.Application.language = net.lecousin.framework.application.Application.Language.FRENCH;
+			//net.lecousin.framework.application.Application.language = net.lecousin.framework.application.Application.Language.ENGLISH;
 		}
 		
 		try {

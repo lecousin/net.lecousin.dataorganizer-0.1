@@ -151,7 +151,6 @@ public class AddDataWizard extends Wizard {
     		}
     		result.db.close();
     		RefreshOptions options = new RefreshOptions();
-    		options.cleanName = true;
     		options.getDataContentIfNotYetDone = true;
     		options.retrieveInfoFromInternet = true;
     		RefreshDialog rd = new RefreshDialog(shell, options);

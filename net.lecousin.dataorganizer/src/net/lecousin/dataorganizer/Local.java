@@ -154,6 +154,7 @@ public enum Local {
 	Please_specify_a_folder_to_analyze("Please specify a folder to analyze", "Veuillez spécifier un dossier à analyzer"),
 	Reading_database_content("Reading database content", "Lecture du contenu de la base de données"),
 	Refresh_database("Refresh database", "Rafraîchir la base de données"),
+	Refreshing_data_content("Refreshing data content", "Rafraîchissement du contenu des données"),
 	Refreshing_database_content("Refreshing database content", "Rafraîchissement du contenu de la base de données"),
 	Refreshing_labels("Refreshing labels", "Rafraîchissement des étiquettes"),
 	Refresh_information_from__("Refresh information from %#1%", "Rafraîchir les informations de %#1%"),

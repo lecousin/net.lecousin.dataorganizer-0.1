@@ -8,6 +8,7 @@ import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.core.DataOrganizer;
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.content.ContentType;
+import net.lecousin.dataorganizer.core.database.content.DataContentType;
 import net.lecousin.dataorganizer.core.database.info.Info.DataLink;
 import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPlugin.SearchResult;
 import net.lecousin.dataorganizer.core.database.source.DataSource;
@@ -47,7 +48,7 @@ public class InfoRetriever {
 	public static void retrieve(Shell shell, Data data, List<InfoRetrieverPlugin> plugins) {
 		WorkProgress progress = new WorkProgress(Local.Retrieve_information.toString(), 1+plugins.size()*100, true);
 		WorkProgressDialog dlg = new WorkProgressDialog(shell, progress);
-		retrieve(shell, data, plugins, progress, 1+plugins.size()*100);
+		retrieve(shell, data, plugins, progress, 1+plugins.size()*100, true);
 		dlg.close();
 	}
 
@@ -57,19 +58,28 @@ public class InfoRetriever {
 			progress.progress(amount);
 			return;
 		}
-		retrieve(shell, data, plugins, progress, amount);
+		retrieve(shell, data, plugins, progress, amount, true);
 	}
 	
-	public static void retrieve(Shell shell, Data data, List<InfoRetrieverPlugin> plugins, WorkProgress progress, int amount) {
+	public static void retrieve(Shell shell, Data data, List<InfoRetrieverPlugin> plugins, WorkProgress progress, int amount, boolean showSubWorksPerPlugin) {
 		List<Pair<InfoRetrieverPlugin,WorkProgress>> todo = new ArrayList<Pair<InfoRetrieverPlugin,WorkProgress>>(plugins.size());
+		DataContentType content = data.getContent();
+		if (content == null) {
+			progress.progress(amount);
+			return;
+		}
+		Info info = content.getInfo();
+		if (info == null) {
+			progress.progress(amount);
+			return;
+		}
 		amount--;
 		int nb = plugins.size();
 		for (InfoRetrieverPlugin plugin : plugins) {
 			int step = amount/nb--;
 			amount -= step;
-			todo.add(new Pair<InfoRetrieverPlugin,WorkProgress>(plugin, progress.addSubWork(plugin.getName(), step, 1000)));
+			todo.add(new Pair<InfoRetrieverPlugin,WorkProgress>(plugin, progress.addSubWork(showSubWorksPerPlugin ? plugin.getName() : null, step, 1000)));
 		}
-		Info info = data.getContent().getInfo();
 		progress.progress(1);
 		for (Pair<InfoRetrieverPlugin,WorkProgress> p : todo) {
 			if (progress.isCancelled()) break;
@@ -82,7 +92,7 @@ public class InfoRetriever {
 				SearchResult result = null;
 				String name = data.getName();
 				do {
-					UIUtil.runPendingEvents(shell.getDisplay());
+					UIUtil.runPendingEventsIfDisplayThread(shell.getDisplay());
 					if (search.isCancelled()) break;
 					search.reset();
 					search.progress(1);
@@ -97,39 +107,13 @@ public class InfoRetriever {
 						break;
 					}
 					if (results.size() == 0) {
-						InputDialog dlgInput = new InputDialog(null, Local.No_result.toString(), Local.Cannot_found + " " + name + " " + Local.on + " " + p.getValue1().getName() + "\r\n" + Local.You_can_retry_with_a_different_name + ":", name, new IInputValidator() {
-							public String isValid(String newText) {
-								if (newText.length() == 0) return "You must provide a name";
-								return null;
-							}
-						});
-						if (dlgInput.open() == Window.CANCEL) break;
-						name = dlgInput.getValue();
+						name = askForNewName(shell, name, p.getValue1());
+						if (name == null) break;
 					} else if (results.size() > 1 || !name.equalsIgnoreCase(results.get(0).getName())) {
-						QuestionDlg dlgQ = new QuestionDlg(shell, Local.Several_results_found.toString(), null);
-						QuestionDlg.Answer[] answers = new QuestionDlg.Answer[results.size() + 1];
-						for (int i = 0; i < results.size(); ++i)
-							answers[i] = new QuestionDlg.AnswerControl(Integer.toString(i), results.get(i).getDescriptionControlProvider());	
-						answers[results.size()] = new QuestionDlg.AnswerText("*change_name", Local.retry_with_a_different_name + ":", name, false, new IInputValidator() {
-							public String isValid(String newText) {
-								if (newText.length() == 0) return Local.You_must_provide_a_name + ".";
-								return null;
-							}
-						});
-						dlgQ.setAnswers(answers);
-						dlgQ.setMessage(results.size() + " " + Local.results_have_been_found + " " + Local._for + " '<a href=\"open\">" + name + "</a>' " + Local.on + " " + p.getValue1().getName() + ".");
-						dlgQ.handleHyperlinkMessage("open", new RunnableWithData<Data>(data) {
-							public void run() {
-								DataListMenu.menu(data(), false);
-							}
-						});
-						dlgQ.show();
-						QuestionDlg.Answer answer = dlgQ.getAnswer();
-						if (answer == null) break;
-						if (answer.id.equals("*change_name"))
-							name = ((QuestionDlg.AnswerText)answer).text;
-						else
-							result = results.get(Integer.parseInt(answer.id));
+						Pair<String,SearchResult> pp = askAmongResults(shell, name, p.getValue1(), results, data);
+						if (pp.getValue1() == null) break;
+						name = pp.getValue1();
+						result = pp.getValue2();
 					} else
 						result = results.get(0);
 				} while(result == null && !progress.isCancelled());
@@ -170,7 +154,7 @@ public class InfoRetriever {
 		}
 		boolean success = false;
 		for (InfoRetrieverPlugin plugin : plugins) {
-			UIUtil.runPendingEvents(dlg.getShell().getDisplay());
+			UIUtil.runPendingEventsIfDisplayThread(dlg.getShell().getDisplay());
 			if (progress.isCancelled()) break;
 			String sourceID = plugin.getSourceID();
 			DataLink link = null;
@@ -208,5 +192,87 @@ public class InfoRetriever {
 		plugin.retrieve(id, name, info, progress, 10000);
 		progress.done();
 		dlg.close();
+	}
+	
+	private static Boolean oneQuestionAtATime = new Boolean(true);
+	
+	private static String askForNewName(Shell shell, String name, InfoRetrieverPlugin plugin) {
+		synchronized (oneQuestionAtATime) {
+			AskForNewName ask = new AskForNewName(shell, name, plugin);
+			shell.getDisplay().syncExec(ask);
+			return ask.name;
+		}
+	}
+	private static class AskForNewName implements Runnable {
+		public AskForNewName(Shell shell, String name, InfoRetrieverPlugin plugin) {
+			this.shell = shell;
+			this.name = name;
+			this.plugin = plugin;
+		}
+		private Shell shell;
+		private String name;
+		private InfoRetrieverPlugin plugin;
+		public void run() {
+			InputDialog dlgInput = new InputDialog(shell, Local.No_result.toString(), Local.Cannot_found + " " + name + " " + Local.on + " " + plugin.getName() + "\r\n" + Local.You_can_retry_with_a_different_name + ":", name, new IInputValidator() {
+				public String isValid(String newText) {
+					if (newText.length() == 0) return "You must provide a name";
+					return null;
+				}
+			});
+			if (dlgInput.open() == Window.CANCEL) 
+				name = null;
+			else
+				name = dlgInput.getValue();
+		}
+	}
+
+	private static Pair<String,SearchResult> askAmongResults(Shell shell, String name, InfoRetrieverPlugin plugin, List<SearchResult> results, Data data) {
+		synchronized (oneQuestionAtATime) {
+			AskAmongResults ask = new AskAmongResults(shell, name, plugin, results, data);
+			shell.getDisplay().syncExec(ask);
+			return new Pair<String,SearchResult>(ask.name,ask.result);
+		}
+	}
+	private static class AskAmongResults implements Runnable {
+		public AskAmongResults(Shell shell, String name, InfoRetrieverPlugin plugin, List<SearchResult> results, Data data) {
+			this.shell = shell;
+			this.name = name;
+			this.plugin = plugin;
+			this.results = results;
+			this.data = data;
+		}
+		private Shell shell;
+		private String name;
+		private InfoRetrieverPlugin plugin;
+		private List<SearchResult> results;
+		private Data data;
+		private SearchResult result = null;
+		public void run() {
+			QuestionDlg dlgQ = new QuestionDlg(shell, Local.Several_results_found.toString(), null);
+			QuestionDlg.Answer[] answers = new QuestionDlg.Answer[results.size() + 1];
+			for (int i = 0; i < results.size(); ++i)
+				answers[i] = new QuestionDlg.AnswerControl(Integer.toString(i), results.get(i).getDescriptionControlProvider());	
+			answers[results.size()] = new QuestionDlg.AnswerText("*change_name", Local.retry_with_a_different_name + ":", name, false, new IInputValidator() {
+				public String isValid(String newText) {
+					if (newText.length() == 0) return Local.You_must_provide_a_name + ".";
+					return null;
+				}
+			});
+			dlgQ.setAnswers(answers);
+			dlgQ.setMessage(results.size() + " " + Local.results_have_been_found + " " + Local._for + " '<a href=\"open\">" + name + "</a>' " + Local.on + " " + plugin.getName() + ".");
+			dlgQ.handleHyperlinkMessage("open", new RunnableWithData<Data>(data) {
+				public void run() {
+					DataListMenu.menu(data(), false);
+				}
+			});
+			dlgQ.show();
+			QuestionDlg.Answer answer = dlgQ.getAnswer();
+			if (answer == null) 
+				name = null;
+			else if (answer.id.equals("*change_name"))
+				name = ((QuestionDlg.AnswerText)answer).text;
+			else
+				result = results.get(Integer.parseInt(answer.id));
+		}
 	}
 }
