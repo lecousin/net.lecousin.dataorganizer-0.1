@@ -4,12 +4,12 @@
    <extension
          point="net.lecousin.dataorganizer.inforetriever">
       <retriever
-            class="net.lecousin.dataorganizer.retrieve.cinefil.film.CineFilMoviePlugin"
+            class="net.lecousin.dataorganizer.retriever.cinefil.film.CineFilMoviePlugin"
             content_type_id="video"
             id="CineFil">
       </retriever>
       <retriever
-            class="net.lecousin.dataorganizer.retrieve.cinefil.star.CineFilStarPlugin"
+            class="net.lecousin.dataorganizer.retriever.cinefil.star.CineFilStarPlugin"
             content_type_id="people"
             id="CineFil">
       </retriever>

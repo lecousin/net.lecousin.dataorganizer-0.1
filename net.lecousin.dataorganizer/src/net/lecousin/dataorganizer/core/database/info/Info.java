@@ -68,16 +68,6 @@ public abstract class Info {
 	public String getSourceName(String source) { Triple<String,String,SourceInfo> t = sources.get(source); if (t == null) return null; return t.getValue2(); }
 	public SourceInfo getSourceInfo(String source) { Triple<String,String,SourceInfo> t = sources.get(source); if (t == null) return null; return t.getValue3(); }
 	
-	public SourceInfo getMergedInfo(Iterable<String> sources) {
-		SourceInfo result = createSourceInfo(null);
-		for (String source : sources) {
-			Triple<String,String,SourceInfo> t = this.sources.get(source);
-			if (t == null || t.getValue3() == null) continue;
-			result.merge(t.getValue3());
-		}
-		return result;
-	}
-	
 	public SourceInfo setSource(String source, String id, String name) {
 		Triple<String,String,SourceInfo> t = sources.get(source);
 		SourceInfo info;
@@ -99,6 +89,27 @@ public abstract class Info {
 			if (changed) signalModification();
 		}
 		return info;
+	}
+	public void mergeSourceInfo(String source, String id, String name, SourceInfo info) {
+		Triple<String,String,SourceInfo> t = sources.get(source);
+		if (t != null) {
+			if (t.getValue1().equals(t.getValue2()))
+				t.getValue3().merge(info);
+			else {
+				t.setValue1(id);
+				t.setValue2(name);
+				t.setValue3(info);
+			}
+		} else {
+			t = new Triple<String,String,SourceInfo>(id, name, info);
+			sources.put(source, t);
+		}
+		info.setParent(this);
+	}
+	
+	public void removeSourceInfo(String source) {
+		if (sources.remove(source) != null)
+			signalModification();
 	}
 	
 	protected abstract SourceInfo createSourceInfo(Info parent);
@@ -125,6 +136,12 @@ public abstract class Info {
 			this.source = elt.getAttribute("source");
 			this.id = elt.getAttribute("id");
 			this.name = elt.getAttribute("name");
+		}
+		public DataLink(DataLink copy) {
+			contentTypeID = copy.contentTypeID;
+			source = copy.source;
+			id = copy.id;
+			name = copy.name;
 		}
 		public String contentTypeID;
 		public String source;

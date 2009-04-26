@@ -174,6 +174,7 @@ public class DataImageControl extends Composite {
 	
 	private void createFromData() {
 		defaultImage = data != null ? EclipseImages.resizeMax(data.getContentType().getDefaultTypeImage(), maxWidth, maxHeight) : null;
+		if (labelImage.isDisposed()) return;
 		labelImage.setImage(defaultImage);
 		linkName.setText(Local.No_image.toString());
 		synchronized (categories) {

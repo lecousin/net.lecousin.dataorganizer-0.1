@@ -16,6 +16,8 @@ import net.lecousin.dataorganizer.internal.EclipsePlugin;
 import net.lecousin.dataorganizer.ui.datalist.DataListMenu;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.collections.CollectionUtil;
+import net.lecousin.framework.collections.SelfMap;
+import net.lecousin.framework.collections.SelfMapUniqueLong;
 import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.thread.RunnableWithData;
 import net.lecousin.framework.ui.eclipse.UIUtil;
@@ -81,6 +83,7 @@ public class InfoRetriever {
 			todo.add(new Pair<InfoRetrieverPlugin,WorkProgress>(plugin, progress.addSubWork(showSubWorksPerPlugin ? plugin.getName() : null, step, 1000)));
 		}
 		progress.progress(1);
+		List<Pair<String,String>> newIDs = new LinkedList<Pair<String,String>>();
 		for (Pair<InfoRetrieverPlugin,WorkProgress> p : todo) {
 			if (progress.isCancelled()) break;
 			p.getValue2().progress(1);
@@ -123,6 +126,9 @@ public class InfoRetriever {
 				retrieve.progress(1);
 				try {
 					p.getValue1().retrieve(result, info, retrieve, 10000);
+					id = info.getSourceID(p.getValue1().getSourceID());
+					if (id != null)
+						newIDs.add(new Pair<String,String>(p.getValue1().getSourceID(), id));
 				} catch (Throwable t) {
 					ErrorDlg.exception("Retrieve on " + p.getValue1().getName(), "Internal error in plug-in", EclipsePlugin.ID, t);
 				}
@@ -137,6 +143,40 @@ public class InfoRetriever {
 				}
 			}
 			p.getValue2().done();
+		}
+		if (!newIDs.isEmpty()) {
+			// check if an existing data already has the same source ID, so the data should be merged
+			SelfMap<Long,Data> noMergeData = new SelfMapUniqueLong<Data>();
+			SelfMap<Long,Data> mergeData = new SelfMapUniqueLong<Data>();
+			for (Pair<String,String> p : newIDs) {
+				Data d = DataOrganizer.database().getDataFromInfoSourceID(data.getContentType(), p.getValue1(), p.getValue2(), data);
+				if (d != null && !noMergeData.contains(d) && !mergeData.contains(d)) {
+					MergeResponse resp = askToMerge(shell, data, d, p.getValue1());
+					switch (resp) {
+					case NO_MERGE :
+						noMergeData.add(d);
+						break;
+					case MERGE:
+						mergeData.add(d);
+						break;
+					case BAD_SOURCE_INFO:
+						data.getContent().getInfo().removeSourceInfo(p.getValue1());
+						break;
+					}
+				}
+			}
+			if (!mergeData.isEmpty()) {
+				synchronized (oneQuestionAtATime) {
+					shell.getDisplay().syncExec(new RunnableWithData<Pair<Shell,Pair<Data,SelfMap<Long,Data>>>>(new Pair<Shell,Pair<Data,SelfMap<Long,Data>>>(shell,new Pair<Data,SelfMap<Long,Data>>(data, mergeData))) {
+						public void run() {
+							for (Data d : data().getValue2().getValue2()) {
+								data().getValue2().getValue1().merge(d, data().getValue1());
+								d.remove();
+							}
+						}
+					});
+				}
+			}
 		}
 		progress.done();
 	}
@@ -273,6 +313,59 @@ public class InfoRetriever {
 				name = ((QuestionDlg.AnswerText)answer).text;
 			else
 				result = results.get(Integer.parseInt(answer.id));
+		}
+	}
+	
+	private static enum MergeResponse {
+		NO_MERGE, MERGE, BAD_SOURCE_INFO
+	}
+	private static MergeResponse askToMerge(Shell shell, Data data, Data sameData, String sourceID) {
+		synchronized (oneQuestionAtATime) {
+			AskToMerge ask = new AskToMerge(shell, data, sameData, sourceID);
+			shell.getDisplay().syncExec(ask);
+			return ask.response;
+		}
+	}
+	private static class AskToMerge implements Runnable {
+		public AskToMerge(Shell shell, Data data, Data sameData, String sourceID) {
+			this.shell = shell;
+			this.data = data;
+			this.sameData = sameData;
+			this.sourceID = sourceID;
+		}
+		private Shell shell;
+		private Data data;
+		private Data sameData;
+		private String sourceID;
+		private MergeResponse response = MergeResponse.NO_MERGE;
+		public void run() {
+			QuestionDlg dlgQ = new QuestionDlg(shell, Local.Duplicate_data.toString(), null);
+			QuestionDlg.Answer[] answers = new QuestionDlg.Answer[3];
+			answers[0] = new QuestionDlg.AnswerSimple("no", Local.Do_not_merge_the_two_data.toString());
+			answers[1] = new QuestionDlg.AnswerSimple("yes", Local.Merge_the_two_data.toString());
+			answers[2] = new QuestionDlg.AnswerSimple("bad", Local.The_retrieved_information_is_not_the_correct_one_and_must_be_removed.toString());
+			dlgQ.setAnswers(answers);
+			dlgQ.setMessage(Local.process(Local.MESSAGE_AskToMerge, data.getName(), sameData.getName(), InfoRetrieverPluginRegistry.getNameForSource(sourceID, data.getContentType().getID())));
+			dlgQ.handleHyperlinkMessage("data", new RunnableWithData<Data>(data) {
+				public void run() {
+					DataListMenu.menu(data(), false);
+				}
+			});
+			dlgQ.handleHyperlinkMessage("sameData", new RunnableWithData<Data>(sameData) {
+				public void run() {
+					DataListMenu.menu(data(), false);
+				}
+			});
+			dlgQ.show();
+			QuestionDlg.Answer answer = dlgQ.getAnswer();
+			if (answer == null)
+				response = MergeResponse.NO_MERGE;
+			else if (answer.id.equals("no"))
+				response = MergeResponse.NO_MERGE;
+			else if (answer.id.equals("yes"))
+				response = MergeResponse.MERGE;
+			else if (answer.id.equals("bad"))
+				response = MergeResponse.BAD_SOURCE_INFO;
 		}
 	}
 }

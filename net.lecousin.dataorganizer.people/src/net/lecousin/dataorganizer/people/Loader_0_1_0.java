@@ -1,16 +1,15 @@
 package net.lecousin.dataorganizer.people;
 
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import net.lecousin.dataorganizer.core.database.info.SourceInfo;
 import net.lecousin.dataorganizer.core.database.info.Info.DataLink;
 import net.lecousin.dataorganizer.core.database.info.SourceInfo.Review;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader_0_1_0;
-import net.lecousin.framework.Pair;
+import net.lecousin.dataorganizer.people.PeopleSourceInfo.Activity;
 import net.lecousin.framework.collections.SelfMap;
+import net.lecousin.framework.collections.SelfMapLinkedList;
 import net.lecousin.framework.version.Version;
 import net.lecousin.framework.xml.XmlUtil;
 
@@ -37,22 +36,18 @@ public class Loader_0_1_0 extends ContentTypeLoader_0_1_0 implements Loader {
 		return XmlUtil.get_inner_text(e);
 	}
 	
-	public Map<String,Pair<List<String>,List<List<DataLink>>>> getActivities(Element root) {
-		Map<String,Pair<List<String>,List<List<DataLink>>>> activities = new HashMap<String,Pair<List<String>,List<List<DataLink>>>>();
+	public SelfMap<String,Activity> getActivities(Element root) {
+		SelfMap<String,Activity> activities = new SelfMapLinkedList<String,Activity>(3);
 		for (Element e : XmlUtil.get_childs_element(root, "activity")) {
-			String name = e.getAttribute("name");
-			List<String> texts = new LinkedList<String>();
+			Activity a = new Activity();
+			a.name = e.getAttribute("name");
 			for (Element eText : XmlUtil.get_childs_element(e, "text"))
-				texts.add(XmlUtil.get_inner_text(eText));
-			List<List<DataLink>> links = new LinkedList<List<DataLink>>();
+				a.freeTexts.add(XmlUtil.get_inner_text(eText));
 			for (Element eLinks : XmlUtil.get_childs_element(e, "links")) {
-				List<DataLink> list = new LinkedList<DataLink>();
-				for (Element eLink : XmlUtil.get_childs_element(eLinks, "link"))
-					list.add(new DataLink(eLink));
-				links.add(list);
+				Element eLink = XmlUtil.get_child_element(eLinks, "link");
+				a.links.add(new DataLink(eLink));
 			}
-			Pair<List<String>,List<List<DataLink>>> p = new Pair<List<String>,List<List<DataLink>>>(texts, links);
-			activities.put(name, p);
+			activities.add(a);
 		}
 		return activities;
 	}

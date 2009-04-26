@@ -57,16 +57,16 @@ public class Loader_0_1_0 extends ContentTypeLoader_0_1_0 implements Loader {
 		return XmlUtil.get_inner_text(e);
 	}
 	
-	public List<Pair<List<String>,List<DataLink>>> getDirectors(Element root) {
+	public List<Pair<String,DataLink>> getDirectors(Element root) {
 		return loadListLinks("director", root);
 	}
-	public List<Pair<List<String>,List<DataLink>>> getActors(Element root) {
+	public List<Pair<String,DataLink>> getActors(Element root) {
 		return loadListLinks("actor", root);
 	}
-	public List<Pair<List<String>,List<DataLink>>> getProductors(Element root) {
+	public List<Pair<String,DataLink>> getProductors(Element root) {
 		return loadListLinks("productor", root);
 	}
-	public List<Pair<List<String>,List<DataLink>>> getScenaristes(Element root) {
+	public List<Pair<String,DataLink>> getScenaristes(Element root) {
 		return loadListLinks("scenariste", root);
 	}
 	
@@ -84,16 +84,14 @@ public class Loader_0_1_0 extends ContentTypeLoader_0_1_0 implements Loader {
 		return loadReviews(source, "publicReview", root);
 	}
 	
-	private List<Pair<List<String>,List<DataLink>>> loadListLinks(String tag, Element elt) {
-		List<Pair<List<String>,List<DataLink>>> list = new LinkedList<Pair<List<String>,List<DataLink>>>();
+	private List<Pair<String,DataLink>> loadListLinks(String tag, Element elt) {
+		List<Pair<String,DataLink>> list = new LinkedList<Pair<String,DataLink>>();
 		for (Element e : XmlUtil.get_childs_element(elt, tag)) {
-			List<String> roles = new LinkedList<String>();
-			for (Element e2 : XmlUtil.get_childs_element(e, "role"))
-				roles.add(e2.getAttribute("name"));
-			List<DataLink> links = new LinkedList<DataLink>();
-			for (Element e2 : XmlUtil.get_childs_element(e, "link"))
-				links.add(new DataLink(e2));
-			list.add(new Pair<List<String>,List<DataLink>>(roles, links));
+			Element e2 = XmlUtil.get_child_element(e, "role");
+			String role = e2.getAttribute("name");
+			e2 = XmlUtil.get_child_element(e, "link");
+			DataLink link = new DataLink(e2);
+			list.add(new Pair<String,DataLink>(role, link));
 		}
 		return list;
 	}

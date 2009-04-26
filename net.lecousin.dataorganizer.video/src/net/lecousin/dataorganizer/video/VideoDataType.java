@@ -47,6 +47,7 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
 import org.w3c.dom.Element;
 
 public class VideoDataType extends DataContentType {
@@ -290,11 +291,11 @@ public class VideoDataType extends DataContentType {
 	}
 	
 	@Override
-	public void createOverviewPanel(Composite panel, SourceInfo source) {
-		new OverviewPanel(panel, this, (VideoSourceInfo)source);
+	public void createOverviewPanel(Composite panel, List<SourceInfo> sources) {
+		new OverviewPanel(panel, this, sources);
 	}
 	@Override
-	public boolean isOverviewPanelSupprotingSourceMerge() {
+	public boolean isOverviewPanelSupportingSourceMerge() {
 		return true;
 	}
 	@Override
@@ -343,5 +344,18 @@ public class VideoDataType extends DataContentType {
 					Log.error(this, "Unable to remove image file '" + image.getFileName() + "' for data ID " + getData().getID());
 			}
 		}
+	}
+	
+	@Override
+	protected void mergeContent(DataContentType other, Shell shell) {
+		VideoDataType o = (VideoDataType)other;
+		if (dimension == null)
+			dimension = o.dimension;
+		if (duration < 0)
+			duration = o.duration;
+		if (!loaded)
+			loaded = o.loaded;
+		previewImages = null;
+		posterImages = null;
 	}
 }

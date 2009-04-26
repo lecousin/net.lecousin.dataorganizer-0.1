@@ -13,11 +13,13 @@ import net.lecousin.dataorganizer.core.database.info.InfoRetriever;
 import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPlugin;
 import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPluginRegistry;
 import net.lecousin.dataorganizer.core.database.info.SourceInfo;
+import net.lecousin.dataorganizer.core.database.info.SourceInfoMergeUtil;
 import net.lecousin.dataorganizer.core.database.info.SourceInfo.Review;
 import net.lecousin.dataorganizer.ui.control.DataImageControl;
 import net.lecousin.dataorganizer.ui.control.RateDataControl;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.collections.SelfMap;
+import net.lecousin.framework.collections.SelfMapLinkedList;
 import net.lecousin.framework.event.Event.Listener;
 import net.lecousin.framework.thread.RunnableWithData;
 import net.lecousin.framework.time.DateTimeUtil;
@@ -168,6 +170,7 @@ public class OverviewPanel extends Composite {
 			this.data.modified().removeListener(dataChanged);
 			this.data.contentModified().removeListener(dataContentChanged);
 		}
+		if (isDisposed()) return;
 		this.data = data;
 		if (data != null) {
 			data.modified().addListener(dataChanged);
@@ -205,13 +208,14 @@ public class OverviewPanel extends Composite {
 			c.moveAbove(buttonRetrieveInfo);
 		}
 	}
-	private void refreshReviews(Data data, SourceInfo info) {
+	private void refreshReviews(Data data, List<SourceInfo> info) {
 		UIControlUtil.clear(reviewsPanel);
 		Set<String> types = data.getContent().getInfo().getReviewsTypes();
 		if (types == null) return;
 		for (String type : types) {
-			SelfMap<String,Review> reviews = info.getReviews(type);
-			if (reviews == null) continue;
+			SelfMap<String,Review> reviews = new SelfMapLinkedList<String, Review>();
+			for (SourceInfo i : info)
+				SourceInfoMergeUtil.mergeReviews(reviews, i.getReviews(type));
 			new ReviewsControl(reviewsPanel, data, type, reviews);
 		}
 	}
@@ -221,9 +225,9 @@ public class OverviewPanel extends Composite {
 			super(parent, SWT.NONE);
 			this.source = source;
 			setBackground(parent.getBackground());
-			int numcolumns = 2 + (data.getContent().isOverviewPanelSupprotingSourceMerge() ? 1 : 0);
+			int numcolumns = 3 + (data.getContent().isOverviewPanelSupportingSourceMerge() ? 1 : 0);
 			UIUtil.gridLayout(this, numcolumns, 0, 0, 2, 0);
-			if (data.getContent().isOverviewPanelSupprotingSourceMerge()) {
+			if (data.getContent().isOverviewPanelSupportingSourceMerge()) {
 				button = UIUtil.newCheck(this, "", new Listener<Pair<Boolean,String>>() {
 					public void fire(Pair<Boolean, String> event) {
 						sourceSelectionChanged(true);
@@ -237,6 +241,15 @@ public class OverviewPanel extends Composite {
 					InfoRetriever.refresh(event.getValue1(), event.getValue2());
 				}
 			}, new Pair<Data,String>(data, source)).setToolTipText(Local.process(Local.Refresh_information_from__, InfoRetrieverPluginRegistry.getNameForSource(source, data.getContentType().getID())));
+			UIUtil.newImageButton(this, SharedImages.getImage(SharedImages.icons.x16.basic.DEL), new Listener<Pair<Data,String>>() {
+				public void fire(Pair<Data,String> event) {
+					DataContentType content = event.getValue1().getContent();
+					if (content == null) return;
+					Info info = content.getInfo();
+					if (info == null) return;
+					info.removeSourceInfo(event.getValue2());
+				}
+			}, new Pair<Data,String>(data, source)).setToolTipText(Local.process(Local.Remove_information_from__, InfoRetrieverPluginRegistry.getNameForSource(source, data.getContentType().getID())));
 		}
 		private Button button;
 		private String source;
@@ -244,13 +257,15 @@ public class OverviewPanel extends Composite {
 	
 	private void sourceSelectionChanged(boolean layout) {
 		UIControlUtil.clear(contentTypePanel);
-		SourceInfo info;
-		if (data.getContent().isOverviewPanelSupprotingSourceMerge())
-			info = data.getContent().getInfo().getMergedInfo(getSelectedSources());
+		List<SourceInfo> infos = new LinkedList<SourceInfo>();
+		List<String> selected = getSelectedSources();
+		for (String source : selected)
+			infos.add(data.getContent().getInfo().getSourceInfo(source));
+		if (data.getContent().isOverviewPanelSupportingSourceMerge())
+			data.getContent().createOverviewPanel(contentTypePanel, infos);
 		else
-			info = null;
-		data.getContent().createOverviewPanel(contentTypePanel, info);
-		refreshReviews(data, info);
+			data.getContent().createOverviewPanel(contentTypePanel, null);
+		refreshReviews(data, infos);
 		if (layout) {
 			layout(true, true);
 			UIControlUtil.resize(this);

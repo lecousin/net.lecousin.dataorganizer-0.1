@@ -1,4 +1,4 @@
-package net.lecousin.dataorganizer.retrieve.cinefil.film;
+package net.lecousin.dataorganizer.retriever.cinefil.film;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -9,9 +9,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import net.lecousin.dataorganizer.retrieve.cinefil.CineFilPage;
-import net.lecousin.dataorganizer.retrieve.cinefil.CineFilUtil;
-import net.lecousin.dataorganizer.retrieve.cinefil.Local;
+import net.lecousin.dataorganizer.retriever.cinefil.CineFilPage;
+import net.lecousin.dataorganizer.retriever.cinefil.CineFilUtil;
+import net.lecousin.dataorganizer.retriever.cinefil.Local;
 import net.lecousin.dataorganizer.video.VideoSourceInfo;
 import net.lecousin.dataorganizer.video.VideoSourceInfo.Genre;
 import net.lecousin.framework.Pair;

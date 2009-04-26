@@ -1,8 +1,8 @@
-package net.lecousin.dataorganizer.retrieve.cinefil.star;
+package net.lecousin.dataorganizer.retriever.cinefil.star;
 
 import net.lecousin.dataorganizer.people.PeopleSourceInfo;
-import net.lecousin.dataorganizer.retrieve.cinefil.CineFilPage;
-import net.lecousin.dataorganizer.retrieve.cinefil.Local;
+import net.lecousin.dataorganizer.retriever.cinefil.CineFilPage;
+import net.lecousin.dataorganizer.retriever.cinefil.Local;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.Triple;
 import net.lecousin.framework.progress.WorkProgress;

@@ -8,6 +8,7 @@ import net.lecousin.dataorganizer.core.database.VirtualData;
 import net.lecousin.dataorganizer.core.database.VirtualDataBase;
 import net.lecousin.dataorganizer.core.database.content.ContentType;
 import net.lecousin.dataorganizer.core.database.content.DataContentType;
+import net.lecousin.dataorganizer.core.database.info.SourceInfoMergeUtil;
 import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
 import net.lecousin.dataorganizer.core.search.DataSearch.Parameter;
@@ -169,8 +170,9 @@ public class VideoContentType extends ContentType {
 			VideoDataType content = (VideoDataType)element.getContent();
 			VideoInfo info = (VideoInfo)content.getInfo();
 			if (info == null) return "";
-			VideoSourceInfo i = (VideoSourceInfo)info.getMergedInfo(info.getSources());
-			long date = i.getReleaseDate();
+			long date = -1;
+			for (String source : info.getSources())
+				date = SourceInfoMergeUtil.mergeDate(date, ((VideoSourceInfo)info.getSourceInfo(source)).getReleaseDate());
 			if (date <= 0) return "";
 			return DateTimeUtil.getDateString(date);
 		}

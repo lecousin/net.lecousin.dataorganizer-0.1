@@ -1,13 +1,13 @@
-package net.lecousin.dataorganizer.retrieve.cinefil.film;
+package net.lecousin.dataorganizer.retriever.cinefil.film;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import net.lecousin.dataorganizer.core.database.info.Info;
 import net.lecousin.dataorganizer.people.PeopleContentType;
-import net.lecousin.dataorganizer.retrieve.cinefil.CineFilPage;
-import net.lecousin.dataorganizer.retrieve.cinefil.CineFilUtil;
-import net.lecousin.dataorganizer.retrieve.cinefil.Local;
+import net.lecousin.dataorganizer.retriever.cinefil.CineFilPage;
+import net.lecousin.dataorganizer.retriever.cinefil.CineFilUtil;
+import net.lecousin.dataorganizer.retriever.cinefil.Local;
 import net.lecousin.dataorganizer.video.VideoSourceInfo;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.progress.WorkProgress;

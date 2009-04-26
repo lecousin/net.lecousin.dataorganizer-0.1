@@ -23,10 +23,10 @@ public interface Loader extends ContentTypeLoader {
 	public long getReleaseDate(Element root);
 	public List<Genre> getGenres(Element root);
 	public String getResume(Element root);
-	public List<Pair<List<String>,List<DataLink>>> getDirectors(Element root);
-	public List<Pair<List<String>,List<DataLink>>> getActors(Element root);
-	public List<Pair<List<String>,List<DataLink>>> getProductors(Element root);
-	public List<Pair<List<String>,List<DataLink>>> getScenaristes(Element root);
+	public List<Pair<String,DataLink>> getDirectors(Element root);
+	public List<Pair<String,DataLink>> getActors(Element root);
+	public List<Pair<String,DataLink>> getProductors(Element root);
+	public List<Pair<String,DataLink>> getScenaristes(Element root);
 	public Map<String,String> getPosters(Element root);
 	public SelfMap<String,Review> getPressReviews(SourceInfo source, Element root);
 	public SelfMap<String,Review> getPublicReviews(SourceInfo source, Element root);

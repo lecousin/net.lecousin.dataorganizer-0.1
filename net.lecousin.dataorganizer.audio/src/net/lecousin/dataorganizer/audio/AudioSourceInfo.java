@@ -1,6 +1,7 @@
 package net.lecousin.dataorganizer.audio;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import net.lecousin.framework.collections.SelfMap;
 import net.lecousin.framework.strings.StringUtil;
 import net.lecousin.framework.xml.XmlWriter;
 
+import org.eclipse.core.resources.IFolder;
 import org.w3c.dom.Element;
 
 public class AudioSourceInfo extends SourceInfo {
@@ -161,25 +163,20 @@ public class AudioSourceInfo extends SourceInfo {
 				tracks = i.tracks;
 				changed = true;
 			} else {
-				int index = 0;
-				while (index < tracks.size() && index < i.tracks.size()) {
-					Track tOld = tracks.get(index);
-					Track tNew = tracks.get(index);
-					if (tOld == null) {
-						if (tNew != null) {
-							tracks.set(index, tNew);
-							changed = true;
+				for (Track tNew : i.tracks) {
+					Track tOld = null;
+					for (Track t : tracks)
+						if (t.title != null && t.title.equals(tNew.title)) {
+							tOld = t;
+							break;
 						}
+					if (tOld == null) {
+						tracks.add(tNew);
+						changed = true;
 						continue;
 					}
-					if (tOld.title == null) tOld.setTitle(tNew.getTitle());
-					if (tOld.length < 0) tOld.setLength(tNew.getLength());
+					if (tOld.length < 0) tOld.setLength(tNew.length);
 					changed |= mergeImages(tOld.images, tNew.images);
-				}
-				if (index < i.tracks.size()) {
-					changed = true;
-					while (index < i.tracks.size())
-						tracks.add(i.tracks.get(index++));
 				}
 			}
 		}
@@ -201,4 +198,28 @@ public class AudioSourceInfo extends SourceInfo {
 		}
 		return changed;
 	}
+	
+
+	@Override
+	protected void copyLocalFiles(IFolder src, IFolder dst) {
+		removeImages(copyImageFiles(src, dst, getImagesPaths(cover_front)), cover_front);
+		removeImages(copyImageFiles(src, dst, getImagesPaths(cover_back)), cover_back);
+		removeImages(copyImageFiles(src, dst, getImagesPaths(images)), images);
+		for (Track t : tracks)
+			removeImages(copyImageFiles(src, dst, getImagesPaths(t.images)), t.images);
+	}
+	private List<String> getImagesPaths(List<Pair<String,String>> images) {
+		List<String> result = new ArrayList<String>(images.size());
+		for (Pair<String,String> p : images)
+			result.add(p.getValue2());
+		return result;
+	}
+	private void removeImages(List<String> paths, List<Pair<String,String>> images) {
+		for (Iterator<Pair<String,String>> it = images.iterator(); it.hasNext(); ) {
+			Pair<String,String> p = it.next();
+			if (paths.contains(p.getValue2()))
+				it.remove();
+		}
+	}
+
 }

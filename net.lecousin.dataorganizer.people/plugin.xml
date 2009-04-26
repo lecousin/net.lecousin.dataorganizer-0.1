@@ -12,6 +12,12 @@
                min="1"
                sub="0">
          </version>
+         <version
+               loader="net.lecousin.dataorganizer.people.Loader_0_1_1"
+               maj="0"
+               min="1"
+               sub="1">
+         </version>
       </type>
    </extension>
 

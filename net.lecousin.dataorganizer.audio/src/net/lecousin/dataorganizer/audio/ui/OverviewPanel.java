@@ -1,5 +1,7 @@
 package net.lecousin.dataorganizer.audio.ui;
 
+import java.util.List;
+
 import net.lecousin.dataorganizer.audio.AudioContentType;
 import net.lecousin.dataorganizer.audio.AudioDataType;
 import net.lecousin.dataorganizer.audio.AudioInfo;
@@ -7,6 +9,7 @@ import net.lecousin.dataorganizer.audio.AudioSourceInfo;
 import net.lecousin.dataorganizer.audio.Local;
 import net.lecousin.dataorganizer.audio.AudioSourceInfo.Track;
 import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPluginRegistry;
+import net.lecousin.dataorganizer.core.database.info.SourceInfo;
 import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.event.Event.Listener;
@@ -32,7 +35,7 @@ import org.eclipse.swt.widgets.Text;
 
 public class OverviewPanel {
 
-	public OverviewPanel(Composite panel, AudioDataType data, AudioSourceInfo sourceNULL) {
+	public OverviewPanel(Composite panel, AudioDataType data, List<SourceInfo> sourcesNULL) {
 		GridLayout layout = UIUtil.gridLayout(panel, 1);
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;

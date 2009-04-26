@@ -1,10 +1,18 @@
 package net.lecousin.dataorganizer.core.database.info;
 
+import java.io.InputStream;
+import java.util.LinkedList;
+import java.util.List;
+
 import net.lecousin.framework.collections.SelfMap;
+import net.lecousin.framework.eclipse.resource.ResourceUtil;
+import net.lecousin.framework.log.Log;
 import net.lecousin.framework.xml.XmlWriter;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 
 public abstract class SourceInfo {
 
@@ -20,10 +28,18 @@ public abstract class SourceInfo {
 	private Info parent;
 	
 	public Info getParent() { return parent; }
+	
+	void setParent(Info newParent) {
+		try { copyLocalFiles(parent.getFolder(), newParent.getFolder()); }
+		catch (CoreException e) {
+			if (Log.error(this))
+				Log.error(this, "Unable to copy info files from a data to antoher", e);
+		}
+		parent = newParent;
+	}
+	protected abstract void copyLocalFiles(IFolder src, IFolder dst);
 
 	public abstract SelfMap<String,Review> getReviews(String type);
-	
-	public abstract void merge(SourceInfo info);
 	
 	protected void signalModification() {
 		if (parent != null)
@@ -81,15 +97,33 @@ public abstract class SourceInfo {
 		if (changed)
 			signalModification();
 	}
-	protected void merge(SelfMap<String,Review> currentReviews, SelfMap<String,Review> newReviews) {
-		boolean changed = false;
-		for (Review newReview : newReviews) {
-			if (!currentReviews.containsKey(newReview.getAuthor())) {
-				currentReviews.put(newReview);
-				changed = true;
+	
+	protected List<String> copyImageFiles(IFolder src, IFolder dst, Iterable<String> paths) {
+		List<String> toRemove = new LinkedList<String>();
+		for (String p : paths) {
+			Path path = new Path(p);
+			IFile file = src.getFile(path);
+			if (!file.exists()) {
+				toRemove.add(p);
+				continue;
+			}
+			IFile file2 = dst.getFile(path);
+			if (file2.exists()) {
+				toRemove.add(p);
+				continue;
+			}
+			try {
+				ResourceUtil.createNecessaryParentFolders(file2);
+				InputStream in = file.getContents();
+				file2.create(in, true, null);
+				in.close();
+			} catch (Throwable ex) {
+				if (Log.error(this))
+					Log.error(this, "Unable to copy image file", ex);
 			}
 		}
-		if (changed) signalModification();
+		return toRemove;
 	}
 	
+	public abstract void merge(SourceInfo other);
 }

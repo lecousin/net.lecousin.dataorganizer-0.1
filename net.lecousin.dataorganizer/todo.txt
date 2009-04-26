@@ -2,6 +2,7 @@
 dataorganizer
 dataorganizer.people
 dataorganizer.video
+dataorganizer.audio
 (dataorganizer.retriever.allocine)
 framework
 framework.net.mime [fix]
@@ -10,6 +11,7 @@ new:
 (dataorganizer.retriever.allocine)
 dataorganizer.retriever.allcdcovers
 dataorganizer.retriever.cinefil
+eclipse.filesystem.apache_vfs
 
 ---------------------------------------------------------------------
 DataOrganizer
@@ -32,8 +34,6 @@ DataOrganizer
  + Blink: pas base sur le temsp mais sur les sleep...
  
  + Continuer de tester AlloCine+CineFil
-    + bug quand merge liste des acteurs: le meme apparait plusieurs fois (merge de sources)
-    + pouvoir merger les données (et le détecter quand retrieve=>meme source=>merge)
  + Continuer encodeXML
  
 Media Player

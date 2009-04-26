@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.lecousin.dataorganizer.core.database.info.SourceInfo;
+import net.lecousin.dataorganizer.core.database.info.SourceInfoMergeUtil;
 import net.lecousin.dataorganizer.core.database.info.Info.DataLink;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.application.Application;
@@ -15,6 +16,7 @@ import net.lecousin.framework.collections.SelfMap;
 import net.lecousin.framework.collections.SelfMapLinkedList;
 import net.lecousin.framework.xml.XmlWriter;
 
+import org.eclipse.core.resources.IFolder;
 import org.w3c.dom.Element;
 
 public class VideoSourceInfo extends SourceInfo {
@@ -52,16 +54,13 @@ public class VideoSourceInfo extends SourceInfo {
 		saveCritiks(pressReviews, "pressReview", xml);
 		saveCritiks(publicReviews, "publicReview", xml);
 	}
-	private void saveListLinks(List<Pair<List<String>,List<DataLink>>> list, String tag, XmlWriter xml) {
-		for (Pair<List<String>,List<DataLink>> p : list) {
+	private void saveListLinks(List<Pair<String,DataLink>> list, String tag, XmlWriter xml) {
+		for (Pair<String,DataLink> p : list) {
 			xml.openTag(tag);
-			for (String role : p.getValue1())
-				xml.openTag("role").addAttribute("name", role).closeTag();
-			for (DataLink dl : p.getValue2()) {
-				xml.openTag("link");
-				dl.save(xml);
-				xml.closeTag();
-			}
+			xml.openTag("role").addAttribute("name", p.getValue1()).closeTag();
+			xml.openTag("link");
+			p.getValue2().save(xml);
+			xml.closeTag();
 			xml.closeTag();
 		}
 	}
@@ -73,13 +72,13 @@ public class VideoSourceInfo extends SourceInfo {
 	/** resume */
 	private String resume = null;
 	/** realisateurs */
-	private List<Pair<List<String>,List<DataLink>>> directors = new LinkedList<Pair<List<String>,List<DataLink>>>();
+	private List<Pair<String,DataLink>> directors = new LinkedList<Pair<String,DataLink>>();
 	/** acteurs <Role,Acteur> */
-	private List<Pair<List<String>,List<DataLink>>> actors = new LinkedList<Pair<List<String>,List<DataLink>>>();
+	private List<Pair<String,DataLink>> actors = new LinkedList<Pair<String,DataLink>>();
 	/** production */
-	private List<Pair<List<String>,List<DataLink>>> productors = new LinkedList<Pair<List<String>,List<DataLink>>>();
+	private List<Pair<String,DataLink>> productors = new LinkedList<Pair<String,DataLink>>();
 	/** scenario */
-	private List<Pair<List<String>,List<DataLink>>> scenaristes = new LinkedList<Pair<List<String>,List<DataLink>>>();
+	private List<Pair<String,DataLink>> scenaristes = new LinkedList<Pair<String,DataLink>>();
 	
 	/** posters <SourceURL,File_relative_to_data.getFolder()> */
 	private Map<String,String> posters = new HashMap<String,String>();
@@ -93,10 +92,10 @@ public class VideoSourceInfo extends SourceInfo {
 	public List<Genre> getGenres() { return new ArrayList<Genre>(genre); }
 	public String getResume() { return resume; }
 	
-	public List<Pair<List<String>,List<DataLink>>> getDirectors() { return new ArrayList<Pair<List<String>,List<DataLink>>>(directors); }
-	public List<Pair<List<String>,List<DataLink>>> getActors() { return new ArrayList<Pair<List<String>,List<DataLink>>>(actors); }
-	public List<Pair<List<String>,List<DataLink>>> getProductors() { return new ArrayList<Pair<List<String>,List<DataLink>>>(productors); }
-	public List<Pair<List<String>,List<DataLink>>> getScenaristes() { return new ArrayList<Pair<List<String>,List<DataLink>>>(scenaristes); }
+	public List<Pair<String,DataLink>> getDirectors() { return new ArrayList<Pair<String,DataLink>>(directors); }
+	public List<Pair<String,DataLink>> getActors() { return new ArrayList<Pair<String,DataLink>>(actors); }
+	public List<Pair<String,DataLink>> getProductors() { return new ArrayList<Pair<String,DataLink>>(productors); }
+	public List<Pair<String,DataLink>> getScenaristes() { return new ArrayList<Pair<String,DataLink>>(scenaristes); }
 	
 	public Collection<String> getPostersPaths() { return posters.values(); }
 	public boolean hasPosterURL(String url) { return posters.containsKey(url); }
@@ -153,118 +152,27 @@ public class VideoSourceInfo extends SourceInfo {
 		setReview(pressReviews, author, review, note);
 	}
 	
-	private void mergeNewLinks(List<Pair<List<String>,List<DataLink>>> currentList, List<Pair<String,DataLink>> newList) {
+	private void mergeNewLinks(List<Pair<String,DataLink>> currentList, List<Pair<String,DataLink>> newList) {
 		boolean changed = false;
 		for (Pair<String,DataLink> pNew : newList) {
 			String newName = pNew.getValue1();
 			DataLink newLink = pNew.getValue2();
 			// looking for the same link
 			boolean linkFound = false;
-			for (Pair<List<String>,List<DataLink>> pOld : currentList) {
-				for (DataLink oldLink : pOld.getValue2()) {
-					if (!oldLink.isSame(newLink)) continue;
+			for (Pair<String,DataLink> pOld : currentList) {
+				if (pOld.getValue2().isSame(newLink)) {
 					linkFound = true;
-					changed |= oldLink.merge(newLink);
+					changed |= pOld.getValue2().merge(newLink);
+					if (pOld.getValue1().length() == 0 && newName.length() > 0) {
+						changed = true;
+						pOld.setValue1(newName);
+					}
 					break;
 				}
-				if (!linkFound) continue;
-				if (!pOld.getValue1().contains(newName)) {
-					pOld.getValue1().add(newName);
-					changed = true;
-				}
-				break;
 			}
 			if (linkFound) continue;
-			// looking for the same name in a link
-			linkFound = false;
-			for (Pair<List<String>,List<DataLink>> pOld : currentList) {
-				for (DataLink oldLink : pOld.getValue2()) {
-					if (!oldLink.name.equals(newLink.name)) continue;
-					// same people name: add the new link
-					pOld.getValue2().add(newLink);
-					changed = true;
-					linkFound = true;
-					break;
-				}
-				if (!linkFound) continue;
-				if (!pOld.getValue1().contains(newName)) {
-					pOld.getValue1().add(newName);
-					changed = true;
-				}
-				break;
-			}
-			if (linkFound) continue;
-			// neither link or same people name found, we cannot assume this is the same people => add it
-			List<String> list1 = new LinkedList<String>();
-			list1.add(newName);
-			List<DataLink> list2 = new LinkedList<DataLink>();
-			list2.add(newLink);
-			currentList.add(new Pair<List<String>,List<DataLink>>(list1, list2));
-			changed = true;
-		}
-		if (changed)
-			signalModification();
-	}
-	private void mergeTwoLists(List<Pair<List<String>,List<DataLink>>> currentList, List<Pair<List<String>,List<DataLink>>> newList) {
-		boolean changed = false;
-		for (Pair<List<String>,List<DataLink>> pNew : newList) {
-			List<String> newNames = pNew.getValue1();
-			List<DataLink> newLinks = pNew.getValue2();
-			// looking for the same link
-			Pair<List<String>,List<DataLink>> linkFound = null;
-			for (DataLink newLink : newLinks) {
-				for (Pair<List<String>,List<DataLink>> pOld : currentList) {
-					for (DataLink oldLink : pOld.getValue2()) {
-						if (!oldLink.isSame(newLink)) continue;
-						linkFound = pOld;
-						break;
-					}
-					if (linkFound != null) break;
-				}
-				if (linkFound != null) break;
-			}
-			if (linkFound == null) {
-				// looking for the same name in a link
-				for (String newName : newNames) {
-					for (Pair<List<String>,List<DataLink>> pOld : currentList) {
-						for (DataLink oldLink : pOld.getValue2()) {
-							if (oldLink.name == null) continue;
-							if (!oldLink.name.equals(newName)) continue;
-							linkFound = pOld;
-							break;
-						}
-						if (linkFound != null) break;
-					}
-					if (linkFound != null) break;
-				}
-			}
-			if (linkFound != null) {
-				// we found a link => merge
-				List<String> oldNames = linkFound.getValue1();
-				List<DataLink> oldLinks = linkFound.getValue2();
-				for (String newName : newNames)
-					if (!oldNames.contains(newName)) {
-						oldNames.add(newName);
-						changed = true;
-					}
-				for (DataLink newLink : newLinks) {
-					boolean found = false;
-					for (DataLink oldLink : oldLinks) {
-						if (oldLink.isSame(newLink)) {
-							found = true;
-							changed |= oldLink.merge(newLink);
-							break;
-						}
-					}
-					if (!found) {
-						oldLinks.add(newLink);
-						changed = true;
-					}
-				}
-				continue;
-			}
-			// neither link or same people name found, we cannot assume this is the same people => add it
-			currentList.add(new Pair<List<String>,List<DataLink>>(newNames, newLinks));
+			// add the new link
+			currentList.add(pNew);
 			changed = true;
 		}
 		if (changed)
@@ -319,20 +227,32 @@ public class VideoSourceInfo extends SourceInfo {
 			}
 		}
 	}
+
+	@Override
+	protected void copyLocalFiles(IFolder src, IFolder dst) {
+		List<String> toRemove = copyImageFiles(src, dst, posters.values());
+		for (String path : toRemove)
+			for (Map.Entry<String,String> e : posters.entrySet())
+				if (e.getValue().equals(path))
+					posters.remove(e.getKey());
+	}
 	
 	@Override
-	public void merge(SourceInfo info) {
-		VideoSourceInfo i = (VideoSourceInfo)info;
-		if (releaseDate <= 0) setReleaseDate(i.getReleaseDate());
-		for (Genre g : i.getGenres()) addGenre(g);
-		if (resume == null && i.getResume() != null) setResume(i.getResume());
-		mergeTwoLists(directors, i.getDirectors());
-		mergeTwoLists(actors, i.getActors());
-		mergeTwoLists(productors, i.getProductors());
-		mergeTwoLists(scenaristes, i.getScenaristes());
-		for (String url : i.posters.keySet())
-			addPoster(url, i.posters.get(url));
-		merge(pressReviews, i.pressReviews);
-		merge(publicReviews, i.publicReviews);
+	public void merge(SourceInfo other) {
+		VideoSourceInfo i = (VideoSourceInfo)other;
+		setReleaseDate(SourceInfoMergeUtil.mergeDate(releaseDate, i.releaseDate));
+		for (Genre g : i.genre)
+			addGenre(g);
+		setResume(SourceInfoMergeUtil.mergeString(resume, i.resume));
+		for (Map.Entry<String,String> e : i.posters.entrySet())
+			addPoster(e.getKey(), e.getValue());
+		setDirectors(i.directors);
+		setActors(i.actors);
+		setProductors(i.productors);
+		setScenaristes(i.scenaristes);
+		for (Review r : i.publicReviews)
+			setPublicReview(r.getAuthor(), r.getReview(), r.getRate());
+		for (Review r : i.pressReviews)
+			setPressReview(r.getAuthor(), r.getReview(), r.getRate());
 	}
 }

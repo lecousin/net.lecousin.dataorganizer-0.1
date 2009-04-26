@@ -2,8 +2,11 @@ package net.lecousin.dataorganizer.video.ui;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
+import net.lecousin.dataorganizer.core.database.info.SourceInfo;
+import net.lecousin.dataorganizer.core.database.info.SourceInfoMergeUtil;
 import net.lecousin.dataorganizer.core.database.info.Info.DataLink;
 import net.lecousin.dataorganizer.people.PeopleContentType;
 import net.lecousin.dataorganizer.ui.control.DataLinkListPanel;
@@ -31,7 +34,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 
 public class OverviewPanel {
 
-	public OverviewPanel(Composite panel, VideoDataType data, VideoSourceInfo source) {
+	public OverviewPanel(Composite panel, VideoDataType data, List<SourceInfo> sources) {
 		GridLayout layout = UIUtil.gridLayout(panel, 1);
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
@@ -48,15 +51,21 @@ public class OverviewPanel {
 		UIUtil.newLabel(line, (data.getDuration() < 0 ? "-" : DateTimeUtil.getTimeMinimalString(data.getDuration())));
 		UIUtil.newLabel(line, Local.Dimension+":", true, false);
 		UIUtil.newLabel(line, (data.getDimension() == null ? "-" : (Integer.toString(data.getDimension().x)+'x'+data.getDimension().y)));
-		if (source != null) {
-			if (source.getReleaseDate() > 0) {
+		if (sources != null && !sources.isEmpty()) {
+			long releaseDate = -1;
+			for (SourceInfo i : sources)
+				releaseDate = SourceInfoMergeUtil.mergeDate(releaseDate, ((VideoSourceInfo)i).getReleaseDate());
+			if (releaseDate > 0) {
 				UIUtil.newSeparator(line, false, true);
 				UIUtil.newLabel(line, Local.Release+":", true, false);
-				UIUtil.newLabel(line, new SimpleDateFormat("dd MMMM yyyy").format(new Date(source.getReleaseDate())));
+				UIUtil.newLabel(line, new SimpleDateFormat("dd MMMM yyyy").format(new Date(releaseDate)));
 			}
 			
-			List<Genre> genres = source.getGenres();
-			if (genres != null && !genres.isEmpty()) {
+			List<Genre> genres = new LinkedList<Genre>();
+			for (SourceInfo i : sources)
+				for (Genre g : ((VideoSourceInfo)i).getGenres())
+					if (!genres.contains(g)) genres.add(g);
+			if (!genres.isEmpty()) {
 				line = UIUtil.newComposite(panel);
 				UIUtil.gridDataHorizFill(line);
 				l = new RowLayout(SWT.HORIZONTAL);
@@ -72,10 +81,22 @@ public class OverviewPanel {
 				}
 			}
 			
-			createPeopleList(panel, source.getDirectors(), Local.Directed_by.toString(), Local.Direction.toString());
-			createPeopleList(panel, source.getActors(), Local.Actors.toString(), Local.Casting.toString());
-			createPeopleList(panel, source.getProductors(), Local.Producted_by.toString(), Local.Production.toString());
-			createPeopleList(panel, source.getScenaristes(), Local.Writen_by.toString(), Local.Write.toString());
+			List<Pair<List<String>,List<DataLink>>> list = new LinkedList<Pair<List<String>,List<DataLink>>>();
+			for (SourceInfo i : sources)
+				SourceInfoMergeUtil.mergePeopleLists(list, ((VideoSourceInfo)i).getDirectors());
+			createPeopleList(panel, list, Local.Directed_by.toString(), Local.Direction.toString());
+			list = new LinkedList<Pair<List<String>,List<DataLink>>>();
+			for (SourceInfo i : sources)
+				SourceInfoMergeUtil.mergePeopleLists(list, ((VideoSourceInfo)i).getActors());
+			createPeopleList(panel, list, Local.Actors.toString(), Local.Casting.toString());
+			list = new LinkedList<Pair<List<String>,List<DataLink>>>();
+			for (SourceInfo i : sources)
+				SourceInfoMergeUtil.mergePeopleLists(list, ((VideoSourceInfo)i).getProductors());
+			createPeopleList(panel, list, Local.Producted_by.toString(), Local.Production.toString());
+			list = new LinkedList<Pair<List<String>,List<DataLink>>>();
+			for (SourceInfo i : sources)
+				SourceInfoMergeUtil.mergePeopleLists(list, ((VideoSourceInfo)i).getScenaristes());
+			createPeopleList(panel, list, Local.Writen_by.toString(), Local.Write.toString());
 		}
 	}
 	

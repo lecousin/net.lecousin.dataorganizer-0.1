@@ -163,6 +163,14 @@ public class DataListMenu {
 					DataListActions.refresh(data());
 				}
 			});
+			if (data.size() == 2) {
+				new FlatPopupMenu.Menu(menu, Local.Merge_the_two_data.toString(), SharedImages.getImage(SharedImages.icons.x16.file.FILE_TO_FILE), false, false, new RunnableWithData<List<Data>>(data) {
+					public void run() {
+						data().get(0).merge(data().get(1), MyDialog.getPlatformShell());
+						data().get(1).remove();
+					}
+				});
+			}
 		}
 	}
 

@@ -200,8 +200,12 @@ public abstract class DataBase {
 	}
 	
 	public final synchronized Data getDataFromInfoSourceID(ContentType type, String source, String id) {
+		return getDataFromInfoSourceID(type, source, id, null);
+	}
+	public final synchronized Data getDataFromInfoSourceID(ContentType type, String source, String id, Data except) {
 		String typeID = type.getID();
 		for (Data d : data) {
+			if (d == except) continue;
 			if (!d.getContentType().getID().equals(typeID)) continue;
 			Info info = d.getContent().getInfo();
 			if (info == null) continue;

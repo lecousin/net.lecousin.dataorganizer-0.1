@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.core.database.content.ContentType;
 import net.lecousin.dataorganizer.core.database.content.DataContentType;
 import net.lecousin.dataorganizer.core.database.info.InfoRetriever;
@@ -17,6 +18,9 @@ import net.lecousin.dataorganizer.ui.dialog.EditDataInfosDlg;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.collections.SelfMap;
 import net.lecousin.framework.event.Event;
+import net.lecousin.framework.ui.eclipse.dialog.ErrorDlg;
+import net.lecousin.framework.ui.eclipse.dialog.QuestionDlg;
+import net.lecousin.framework.ui.eclipse.dialog.QuestionDlg.Answer;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.CoreException;
@@ -211,6 +215,72 @@ public abstract class Data implements SelfMap.Entry<Long> {
 		Set<File> links = getLinkedFiles();
 		links.retainAll(files);
 		return links;
+	}
+	
+	public void merge(Data other, Shell shell) {
+		views.addAll(other.views);
+		if (rate == -1)
+			rate = other.rate;
+		else if (other.rate > rate)
+			rate = other.rate; // keep the best rating
+		if (comment == null || comment.length() == 0)
+			comment = other.comment;
+		for (DataSource source : other.sources) {
+			boolean found = false;
+			for (DataSource source2 : sources) {
+				if (source2.isExactlyTheSame(source)) {
+					found = true;
+					break;
+				}
+			}
+			if (found) continue;
+			for (DataSource source2 : sources) {
+				if (source2.isSameInDifferentLocation(source)) {
+					QuestionDlg dlg = new QuestionDlg(shell, Local.Merge_data.toString(), null);
+					dlg.setMessage(Local.MESSAGE_Merge_Data_2_Sources_Different_Locations.toString());
+					dlg.setAnswers(new Answer[] {
+						new QuestionDlg.AnswerSimple("current", Local.Keep+" "+source2.getPathToDisplay()),	
+						new QuestionDlg.AnswerSimple("other", Local.Keep+" "+source.getPathToDisplay()),	
+						new QuestionDlg.AnswerSimple("current_remove_other", Local.Keep+" "+source2.getPathToDisplay()+" "+Local.and_remove+" "+source.getPathToDisplay()+" "+Local.from_filesystem),	
+						new QuestionDlg.AnswerSimple("other_remove_current", Local.Keep+" "+source.getPathToDisplay()+" "+Local.and_remove+" "+source2.getPathToDisplay()+" "+Local.from_filesystem),	
+						new QuestionDlg.AnswerSimple("both", Local.Keep_both.toString())
+					});
+					dlg.show();
+					String answer = dlg.getAnswerID();
+					if (answer == null) answer = "both";
+					if (answer.equals("both")) {
+						sources.add(source);
+					} else if (answer.equals("current")) {
+						// ok
+					} else if (answer.equals("other")) {
+						int i = sources.indexOf(source2);
+						sources.remove(source2);
+						sources.add(i, source);
+					} else if (answer.equals("current_remove_other")) {
+						try { source.removeFromFileSystem(); }
+						catch (Exception e) {
+							ErrorDlg.error(Local.Remove.toString(), "Error while removing files from file system", e);
+						}
+					} else if (answer.equals("other_remove_current")) {
+						int i = sources.indexOf(source2);
+						sources.remove(source2);
+						sources.add(i, source);
+						try { source2.removeFromFileSystem(); }
+						catch (Exception e) {
+							ErrorDlg.error(Local.Remove.toString(), "Error while removing files from file system", e);
+						}
+					} else if (answer.equals("both")) {
+						sources.add(source);
+					}
+					found = true;
+					break;
+				}
+			}
+			if (found) continue;
+			sources.add(source);
+		}
+		getContent().merge(other.getContent(), shell);
+		signalModification();
 	}
 	
 	@Override

@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
 import org.w3c.dom.Element;
 
 public abstract class DataContentType implements SelfMap.Entry<Long> {
@@ -101,9 +102,9 @@ public abstract class DataContentType implements SelfMap.Entry<Long> {
 	public abstract void removeImage(DataImageLoaded image);
 	public abstract Control createImageCategoryControls(Composite parent);
 	
-	public abstract void createOverviewPanel(Composite panel, SourceInfo sourceInfo);
+	public abstract void createOverviewPanel(Composite panel, List<SourceInfo> sources);
 	public abstract void createDescriptionPanel(Composite panel);
-	public abstract boolean isOverviewPanelSupprotingSourceMerge();
+	public abstract boolean isOverviewPanelSupportingSourceMerge();
 	
 	public abstract DuplicateAnalysis checkForDuplicateOnContent(Data data);
 	public abstract boolean isSame(Info info);
@@ -143,4 +144,21 @@ public abstract class DataContentType implements SelfMap.Entry<Long> {
 	public void signalModification() {
 		data.signalContentModification(this);
 	}
+	
+	public final void merge(DataContentType other, Shell shell) {
+		Info oi = other.getInfo();
+		if (oi != null) {
+			if (info == null) {
+				info = oi;
+			} else {
+				for (String source : oi.getSources()) {
+					SourceInfo si = oi.getSourceInfo(source); 
+					if (si == null) continue;
+					info.mergeSourceInfo(source, oi.getSourceID(source), oi.getSourceName(source), si);
+				}
+			}
+		}
+		mergeContent(other, shell);
+	}
+	protected abstract void mergeContent(DataContentType other, Shell shell);
 }

@@ -31,7 +31,7 @@ public class PeopleContentType extends ContentType {
 	public PeopleContentType() {
 	}
 
-	private static final Version version = new Version(0,1,0);
+	private static final Version version = new Version(0,1,1);
 	@Override
 	public Version getCurrentVersion() { return version; }
 	
@@ -47,7 +47,7 @@ public class PeopleContentType extends ContentType {
 
 	@Override
 	public DataContentType loadContent(Data data, Element elt) {
-		return loadContent(data, elt, new Loader_0_1_0());
+		return loadContent(data, elt, new Loader_0_1_1());
 	}
 	@Override
 	public DataContentType loadContent(Data data, Element elt, ContentTypeLoader loader) {

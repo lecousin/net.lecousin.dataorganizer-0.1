@@ -90,13 +90,12 @@ public class Param_Casting extends ReversableParameter {
 			}
 			return false;
 		}
-		private void addList(List<Pair<List<String>,List<DataLink>>> list, Set<String> result) {
-			for (Pair<List<String>,List<DataLink>> p : list)
-				for (DataLink link : p.getValue2()) {
-					String s = StringUtil.normalizeString(link.name.trim());
-					if (s.length() > 0)
-						result.add(s);
-				}
+		private void addList(List<Pair<String,DataLink>> list, Set<String> result) {
+			for (Pair<String,DataLink> p : list) {
+				String s = StringUtil.normalizeString(p.getValue2().name.trim());
+				if (s.length() > 0)
+					result.add(s);
+			}
 		}
 	}
 	

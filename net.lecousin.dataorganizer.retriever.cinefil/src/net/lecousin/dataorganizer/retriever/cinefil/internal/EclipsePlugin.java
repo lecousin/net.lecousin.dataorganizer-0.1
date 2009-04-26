@@ -1,4 +1,4 @@
-package net.lecousin.dataorganizer.retrieve.cinefil.internal;
+package net.lecousin.dataorganizer.retriever.cinefil.internal;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -9,7 +9,7 @@ import org.osgi.framework.BundleContext;
 public class EclipsePlugin extends AbstractUIPlugin {
 
 	// The plug-in ID
-	public static final String ID = "net.lecousin.dataorganizer.retrieve.cinefil";
+	public static final String ID = "net.lecousin.dataorganizer.retriever.cinefil";
 
 	// The shared instance
 	private static EclipsePlugin plugin;

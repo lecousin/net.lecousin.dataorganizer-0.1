@@ -27,6 +27,7 @@ public enum Local {
 	From("From", "De"),
 	including("including", "incluant"),
 	into("into", "vers"),
+	Keep("Keep", "Garder"),
 	Labels("Labels", "Etiquettes"),
 	last("last", "dernier"),
 	Loading("Loading", "Chargement"),
@@ -74,6 +75,7 @@ public enum Local {
 	Analyzing_file_system("Analyzing file system", "Analyse du système de fichiers"),
 	analyzed_folders("folders analyzed", "dossiers analysés"),
 	analyzed_files("files analyzed", "fichiers analysés"),
+	and_remove("and remove", "et supprimer"),
 	Application_update("DataOrganizer update", "Mise à jour de DataOrganizer"),
 	Are_you_sure_you_want_to_remove_the_label("Are you sure you want to remove the label", "Etes-vous sûr de vouloir supprimer l'étiquette"),
 	Browse_local("Browse local", "Parcourir l'ordinateur"),
@@ -95,9 +97,10 @@ public enum Local {
 	Detecting_data_from_analyzed_files("Detecting data from analyzed files and folders", "Détection de données à partir des fichiers et dossiers analysés"),
 	Detecting_data_for_type("Detecting data of type", "Détection des données de type"),
 	Do_action_for_same_situation("Do this action for all data in the same situation", "Effectuer cette action pour toutes les données dans la même situation"),
+	Do_not_merge_the_two_data("Do not merge the two data", "Ne pas fusionner les 2 données"),
 	Do_not_rate_this_data("Do not rate this data", "Ne pas noter cette donnée"),
-	Do_you_confirm_this_operation("Do you confirm this operation ?", "Confirmez-vous cette opération ?"),
 	Do_not_do_anything__skip_new_data("Do not do anything (skip the new data and do not store it in the database)", "Ne rien faire (la nouvelle donnée sera ignorée et ne figurera pas dans la base de données)"),
+	Do_you_confirm_this_operation("Do you confirm this operation ?", "Confirmez-vous cette opération ?"),
 	Downloading_latest_version("Downloading latest version", "Télechargement de la dernière version"),
 	Drag_data_to_a_label("Drag data to a label to attach this label to the data", "Glissez des données vers une étiquette pour attacher cette étiquette aux données"),
 	Duplicate_data("Duplicate data", "Donnée en double"),
@@ -112,6 +115,7 @@ public enum Local {
 	Filter_files_already_linked("Filter files already linked", "Filtre les fichiers déjà liés"),
 	Folders_found("Folders found", "Dossiers trouvés"),
 	Folder_URI("Folder URI", "Dossier URI"),
+	from_filesystem("from file system", "de l'ordinateur (fichiers)"),
 	Go_to__page_of__("Go to %#1% page of %#2%", "Voir la page %#1% de %#2%"),
 	Ignore_all("Ignore all", "Ignorer tout"),
 	Informtion_already_retrieved("Information have been already retrieved from all known sources", "Les informations ont déjà été récupérées depuis toutes les sources connues"),
@@ -119,6 +123,7 @@ public enum Local {
 	into_the_label("into the label", "vers l'étiquette"),
 	is_exactly_the_same_as_data("is exactly the same as data", "est exactement la même que la donnée"),
 	is_not_in_your_database("is not in your database", "n'est pas dans votre base de données"),
+	Keep_both("Keep both", "Garder les deux"),
 	Keep_data_with_links_on_removed_files("Keep the data with links on removed files", "Conserver la donnée avec les liens sur les fichiers supprimés"),
 	Last_open("Last open", "Dernière ouverture"),
 	Load_information_from_the_data_sources("Load information from the data sources (i.e. previews on videos)", "Récupérer des information depuis les sources (par ex. prévisualisation sur les vidéos)"),
@@ -129,6 +134,8 @@ public enum Local {
 	Loading_workspace("Loading workspace", "Chargement de l'espace de travail"),
 	Main_criteria("Main criteria", "Critères principaux"),
 	Main_data_information("Main data information", "Informations principales des données"),
+	Merge_data("Merge data", "Fusionner les données"),
+	Merge_the_two_data("Merge the 2 data", "Fusionner les 2 données"),
 	Move_labels("Move labels", "Déplacer des étiquettes"),
 	New_label("New label", "Nouvelle étiquette"),
 	No_database_exist("No database exist", "Pas de base de données existante"),
@@ -162,6 +169,7 @@ public enum Local {
 	Remove_data("Remove data", "Supprimer la donnée"),
 	Remove_data__s("Remove data", "Supprimer des données"),
 	Remove_from_database_and_filesystem("Remove from database and filesystem", "Supprimer de la base de données et de l'ordinateur"),
+	Remove_information_from__("Remove information from %#1%", "Supprimer les informations venant de %#1%"),
 	Remove_label("Remove label", "Supprimer une étiquette"),
 	Remove_links_to_removed_files("Remove links to removed files", "Supprimer les liens vers les fichiers supprimés"),
 	Remove_only_from_database("Remove only from database", "Supprimer uniquement de la base de données"),
@@ -194,6 +202,7 @@ public enum Local {
 	that_is_currently_present_in_the_database("currently present in the database", "qui est actuellement en base de données"),
 	The_name_cannot_be_empty("The name cannot be empty", "Le nom ne peut pas être vide"),
 	The_new_data("The new data", "La nouvelle donnée"),
+	The_retrieved_information_is_not_the_correct_one_and_must_be_removed("The retrieved information is not correct and must be removed", "Les informations récupérées sont invalides et doivent être supprimées"),
 	The_specified_folder_doesnt_exist("The specified folder doesn't exist", "Le dossier spécifié n'existe pas"),
 	The_specified_folder_is_not_a_folder("The specified folder is not a folder", "Le dossier spécifié n'est pas un dossier"),
 	The_specified_folder_URI_is_not_valid("The specified folder URI is not valid", "Le dossier URI spécifié n'est pas valide"),
@@ -449,6 +458,19 @@ public enum Local {
 		"%#3%<br/>" +
 		"Souhaitez-vous mettre à jour la donnée afin qu'elle soit liée au nouveau fichier ?<br/><br/>"+
 		"<b>Note:</b>Afin d'identifier des fichiers similaires, DataOrganizer utilise des <i>signatures de fichier</i> pour détecter des contenu similaires. En effet, le fichier initial n'existant plus il est impossible de comparer le contenu entier! Vérifier donc attentivement que le nouveau fichier corresponde vraiment à la donnée."
+	),
+	
+	MESSAGE_AskToMerge(
+		"Information from %#3% have been successfully retrieved for data <a href=\"data\">%#1%</a>.<br/>"+
+		"However another data: <a href=\"sameData\">%#2%</a> already contains these information.<br/>"+
+		"It means the two data seem to be the same. Which action do you want to perform ?",
+		"Les informations ont été correctement récupérées depuis %#3% pour la donnée <a href=\"data\">%#1%</a>.<br/>"+
+		"Cependant une autre donnée: <a href=\"sameData\">%#2%</a> contient déjà ces informations.<br/>"+
+		"Il semble donc que ces 2 données soient en réalité une seule et même donnée. Quelle action souhaitez vous effectuer ?"
+	),
+	MESSAGE_Merge_Data_2_Sources_Different_Locations(
+		"The two data to merge contain a similar source: the two sources seem to have the same content but are in different locations.",
+		"Les deux données à fusionner contiennent une source similaire: les deux sources semblent avoir le même contenu, mais sont dans des endroits différents."
 	),
 	
 	;

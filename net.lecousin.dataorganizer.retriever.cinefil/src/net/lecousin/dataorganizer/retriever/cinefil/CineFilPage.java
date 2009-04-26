@@ -1,4 +1,4 @@
-package net.lecousin.dataorganizer.retrieve.cinefil;
+package net.lecousin.dataorganizer.retriever.cinefil;
 
 import java.io.IOException;
 

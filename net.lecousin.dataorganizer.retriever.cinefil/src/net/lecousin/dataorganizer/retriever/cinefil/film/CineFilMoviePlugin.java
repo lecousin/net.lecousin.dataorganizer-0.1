@@ -1,31 +1,31 @@
-package net.lecousin.dataorganizer.retrieve.cinefil.star;
+package net.lecousin.dataorganizer.retriever.cinefil.film;
 
 import java.util.List;
 
 import net.lecousin.dataorganizer.core.database.info.Info;
 import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPlugin;
-import net.lecousin.dataorganizer.people.PeopleInfo;
-import net.lecousin.dataorganizer.people.PeopleSourceInfo;
-import net.lecousin.dataorganizer.retrieve.cinefil.CineFilUtil;
-import net.lecousin.dataorganizer.retrieve.cinefil.Search;
-import net.lecousin.dataorganizer.retrieve.cinefil.internal.EclipsePlugin;
+import net.lecousin.dataorganizer.retriever.cinefil.CineFilUtil;
+import net.lecousin.dataorganizer.retriever.cinefil.Search;
+import net.lecousin.dataorganizer.retriever.cinefil.internal.EclipsePlugin;
+import net.lecousin.dataorganizer.video.VideoInfo;
+import net.lecousin.dataorganizer.video.VideoSourceInfo;
 import net.lecousin.framework.application.Application.Language;
 import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.ui.eclipse.EclipseImages;
 
 import org.eclipse.swt.graphics.Image;
 
-public class CineFilStarPlugin implements InfoRetrieverPlugin {
+public class CineFilMoviePlugin implements InfoRetrieverPlugin {
 
-	public CineFilStarPlugin() {
+	public CineFilMoviePlugin() {
 	}
 
 	public Image getIcon() { return EclipseImages.getImage(EclipsePlugin.ID, "images/icon.gif"); }
 	public int getMaxThreads() { return 3; }
 	public String getName() { return "CineFil"; }
-	public String getSourceID() { return CineFilUtil.SOURCE_ID; }
+	public String getSourceID() { return "CineFil"; }
 	public String getURLForSourceID(String id) {
-		return "http://"+CineFilUtil.getHost()+"/star/" + id;
+		return "http://"+CineFilUtil.getHost()+"/film/" + id;
 	}
 	public boolean isSupportingLanguage(Language lang) {
 		switch (lang) {
@@ -39,31 +39,29 @@ public class CineFilStarPlugin implements InfoRetrieverPlugin {
 	}
 
 	public boolean retrieve(String id, String name, Info info, WorkProgress progress, int work) {
-		PeopleInfo pi = (PeopleInfo)info;
-		PeopleSourceInfo source = (PeopleSourceInfo)pi.setSource(CineFilUtil.SOURCE_ID, id, name);
+		VideoInfo mi = (VideoInfo)info;
+		VideoSourceInfo source = (VideoSourceInfo)mi.setSource(CineFilUtil.SOURCE_ID, id, name);
 		boolean success = false;
 		int nb = 4;
 		int step = work/nb--;
 		work -= step;
 		if (progress.isCancelled()) return false;
-		success |= new People().retrieve(id, source, progress, step);
+		success |= new Movie().retrieve(id, source, progress, step);
 		step = work/nb--;
 		work -= step;
 		if (progress.isCancelled()) return false;
-		success |= new Biographie().retrieve(id, source, progress, step);
+		success |= new Casting().retrieve(id, source, progress, step);
 		step = work/nb--;
 		work -= step;
 		if (progress.isCancelled()) return false;
-		success |= new Filmographie().retrieve(id, source, progress, step);
-		step = work/nb--;
-		work -= step;
+		success |= new PressCritik().retrieve(id, source, progress, step);
 		if (progress.isCancelled()) return false;
-		success |= new Avis().retrieve(id, source, progress, step);
+		success |= new UsersCritik().retrieve(id, source, progress, work);
 		return success;
 	}
 
 	public List<SearchResult> search(String name, WorkProgress progress, int work) {
-		return Search.search(name, Search.CAT_STAR, progress, work);
+		return Search.search(name, Search.CAT_FILM, progress, work);
 	}
 }
 

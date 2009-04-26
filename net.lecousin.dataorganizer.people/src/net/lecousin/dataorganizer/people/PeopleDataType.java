@@ -11,6 +11,7 @@ import net.lecousin.dataorganizer.core.database.Data.DuplicateAnalysis;
 import net.lecousin.dataorganizer.core.database.content.DataContentType;
 import net.lecousin.dataorganizer.core.database.info.Info;
 import net.lecousin.dataorganizer.core.database.info.SourceInfo;
+import net.lecousin.dataorganizer.core.database.info.SourceInfoMergeUtil;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
 import net.lecousin.dataorganizer.people.ui.DescriptionPanel;
 import net.lecousin.dataorganizer.people.ui.OverviewPanel;
@@ -28,6 +29,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
 import org.w3c.dom.Element;
 
 public class PeopleDataType extends DataContentType {
@@ -71,30 +73,29 @@ public class PeopleDataType extends DataContentType {
 			if (n2 == null) continue;
 			if (!n1.equalsIgnoreCase(n2)) return false;
 		}
-		PeopleSourceInfo info1 = new PeopleSourceInfo(null);
-		PeopleSourceInfo info2 = new PeopleSourceInfo(null);
+		long bd1 = -1, bd2 = -1;
 		for (String s : i1.getSources()) {
 			PeopleSourceInfo pi = i1.getSourceInfo(s);
 			if (pi == null) continue;
-			info1.merge(pi);
+			bd1 = SourceInfoMergeUtil.mergeDate(bd1, pi.getBirthDay());
 		}
 		for (String s : i2.getSources()) {
 			PeopleSourceInfo pi = i2.getSourceInfo(s);
 			if (pi == null) continue;
-			info2.merge(pi);
+			bd2 = SourceInfoMergeUtil.mergeDate(bd2, pi.getBirthDay());
 		}
-		if (info1.getBirthDay() == 0) return true;
-		if (info2.getBirthDay() == 0) return true; 
-		if (info1.getBirthDay() != info2.getBirthDay()) return false;
+		if (bd1 <= 0) return true;
+		if (bd2 <= 0) return true; 
+		if (bd1 != bd2) return false;
 		return true;
 	}
 
 	@Override
-	public void createOverviewPanel(Composite panel, SourceInfo info) {
-		new OverviewPanel(panel, this, (PeopleSourceInfo)info);
+	public void createOverviewPanel(Composite panel, List<SourceInfo> sources) {
+		new OverviewPanel(panel, this, sources);
 	}
 	@Override
-	public boolean isOverviewPanelSupprotingSourceMerge() {
+	public boolean isOverviewPanelSupportingSourceMerge() {
 		return true;
 	}
 	@Override
@@ -197,5 +198,10 @@ public class PeopleDataType extends DataContentType {
 					Log.error(this, "Unable to remove image file '" + image.getFileName() + "' for data ID " + getData().getID());
 			}
 		}
+	}
+	
+	@Override
+	protected void mergeContent(DataContentType other, Shell shell) {
+		photos = null;
 	}
 }

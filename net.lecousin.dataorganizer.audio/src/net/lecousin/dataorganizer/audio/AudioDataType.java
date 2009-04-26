@@ -36,6 +36,7 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
 import org.w3c.dom.Element;
 
 public class AudioDataType extends DataContentType {
@@ -82,11 +83,11 @@ public class AudioDataType extends DataContentType {
 
 	}
 	@Override
-	public void createOverviewPanel(Composite panel, SourceInfo source) {
-		new OverviewPanel(panel, this, (AudioSourceInfo)source);
+	public void createOverviewPanel(Composite panel, List<SourceInfo> sources) {
+		new OverviewPanel(panel, this, sources);
 	}
 	@Override
-	public boolean isOverviewPanelSupprotingSourceMerge() {
+	public boolean isOverviewPanelSupportingSourceMerge() {
 		return false;
 	}
 
@@ -316,4 +317,10 @@ public class AudioDataType extends DataContentType {
 		return false;
 	}
 
+	@Override
+	protected void mergeContent(DataContentType other, Shell shell) {
+		coverFront = null;
+		coverBack = null;
+		otherImages = null;
+	}
 }

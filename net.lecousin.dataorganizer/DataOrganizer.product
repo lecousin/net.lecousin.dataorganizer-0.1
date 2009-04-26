@@ -36,13 +36,16 @@
    <plugins>
       <plugin id="com.ibm.icu"/>
       <plugin id="net.lecousin.dataorganizer"/>
-      <plugin id="net.lecousin.dataorganizer.allocine"/>
       <plugin id="net.lecousin.dataorganizer.audio"/>
       <plugin id="net.lecousin.dataorganizer.datalist"/>
       <plugin id="net.lecousin.dataorganizer.mediaplayer"/>
       <plugin id="net.lecousin.dataorganizer.neufbox.mediacenter"/>
       <plugin id="net.lecousin.dataorganizer.people"/>
+      <plugin id="net.lecousin.dataorganizer.retriever.allcdcovers"/>
+      <plugin id="net.lecousin.dataorganizer.retriever.allocine"/>
+      <plugin id="net.lecousin.dataorganizer.retriever.cinefil"/>
       <plugin id="net.lecousin.dataorganizer.video"/>
+      <plugin id="net.lecousin.eclipse.filesystem.apache_vfs"/>
       <plugin id="net.lecousin.framework"/>
       <plugin id="net.lecousin.framework.files"/>
       <plugin id="net.lecousin.framework.files.audio"/>
@@ -62,6 +65,9 @@
       <plugin id="net.lecousin.media.jvlc.common"/>
       <plugin id="net.lecousin.media.mp3"/>
       <plugin id="net.lecousin.neufbox.mediacenter"/>
+      <plugin id="org.apache.commons.codec"/>
+      <plugin id="org.apache.commons.httpclient"/>
+      <plugin id="org.apache.commons.logging"/>
       <plugin id="org.eclipse.core.commands"/>
       <plugin id="org.eclipse.core.contenttype"/>
       <plugin id="org.eclipse.core.databinding"/>
