@@ -9,6 +9,7 @@ import net.lecousin.dataorganizer.video.VideoContentType;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.application.Application;
 import net.lecousin.framework.progress.WorkProgress;
+import net.lecousin.framework.xml.XmlUtil;
 
 public class Filmographie extends AlloCinePage<PeopleSourceInfo> {
 
@@ -63,7 +64,7 @@ public class Filmographie extends AlloCinePage<PeopleSourceInfo> {
 			if (nextLine != null && nextLine.getValue1().contains("<hr")) {
 				String[] columns = getColumns(line.getValue1());
 				if (columns.length == 0) continue;
-				activity = removeAllTags(columns[0]);
+				activity = XmlUtil.decodeXML(removeAllTags(columns[0]));
 //				detailsNames = new String[columns.length-1];
 //				for (int j = 1; j < columns.length; ++j)
 //					detailsNames[j-1] = removeAllTags(columns[j]);

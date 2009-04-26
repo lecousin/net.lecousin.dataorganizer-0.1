@@ -164,10 +164,16 @@ public class DataListMenu {
 				}
 			});
 			if (data.size() == 2) {
-				new FlatPopupMenu.Menu(menu, Local.Merge_the_two_data.toString(), SharedImages.getImage(SharedImages.icons.x16.file.FILE_TO_FILE), false, false, new RunnableWithData<List<Data>>(data) {
+				new FlatPopupMenu.Menu(menu, Local.Merge_the_two_data_to+" "+data.get(0).getName(), SharedImages.getImage(SharedImages.icons.x16.file.FILE_TO_FILE), false, false, new RunnableWithData<List<Data>>(data) {
 					public void run() {
 						data().get(0).merge(data().get(1), MyDialog.getPlatformShell());
 						data().get(1).remove();
+					}
+				});
+				new FlatPopupMenu.Menu(menu, Local.Merge_the_two_data_to+" "+data.get(1).getName(), SharedImages.getImage(SharedImages.icons.x16.file.FILE_TO_FILE), false, false, new RunnableWithData<List<Data>>(data) {
+					public void run() {
+						data().get(1).merge(data().get(0), MyDialog.getPlatformShell());
+						data().get(0).remove();
 					}
 				});
 			}

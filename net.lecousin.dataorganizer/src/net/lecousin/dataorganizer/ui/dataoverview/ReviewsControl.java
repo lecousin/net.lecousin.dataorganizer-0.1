@@ -5,6 +5,7 @@ import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.info.SourceInfo.Review;
 import net.lecousin.framework.collections.SelfMap;
 import net.lecousin.framework.event.Event.Listener;
+import net.lecousin.framework.math.RangeInteger;
 import net.lecousin.framework.ui.eclipse.UIUtil;
 import net.lecousin.framework.ui.eclipse.control.chart.BarChart;
 import net.lecousin.framework.ui.eclipse.dialog.FlatPagedListDialog;
@@ -14,9 +15,12 @@ import net.lecousin.framework.ui.eclipse.dialog.MyDialog.Orientation;
 import net.lecousin.framework.ui.eclipse.graphics.ColorUtil;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 
 public class ReviewsControl extends Composite {
@@ -74,9 +78,63 @@ public class ReviewsControl extends Composite {
 						public Control createControl(Composite parent, Review element) {
 							return new ReviewControl(parent, element.getAuthor(), element.getReview(), element.getRate(), ReviewsControl.this.data);
 						}
-					}, new Filter[] {}
+					}, new Filter[] {
+						new RateFilter()
+					}
 				);
 			dlg.openRelative(c, Orientation.TOP_BOTTOM, true, false);
+		}
+	}
+	private static class RateFilter implements Filter<Review> {
+		public String getName() { return Local.Rate.toString(); }
+		public void fillPanel(Composite panel) {
+			UIUtil.gridLayout(panel, 2);
+			UIUtil.newLabel(panel, Local.Rate_range.toString());
+			text = UIUtil.newText(panel, "0-20", new ModifyListener() {
+				public void modifyText(ModifyEvent e) {
+					String s = text.getText();
+					boolean valid = false;
+					if (s != null && s.trim().length() > 0) {
+						int i = s.indexOf('-');
+						if (i < 0) {
+							try {
+								i = Integer.parseInt(s.trim());
+								if (i >= 0 && i <= 20) {
+									range.min = range.max = i;
+									valid = true;
+								}
+							} catch (NumberFormatException ex) {}
+						} else {
+							try {
+								int min = Integer.parseInt(s.substring(0,i).trim());
+								int max = Integer.parseInt(s.substring(i+1).trim());
+								if (min >= 0 && min <= 20 && max >= 0 && max <= 20 && max >= min) {
+									range.min = min;
+									range.max = max;
+									valid = true;
+								}
+							} catch (NumberFormatException ex) {}
+						}
+					}
+					if (valid) {
+						text.setBackground(ColorUtil.getWhite());
+						dlg.refreshFilter();
+					} else {
+						text.setBackground(ColorUtil.getOrange());
+					}
+				}
+			});
+		}
+		public void setDialog(FlatPagedListDialog<Review> dialog) {
+			this.dlg = dialog;
+		}
+		private Text text;
+		private RangeInteger range = new RangeInteger(0, 20);
+		private FlatPagedListDialog<Review> dlg;
+		public boolean accept(Review element) {
+			Integer i = element.getRate();
+			if (i == null) return true;
+			return i >= range.min && i <= range.max;
 		}
 	}
 //		public ReviewsListDialog(Control c) {

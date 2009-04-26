@@ -20,5 +20,7 @@ public interface AddData_Page extends IWizardPage {
 		//public List<IFileStore> usedFiles = new LinkedList<IFileStore>();
 		public List<String> notDetectedNotTypesFiles = new LinkedList<String>();
 		public List<String> notDetectedTypesFiles = new LinkedList<String>();
+		
+		public boolean showRefreshAfterAdd = true;
 	}
 }

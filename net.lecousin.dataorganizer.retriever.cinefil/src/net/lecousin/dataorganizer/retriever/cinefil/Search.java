@@ -25,6 +25,7 @@ import net.lecousin.framework.ui.eclipse.browser.BrowserWindow;
 import net.lecousin.framework.ui.eclipse.control.ControlProvider;
 import net.lecousin.framework.ui.eclipse.control.text.lcml.LCMLText;
 import net.lecousin.framework.xml.XmlParsingUtil;
+import net.lecousin.framework.xml.XmlUtil;
 import net.lecousin.framework.xml.XmlParsingUtil.Node;
 
 import org.eclipse.swt.SWT;
@@ -98,7 +99,7 @@ public class Search {
 			String url = t.getValue1().attributes.get("href");
 			Pair<String,Integer> section = HTMLAnalyzeUtil.getSection(cols[cols.length-1], "<h3>", "</h3>", 0);
 			if (section == null) continue;
-			String name = HTMLAnalyzeUtil.removeAllTags(section.getValue1());
+			String name = XmlUtil.decodeXML(HTMLAnalyzeUtil.removeAllTags(section.getValue1()));
 			String info = HTMLAnalyzeUtil.cleanInfo(cols[cols.length-1].substring(section.getValue2()), true);
 			results.add(new CineFilSearchResult(name, url, imageURL, info));
 		} while (true);
@@ -119,7 +120,7 @@ public class Search {
 			String url = t.getValue1().attributes.get("href");
 			Pair<String,Integer> section = HTMLAnalyzeUtil.getSection(response.getValue1(), "<h3>", "</h3>", 0);
 			if (section == null) continue;
-			String name = HTMLAnalyzeUtil.removeAllTags(section.getValue1());
+			String name = XmlUtil.decodeXML(HTMLAnalyzeUtil.removeAllTags(section.getValue1()));
 			results.add(new CineFilSearchResult(name, url, null, ""));
 		} while (true);
 		return results;

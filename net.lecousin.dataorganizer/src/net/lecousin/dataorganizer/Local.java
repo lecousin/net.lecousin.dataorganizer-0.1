@@ -22,6 +22,7 @@ public enum Local {
 	Details("Details", "Détails"),
 	extensions("extensions", "extensions"),
 	Extensions("Extensions", "Extensions"),
+	File("File", "Fichier"),
 	Files("Files", "Fichiers"),
 	_for("for", "pour"),
 	From("From", "De"),
@@ -68,6 +69,8 @@ public enum Local {
 	Add_data("Add data", "Ajouter des données"),
 	Add_data_from_a_folder("Add data from a folder", "Ajouter des données depuis un dossier"),
 	Add_data_from_a_folder__description("Specify from which folder to add data and how the folder should be analyzed.", "Spécifiez depuis quel dossier vous souhaitez ajouter des données et comment ce dossier doit être analysé."),
+	Add_data_from_internet("Add data from Internet", "Ajouter une donnée depuis Internet"),
+	Add_data_from_internet__description("Specify which kind of data to search, its name, and select the sources you want to use", "Spécifiez quel type de donnée vous recherchez, son nom, et sélectionnez les sources que vous souhaitez utiliser pour votre recherche"),
 	Add_the_new_data_anyway("Add the new data anyway", "Quand même ajouter la nouvelle donnée"),
 	Amovible_media("Amovible media", "Média amovible"),
 	Analyze_sub_folders_recursively("Analyze sub-folders recursively", "Parcourir les sous-dossiers recursivement"),
@@ -136,6 +139,7 @@ public enum Local {
 	Main_data_information("Main data information", "Informations principales des données"),
 	Merge_data("Merge data", "Fusionner les données"),
 	Merge_the_two_data("Merge the 2 data", "Fusionner les 2 données"),
+	Merge_the_two_data_to("Merge the 2 data to", "Fusionner les 2 données vers"),
 	Move_labels("Move labels", "Déplacer des étiquettes"),
 	New_label("New label", "Nouvelle étiquette"),
 	No_database_exist("No database exist", "Pas de base de données existante"),
@@ -147,6 +151,7 @@ public enum Local {
 	Not_labeled("Not labeled", "Non étiquetté"),
 	Not_rated("Not rated", "Non noté"),
 	Old_database("Old database", "Ancienne base de données"),
+	Only_data_linked_to_files("Only data linked to file(s)", "Uniquement liées à des fichiers"),
 	Only_if_not_yet_done("Only if not yet done", "Seulement si pas encore fait"),
 	Open_with("Open with", "Ouvrir avec"),
 	Open_with_default_application("Open with default application", "Ouvrir avec l'application par défaut"),
@@ -158,7 +163,9 @@ public enum Local {
 	Please_insert_the_amovible_media_containing("Please insert the amovible media containing", "Veuillez insérer le média amovible contenant"),
 	Please_select_at_least_one_content_type("Please select at least one content type", "Veuillez sélectionner au moins un type de contenu"),
 	Please_select_the_dates_to_take_into_account("Please select the dates to take into account","Veuillez sélectionner les dates à prendre en compte"),
+	Please_specify_a_content_type("Please specify a content type", "Veuillez spécifier un type de contenu"),
 	Please_specify_a_folder_to_analyze("Please specify a folder to analyze", "Veuillez spécifier un dossier à analyzer"),
+	Rate_range("Rates range", "Gamme de notes"),
 	Reading_database_content("Reading database content", "Lecture du contenu de la base de données"),
 	Refresh_database("Refresh database", "Rafraîchir la base de données"),
 	Refreshing_data_content("Refreshing data content", "Rafraîchissement du contenu des données"),
@@ -171,6 +178,7 @@ public enum Local {
 	Remove_from_database_and_filesystem("Remove from database and filesystem", "Supprimer de la base de données et de l'ordinateur"),
 	Remove_information_from__("Remove information from %#1%", "Supprimer les informations venant de %#1%"),
 	Remove_label("Remove label", "Supprimer une étiquette"),
+	Remove_link("Remove link", "Supprimer le lien"),
 	Remove_links_to_removed_files("Remove links to removed files", "Supprimer les liens vers les fichiers supprimés"),
 	Remove_only_from_database("Remove only from database", "Supprimer uniquement de la base de données"),
 	Remove_the_new_data_from_the_filesystem("Remove the new data from the file system and keep the current", "Supprimer la nouvelle donnée de l'ordinateur, et conserver la donnée actuelle"),
@@ -221,6 +229,7 @@ public enum Local {
 	What_do_you_want_to_do("What do you want to do ?", "Que souhaitez vous faire ?"),
 	You_are_requesting_to_remove("You are requesting to remove", "Vous demandez la suppression de"),
 	You_must_select_a_data_type("You must select a data type", "Vous devez sélectionner un type de donnée"),
+	You_must_select_at_least_one_source("You must select at least one source", "Vous devez sélectionner au moins une source"),
 	You_must_select_the_way_you_want_to_add_data("You must select the way you want to add data", "Vous devez sélectionner une manière d'ajouter les données"),
 	Your_review("Your review", "Votre critique"),
 	
@@ -338,6 +347,12 @@ public enum Local {
 		"Select all labels to include in the search.<br>If nothing is selected, it means all data.",
 		"Sélectionnez toutes les étiquettes à inclure dans la recherche.<br>Si rien n'est sélectionné, toutes les données seront inclues."
 	),
+	HELP_Search_Files(
+		"<b>Only data linked to file(s)</b>: when selected, all data you do not have on your computer will be hidden.<br/>"+
+		"<b>Name</b>: only data linked to a file which name contains the specified name will be selected. If empty, no filter is applied on file names.",
+		"<b>Uniquement liées à des fichiers</b>: quand cette option est sélectionnée, toutes les données que vous n'avez pas sur votre ordinateur seront cachées.<br/>"+
+		"<b>Nom</b>: uniquement les données liées à un fichier dont le nom contient le texte spécifié seront affichées. Si ce champ est vide, aucun filtre ne sera appliqué sur les noms de fichiers."
+	),
 
 
 	OPENED_DATA_DIALOG_MESSAGE(
@@ -444,6 +459,10 @@ public enum Local {
 		"You add data from an amovible disk (CD/DVD, USB key...).\r\nDo you want to continue with another amovible disk ?",
 		"Vous venez d'ajouter des données depuis un disque amovible (CD/DVD, clé USB...).\r\nSouhaitez-vous continuer avec un autre disque amovible ?"
 	),
+	MESSAGE_Add_Data_Continue_On_Internet(
+			"You add a data from Internet.\r\nDo you want to continue with another Internet search ?",
+			"Vous venez d'ajouter une donnée depuis Internet.\r\nSouhaitez-vous continuer avec une autre recherche sur Internet ?"
+		),
 	
 	MESSAGE_RELOCATE_File_found(
 		"The data <a href=\"data\">%#1%</a> is linked to the following file which doesn't exist anymore:<br/>" +

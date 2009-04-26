@@ -130,28 +130,30 @@ public abstract class Data implements SelfMap.Entry<Long> {
 	}
 	
 	public DuplicateAnalysis checkForDuplicate(Data data) {
-		// check if exactly the same or same content
-		List<DataSource> listCurrent = new ArrayList<DataSource>(sources);
-		List<DataSource> listNew = new ArrayList<DataSource>(data.getSources());
-		boolean changeLocation = false;
-		for (DataSource n : data.getSources()) {
-			if (n == null) { listNew.remove(null); continue; }
-			for (DataSource c : sources)
-				if (c == null) {
-					listCurrent.remove(null);
-				} else if (c.isExactlyTheSame(n)) {
-					listCurrent.remove(c);
-					listNew.remove(n);
-					break;
-				} else if (c.isSameInDifferentLocation(n)) {
-					listCurrent.remove(c);
-					listNew.remove(n);
-					changeLocation = true;
-					break;
-				}
+		if (!sources.isEmpty() && !data.getSources().isEmpty()) {
+			// check if exactly the same or same content based on the physical sources
+			List<DataSource> listCurrent = new ArrayList<DataSource>(sources);
+			List<DataSource> listNew = new ArrayList<DataSource>(data.getSources());
+			boolean changeLocation = false;
+			for (DataSource n : data.getSources()) {
+				if (n == null) { listNew.remove(null); continue; }
+				for (DataSource c : sources)
+					if (c == null) {
+						listCurrent.remove(null);
+					} else if (c.isExactlyTheSame(n)) {
+						listCurrent.remove(c);
+						listNew.remove(n);
+						break;
+					} else if (c.isSameInDifferentLocation(n)) {
+						listCurrent.remove(c);
+						listNew.remove(n);
+						changeLocation = true;
+						break;
+					}
+			}
+			if (listCurrent.isEmpty() && listNew.isEmpty()) 
+				return changeLocation ? DuplicateAnalysis.SAME_IN_DIFFERENT_LOCATION : DuplicateAnalysis.EXACTLY_THE_SAME;
 		}
-		if (listCurrent.isEmpty() && listNew.isEmpty()) 
-			return changeLocation ? DuplicateAnalysis.SAME_IN_DIFFERENT_LOCATION : DuplicateAnalysis.EXACTLY_THE_SAME;
 		return getContent().checkForDuplicateOnContent(data);
 	}
 	
@@ -218,13 +220,6 @@ public abstract class Data implements SelfMap.Entry<Long> {
 	}
 	
 	public void merge(Data other, Shell shell) {
-		views.addAll(other.views);
-		if (rate == -1)
-			rate = other.rate;
-		else if (other.rate > rate)
-			rate = other.rate; // keep the best rating
-		if (comment == null || comment.length() == 0)
-			comment = other.comment;
 		for (DataSource source : other.sources) {
 			boolean found = false;
 			for (DataSource source2 : sources) {
@@ -239,12 +234,13 @@ public abstract class Data implements SelfMap.Entry<Long> {
 					QuestionDlg dlg = new QuestionDlg(shell, Local.Merge_data.toString(), null);
 					dlg.setMessage(Local.MESSAGE_Merge_Data_2_Sources_Different_Locations.toString());
 					dlg.setAnswers(new Answer[] {
-						new QuestionDlg.AnswerSimple("current", Local.Keep+" "+source2.getPathToDisplay()),	
-						new QuestionDlg.AnswerSimple("other", Local.Keep+" "+source.getPathToDisplay()),	
-						new QuestionDlg.AnswerSimple("current_remove_other", Local.Keep+" "+source2.getPathToDisplay()+" "+Local.and_remove+" "+source.getPathToDisplay()+" "+Local.from_filesystem),	
-						new QuestionDlg.AnswerSimple("other_remove_current", Local.Keep+" "+source.getPathToDisplay()+" "+Local.and_remove+" "+source2.getPathToDisplay()+" "+Local.from_filesystem),	
+						new QuestionDlg.AnswerSimple("current", Local.Keep+" "+source2.getPathToDisplay()+"/"+source2.getFileName()),	
+						new QuestionDlg.AnswerSimple("other", Local.Keep+" "+source.getPathToDisplay()+"/"+source.getFileName()),	
+						new QuestionDlg.AnswerSimple("current_remove_other", Local.Keep+" "+source2.getPathToDisplay()+"/"+source2.getFileName()+" "+Local.and_remove+" "+source.getPathToDisplay()+"/"+source.getFileName()+" "+Local.from_filesystem),	
+						new QuestionDlg.AnswerSimple("other_remove_current", Local.Keep+" "+source.getPathToDisplay()+"/"+source.getFileName()+" "+Local.and_remove+" "+source2.getPathToDisplay()+"/"+source2.getFileName()+" "+Local.from_filesystem),	
 						new QuestionDlg.AnswerSimple("both", Local.Keep_both.toString())
 					});
+					dlg.setCancellable(false);
 					dlg.show();
 					String answer = dlg.getAnswerID();
 					if (answer == null) answer = "both";
@@ -279,7 +275,19 @@ public abstract class Data implements SelfMap.Entry<Long> {
 			if (found) continue;
 			sources.add(source);
 		}
+		views.addAll(other.views);
+		if (rate == -1)
+			rate = other.rate;
+		else if (other.rate > rate)
+			rate = other.rate; // keep the best rating
+		if (comment == null || comment.length() == 0)
+			comment = other.comment;
 		getContent().merge(other.getContent(), shell);
+		signalModification();
+	}
+	
+	public void removeSource(DataSource source) {
+		sources.remove(source);
 		signalModification();
 	}
 	

@@ -4,9 +4,10 @@ dataorganizer.people
 dataorganizer.video
 dataorganizer.audio
 (dataorganizer.retriever.allocine)
+dataorganizer.datalist
 framework
 framework.net.mime [fix]
-framework.ui [fix]
+framework.ui
 new:
 (dataorganizer.retriever.allocine)
 dataorganizer.retriever.allcdcovers
@@ -16,7 +17,7 @@ eclipse.filesystem.apache_vfs
 ---------------------------------------------------------------------
 DataOrganizer
  + Bug LCTable: ne plus utiliser ScrolledComposite a cause de MouseWhell, mais mettre la horizontal scroll bar manuellement
- + Add data: from internet, single audio
+ + Add data: single audio
  + DataOverview: meilleure gestion du scrolling
  + Clean not DEBUG:
    + Log: faire une tournante de fichiers (par taille)
@@ -26,22 +27,13 @@ DataOrganizer
  + BUG: PreviewTaker: attendre que l'image change avant de prendre reellement... (permet d'etre sur que la video est prete)
  + AdvancedList: gerer la limitation du nombre d'éléments
  + Data opened menu: + ergonomique pour traiter plusieurs en meme temps???
- + ReviewsDialog: filtre par note
  + Gestion des prets...
- + Add data from internet => use InfoRetriever.search...
  + Import all/Refresh all sur DataLink list (utiliser aussi le ListDialog qui gere les pages, filtres... ?? ou une table ??)
- + DataList: menu on right click, drag...
- + Blink: pas base sur le temsp mais sur les sleep...
- 
- + Continuer de tester AlloCine+CineFil
  + Continuer encodeXML
- 
 Media Player
  + playlist : deplacer les elements par drag'n'drop
- 
 Update
  + really improve the system so even if there is a bug we can show message/update the soft
- 
 Audio
  + Lecteur: CDA???
  + essayer avec tous mes CD audios
@@ -51,17 +43,13 @@ Audio
  + UI: genres
  + tous les TODO...
  + File: plug-in missing...
- 
 Picture
  + tout
-
 Video
  + DVD, Video CD
  + continuer les types
- 
 Internet plugins:
  + AlloCine: image DVD
- + cinefil.com (video, french)
  + freedb.org (audio, english?)
  + allcdcovers.com (video+audio)
  + lyricsreg.com (audio)

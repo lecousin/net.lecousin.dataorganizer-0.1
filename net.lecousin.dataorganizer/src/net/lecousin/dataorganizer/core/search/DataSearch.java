@@ -60,6 +60,7 @@ public class DataSearch {
 		addParameter(new Param_Rate());
 		addParameter(new Param_DateAdded());
 		addParameter(new Param_DateOpened());
+		addParameter(new Param_PhysicalSource());
 		for (ContentType type : ContentType.getAvailableTypes()) {
 			List<Parameter> params = type.createSearchParameters();
 			if (params == null || params.isEmpty()) continue;

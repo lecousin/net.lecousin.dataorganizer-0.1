@@ -22,6 +22,7 @@ import net.lecousin.framework.ui.eclipse.UIUtil;
 import net.lecousin.framework.ui.eclipse.browser.BrowserWindow;
 import net.lecousin.framework.ui.eclipse.control.ControlProvider;
 import net.lecousin.framework.ui.eclipse.control.text.lcml.LCMLText;
+import net.lecousin.framework.xml.XmlUtil;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -193,7 +194,7 @@ public class Search {
 			if (i < 0) break;
 			j = page.indexOf("</a>", i);
 			if (j < 0) break;
-			result.title = page.substring(i+4, j).replace("<b>", "").replace("</b>", "");
+			result.title = XmlUtil.decodeXML(page.substring(i+4, j).replace("<b>", "").replace("</b>", ""));
 			
 			// infos
 			int endSection = page.indexOf("</td>", j);

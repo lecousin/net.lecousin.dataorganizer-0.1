@@ -3,7 +3,10 @@ package net.lecousin.dataorganizer.ui.dialog;
 import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.source.DataSource;
+import net.lecousin.framework.event.Event.Listener;
 import net.lecousin.framework.strings.StringUtil;
+import net.lecousin.framework.thread.RunnableWithData;
+import net.lecousin.framework.ui.eclipse.SharedImages;
 import net.lecousin.framework.ui.eclipse.UIUtil;
 import net.lecousin.framework.ui.eclipse.control.buttonbar.CloseButtonPanel;
 import net.lecousin.framework.ui.eclipse.control.list.LCContentProvider;
@@ -13,6 +16,7 @@ import net.lecousin.framework.ui.eclipse.control.list.LCTable.ColumnProviderText
 import net.lecousin.framework.ui.eclipse.control.list.LCTable.LCTableProvider;
 import net.lecousin.framework.ui.eclipse.control.list.LCTable.TableConfig;
 import net.lecousin.framework.ui.eclipse.dialog.FlatDialog;
+import net.lecousin.framework.ui.eclipse.dialog.FlatPopupMenu;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
@@ -44,11 +48,25 @@ public class SourcesInfoDialog extends FlatDialog {
 		UIUtil.newLabel(container, Local.Data+":", true, false);
 		UIUtil.newLabel(container, data.getName());
 		UIUtil.gridDataHorizFill(UIUtil.newLabel(container, Local.Files+":", true, false));
-		LCTable<DataSource> table = new LCTable<DataSource>(container, provider);
+		table = new LCTable<DataSource>(container, provider);
 		table.getControl().setLayoutData(UIUtil.gridData(2, true, 1, true));
 		new CloseButtonPanel(container, true).centerAndFillInGrid();
+		
+		table.addRightClickListener(new Listener<DataSource>() {
+			public void fire(DataSource event) {
+				FlatPopupMenu menu = new FlatPopupMenu(null, Local.File.toString(), false, true, false, false);
+				new FlatPopupMenu.Menu(menu, Local.Remove_link.toString(), SharedImages.getImage(SharedImages.icons.x16.basic.DEL), false, false, new RunnableWithData<DataSource>(event) {
+					public void run() {
+						data.removeSource(data());
+						table.refresh(true);
+					}
+				});
+				menu.show(null, Orientation.BOTTOM, true);
+			}
+		});
 	}
 	
+	private LCTable<DataSource> table;
 	private LCTableProvider<DataSource> provider = new LCTableProvider<DataSource>() {
 		public TableConfig getConfig() { return config; }
 		public ColumnProvider<DataSource>[] getColumns() { return columns; }

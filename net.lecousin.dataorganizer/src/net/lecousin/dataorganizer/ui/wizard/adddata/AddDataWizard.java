@@ -40,6 +40,7 @@ public class AddDataWizard extends Wizard {
 	private AddData_SelectType firstPage;
 	private Map<String,AddData_Page> typePages = new HashMap<String,AddData_Page>();
 	private AddData_Folder folderPage;
+	private AddData_Internet internetPage;
 	
 	@Override
 	public void addPages() {
@@ -53,6 +54,7 @@ public class AddDataWizard extends Wizard {
 			}
 		}
 		addPage(folderPage = new AddData_Folder());
+		addPage(internetPage = new AddData_Internet());
 	}
 	
 	public IWizardPage getTypePage(String type_id) {
@@ -60,6 +62,9 @@ public class AddDataWizard extends Wizard {
 	}
 	public IWizardPage getFolderPage() {
 		return folderPage;
+	}
+	public IWizardPage getInternetPage() {
+		return internetPage;
 	}
 	
 	@Override
@@ -150,12 +155,14 @@ public class AddDataWizard extends Wizard {
     			throw new InterruptedException();
     		}
     		result.db.close();
-    		RefreshOptions options = new RefreshOptions();
-    		options.getDataContentIfNotYetDone = true;
-    		options.retrieveInfoFromInternet = true;
-    		RefreshDialog rd = new RefreshDialog(shell, options);
-    		if (rd.open() != null)
-    			Refresher.refresh(shell, DataOrganizer.database(), added, options);
+    		if (result.showRefreshAfterAdd) {
+	    		RefreshOptions options = new RefreshOptions();
+	    		options.getDataContentIfNotYetDone = true;
+	    		options.retrieveInfoFromInternet = true;
+	    		RefreshDialog rd = new RefreshDialog(shell, options);
+	    		if (rd.open() != null)
+	    			Refresher.refresh(shell, DataOrganizer.database(), added, options);
+    		}
     		MessageDialog.openInformation(shell, Local.Add_data.toString(), ""+result.toAdd.size()+" "+Local.data_successfully_added);
     	}
 	}

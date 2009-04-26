@@ -35,6 +35,7 @@ public class AddData_SelectType extends WizardPage {
 			if (((AddDataWizard)getWizard()).getTypePage(type.getID()) != null)
 				comboSingleType.addItem(type.getIcon(), type.getName(), type.getID());
 		radioAddType.addOption("folder", Local.Add_data_from_a_folder+" ("+Local.or_any_URI+")");
+		radioAddType.addOption("internet", Local.Add_data_from_internet.toString());
 		setControl(panel);
 		
 		radioAddType.addSelectionChangedListener(new Listener<String>() {
@@ -64,6 +65,8 @@ public class AddData_SelectType extends WizardPage {
 			}
 		} else if (option.equals("folder")) {
 			
+		} else if (option.equals("internet")) {
+			
 		}
 		
 		updateStatus(null);
@@ -84,6 +87,8 @@ public class AddData_SelectType extends WizardPage {
 		}
 		if (option.equals("folder"))
 			return ((AddDataWizard)getWizard()).getFolderPage();
+		if (option.equals("internet"))
+			return ((AddDataWizard)getWizard()).getInternetPage();
 		return null;
 	}
 	
