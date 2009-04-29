@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension
+         point="net.lecousin.dataorganizer.inforetriever">
+      <retriever
+            class="net.lecousin.dataorganizer.retriever.imdb.title.IMDBTitlePlugin"
+            content_type_id="video"
+            id="imdb">
+      </retriever>
+      <retriever
+            class="net.lecousin.dataorganizer.retriever.imdb.name.IMDBNamePlugin"
+            content_type_id="people"
+            id="imdb">
+      </retriever>
+   </extension>
+
+</plugin>

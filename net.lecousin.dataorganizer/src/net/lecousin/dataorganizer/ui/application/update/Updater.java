@@ -71,14 +71,45 @@ public class Updater {
 	}
 	
 	public static boolean signalInstallation() {
-		if (isMySelf()) return true;
 		HttpClient client = new HttpClient(SocketFactory.getDefault());
-		HttpRequest req = new HttpRequest(install_tracker_host, install_tracker_path);
-		try { client.send(req, true, null, 0); return true; }
+		HttpRequest req;
+		try {
+			Version v = getCurrentVersion();
+			req = new HttpRequest("dataorganizer.webhop.net", "/track/track.php?type=install&version=" + (isMySelf() ? "ME" : "") + v.toString());
+			try { client.send(req, true, null, 0); }
+			catch (IOException e) {
+				if (Log.warning(Updater.class))
+					Log.warning(Updater.class, "Unable to track installation", e);
+				return false;
+			}
+		} catch (UpdateException e) {
+			if (Log.warning(Updater.class))
+				Log.warning(Updater.class, "Unable to track installation", e);
+		}
+		if (isMySelf()) return true;
+		req = new HttpRequest(install_tracker_host, install_tracker_path);
+		try { client.send(req, true, null, 0); }
 		catch (IOException e) {
 			if (Log.warning(Updater.class))
 				Log.warning(Updater.class, "Unable to track installation", e);
 			return false;
+		}
+		return true;
+	}
+	public static void signalLaunch() {
+		HttpClient client = new HttpClient(SocketFactory.getDefault());
+		HttpRequest req;
+		try {
+			Version v = getCurrentVersion();
+			req = new HttpRequest("dataorganizer.webhop.net", "/track/track.php?type=launch&version=" + (isMySelf() ? "ME" : "") + v.toString()+"&lang="+Application.language.toString());
+			try { client.send(req, true, null, 0); }
+			catch (IOException e) {
+				if (Log.warning(Updater.class))
+					Log.warning(Updater.class, "Unable to track launch", e);
+			}
+		} catch (UpdateException e) {
+			if (Log.warning(Updater.class))
+				Log.warning(Updater.class, "Unable to track installation", e);
 		}
 	}
 	
@@ -216,6 +247,13 @@ public class Updater {
 			HttpClient client = new HttpClient(SocketFactory.getDefault());
 			HttpRequest req;
 			HttpResponse resp;
+			Version current = getCurrentVersion();
+			req = new HttpRequest("dataorganizer.webhop.net", "/track/track.php?type=update&version=" + (isMySelf() ? "ME" : "") + current.toString());
+			try { client.send(req, true, null, 0); }
+			catch (IOException e) {
+				if (Log.warning(Updater.class))
+					Log.warning(Updater.class, "Unable to track update", e);
+			}
 			if (!isMySelf()) {
 				req = new HttpRequest(update_tracker_host, update_tracker_path);
 				try { resp = client.send(req, true, progress, 9500); }
@@ -271,7 +309,6 @@ public class Updater {
 				throw new UpdateException(Local.ERROR_UPDATE_WEB_SITE.toString());
 			}
 			
-			Version current = getCurrentVersion();
 			Update update = new Update(current);
 			for (Element e : XmlUtil.get_childs_element(root, "update"))
 				update.newNode(e);

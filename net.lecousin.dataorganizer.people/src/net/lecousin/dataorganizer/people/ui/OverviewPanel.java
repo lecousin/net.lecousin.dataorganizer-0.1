@@ -13,8 +13,11 @@ import net.lecousin.framework.collections.SelfMap;
 import net.lecousin.framework.collections.SelfMapLinkedList;
 import net.lecousin.framework.time.DateTimeUtil;
 import net.lecousin.framework.ui.eclipse.UIUtil;
+import net.lecousin.framework.ui.eclipse.control.UIControlUtil;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TabFolder;
@@ -58,6 +61,13 @@ public class OverviewPanel extends Composite {
 			item.setText(a.name);
 			DataLinkListPanel panel = new DataLinkListPanel(folder, new Provider(a));
 			item.setControl(panel);
+			panel.addControlListener(new ControlListener() {
+				public void controlMoved(ControlEvent e) {
+				}
+				public void controlResized(ControlEvent e) {
+					UIControlUtil.autoresize(OverviewPanel.this);
+				}
+			});
 		}
 	}
 	

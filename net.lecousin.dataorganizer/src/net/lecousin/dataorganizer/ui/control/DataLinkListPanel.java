@@ -28,7 +28,8 @@ public class DataLinkListPanel extends Composite {
 
 	public DataLinkListPanel(Composite parent, ListProvider provider) {
 		super(parent, SWT.NONE);
-		String[] titles = provider.getTitles();
+		this.provider = provider;
+		titles = provider.getTitles();
 		GridLayout layout = UIUtil.gridLayout(this, titles.length*2, 0, 0);
 		layout.horizontalSpacing = 0;
 		layout.verticalSpacing = 0;
@@ -39,32 +40,46 @@ public class DataLinkListPanel extends Composite {
 			else newLabel(" ", titleBgColor, titleFgColor);
 			newLabel(title, titleBgColor, titleFgColor);
 		}
-		int nb = provider.getNbRows();
-		for (int i = 0; i < nb; ++i) {
-			Color bg = (i%2)==0 ? rowBgColor1 : rowBgColor2;
-			Color fg = (i%2)==0 ? rowFgColor1 : rowFgColor2;
-			Object[] o = provider.getRow(i);
-			Data data = getData(o);
-			if (data == null)
-				newLabel("", bg, fg);
-			else {
-				DataImageControl c = new DataImageControl(this, data, 64, 50);
-				c.setBackground(bg);
-				setGD(c);
-			}
-			first = true;
-			int j;
-			for (j = 0; j < o.length; ++j) {
-				if (first) first = false;
-				else newLabel("", bg, fg);
-				createControl(o[j], bg, fg);
-			}
-			while (j++ < titles.length) {
-				newLabel("", bg, fg);
-				newLabel("", bg, fg);
-			}
-		}
+		getDisplay().asyncExec(shower);
 	}
+	
+	private ListProvider provider;
+	private int pos = 0;
+	private String[] titles;
+	private Runnable shower = new Runnable() {
+		public void run() {
+			if (DataLinkListPanel.this.isDisposed()) return;
+			int nb = provider.getNbRows();
+			int start = pos;
+			for (; pos < nb && pos-start<5; pos++) {
+				Color bg = (pos%2)==0 ? rowBgColor1 : rowBgColor2;
+				Color fg = (pos%2)==0 ? rowFgColor1 : rowFgColor2;
+				Object[] o = provider.getRow(pos);
+				Data data = getData(o);
+				if (data == null)
+					newLabel("", bg, fg);
+				else {
+					DataImageControl c = new DataImageControl(DataLinkListPanel.this, data, 64, 50);
+					c.setBackground(bg);
+					setGD(c);
+				}
+				boolean first = true;
+				int j;
+				for (j = 0; j < o.length; ++j) {
+					if (first) first = false;
+					else newLabel("", bg, fg);
+					createControl(o[j], bg, fg);
+				}
+				while (j++ < titles.length) {
+					newLabel("", bg, fg);
+					newLabel("", bg, fg);
+				}
+			}
+			UIUtil.resize(DataLinkListPanel.this);
+			if (pos < nb)
+				getDisplay().asyncExec(this);
+		}
+	};
 	
 	public static interface ListProvider {
 		public String[] getTitles();

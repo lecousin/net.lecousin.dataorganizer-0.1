@@ -22,6 +22,8 @@ import net.lecousin.framework.time.DateTimeUtil;
 import net.lecousin.framework.ui.eclipse.UIUtil;
 import net.lecousin.framework.ui.eclipse.control.Row_ExpandableList;
 import net.lecousin.framework.ui.eclipse.dialog.FlatPopupMenu;
+import net.lecousin.framework.ui.eclipse.dialog.MyDialog;
+import net.lecousin.framework.ui.eclipse.event.ControlListenerWithData;
 import net.lecousin.framework.ui.eclipse.event.HyperlinkListenerWithData;
 
 import org.eclipse.swt.SWT;
@@ -120,8 +122,13 @@ public class OverviewPanel {
 		Hyperlink link = UIUtil.newLink(panel, Local.View_all+" (" + list.size() + ")", new HyperlinkListenerWithData<Pair<String,List<Pair<List<String>,List<DataLink>>>>>(new Pair<String,List<Pair<List<String>,List<DataLink>>>>(title2, list)) {
 			public void linkActivated(HyperlinkEvent e) {
 				FlatPopupMenu dlg = new FlatPopupMenu((Control)e.widget, data().getValue1(), true, true, false, true);
-				new DataLinkListPanel(dlg.getControl(), new Provider());
-				dlg.show((Control)e.widget, FlatPopupMenu.Orientation.TOP_BOTTOM, true);
+				new DataLinkListPanel(dlg.getControl(), new Provider()).addControlListener(new ControlListenerWithData<MyDialog>(dlg) {
+					public void controlMoved(org.eclipse.swt.events.ControlEvent e) {};
+					public void controlResized(org.eclipse.swt.events.ControlEvent e) {
+						data().resize();
+					}
+				});
+				dlg.show((Control)e.widget, FlatPopupMenu.Orientation.TOP_BOTTOM, false);
 			}
 			public void linkEntered(HyperlinkEvent e) {
 				((Hyperlink)e.widget).setUnderlined(true);

@@ -7,6 +7,7 @@ dataorganizer.audio
 dataorganizer.datalist
 framework
 framework.net.mime [fix]
+framework.net.http [fix]
 framework.ui
 new:
 (dataorganizer.retriever.allocine)
@@ -15,6 +16,7 @@ dataorganizer.retriever.cinefil
 eclipse.filesystem.apache_vfs
 
 ---------------------------------------------------------------------
++PLS,allcdcovers,essayer d'ameliorer un peu pour Audio,UPDATE
 DataOrganizer
  + Bug LCTable: ne plus utiliser ScrolledComposite a cause de MouseWhell, mais mettre la horizontal scroll bar manuellement
  + Add data: single audio
