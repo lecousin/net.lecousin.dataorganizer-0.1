@@ -6,6 +6,14 @@ Bundle-Version: 0.1.0
 Bundle-Activator: net.lecousin.dataorganizer.allcdcovers.retriever.internal.EclipsePlugin
 Bundle-Vendor: Guillaume LE COUSIN
 Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime
+ org.eclipse.core.runtime,
+ net.lecousin.dataorganizer;bundle-version="0.3.0",
+ net.lecousin.dataorganizer.audio;bundle-version="0.3.0",
+ net.lecousin.dataorganizer.video;bundle-version="0.3.0",
+ net.lecousin.framework;bundle-version="0.3.0",
+ net.lecousin.framework.net.http;bundle-version="0.1.1",
+ net.lecousin.framework.net.mime;bundle-version="0.1.1",
+ net.lecousin.framework.ui;bundle-version="0.3.0",
+ net.lecousin.framework.ui.eclipse.browser;bundle-version="0.1.0"
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy

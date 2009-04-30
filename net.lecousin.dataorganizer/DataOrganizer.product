@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.4"?>
 
-<product name="DataOrganizer" id="net.lecousin.dataorganizer.product" application="net.lecousin.dataorganizer.application" version="0.1.0" useFeatures="false">
+<product name="DataOrganizer" id="net.lecousin.dataorganizer.product" application="net.lecousin.dataorganizer.application" version="0.3.0" useFeatures="false">
 
    <configIni use="default">
    </configIni>
@@ -41,9 +41,9 @@
       <plugin id="net.lecousin.dataorganizer.mediaplayer"/>
       <plugin id="net.lecousin.dataorganizer.neufbox.mediacenter"/>
       <plugin id="net.lecousin.dataorganizer.people"/>
-      <plugin id="net.lecousin.dataorganizer.retriever.allcdcovers"/>
       <plugin id="net.lecousin.dataorganizer.retriever.allocine"/>
       <plugin id="net.lecousin.dataorganizer.retriever.cinefil"/>
+      <plugin id="net.lecousin.dataorganizer.retriever.imdb"/>
       <plugin id="net.lecousin.dataorganizer.video"/>
       <plugin id="net.lecousin.eclipse.filesystem.apache_vfs"/>
       <plugin id="net.lecousin.framework"/>

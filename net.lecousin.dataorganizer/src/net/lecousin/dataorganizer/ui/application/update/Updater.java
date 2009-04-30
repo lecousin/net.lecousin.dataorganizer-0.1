@@ -62,7 +62,7 @@ public class Updater {
 		}
 	}
 	
-	private static boolean isMySelf() {
+	public static boolean isMySelf() {
 		if (!"C:\\Users\\Guillaume".equals(System.getProperty("user.home"))) return false;
 		if (!"GUILLAUME-PORT".equals(System.getenv("COMPUTERNAME"))) return false;
 		if (Log.debug(Updater.class))
@@ -96,12 +96,12 @@ public class Updater {
 		}
 		return true;
 	}
-	public static void signalLaunch() {
+	public static void signalLaunch(long count) {
 		HttpClient client = new HttpClient(SocketFactory.getDefault());
 		HttpRequest req;
 		try {
 			Version v = getCurrentVersion();
-			req = new HttpRequest("dataorganizer.webhop.net", "/track/track.php?type=launch&version=" + (isMySelf() ? "ME" : "") + v.toString()+"&lang="+Application.language.toString());
+			req = new HttpRequest("dataorganizer.webhop.net", "/track/track.php?type=launch&version=" + (isMySelf() ? "ME" : "") + v.toString()+"&lang="+Application.language.toString()+"&count="+count);
 			try { client.send(req, true, null, 0); }
 			catch (IOException e) {
 				if (Log.warning(Updater.class))

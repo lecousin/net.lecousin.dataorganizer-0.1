@@ -17,6 +17,7 @@ eclipse.filesystem.apache_vfs
 
 ---------------------------------------------------------------------
 +PLS,allcdcovers,essayer d'ameliorer un peu pour Audio,UPDATE
++UPDATE: update uninstall... complete uninstall...
 DataOrganizer
  + Bug LCTable: ne plus utiliser ScrolledComposite a cause de MouseWhell, mais mettre la horizontal scroll bar manuellement
  + Add data: single audio
@@ -60,5 +61,4 @@ Internet plugins:
  (+ google.com/movies)
  + cinemovies.fr (?? semble pareil que allocine)
  + moviecovers.com ?? (comparer a allcdcovers.com)
- + imdb.org (video, english)
  + wikipedia ???

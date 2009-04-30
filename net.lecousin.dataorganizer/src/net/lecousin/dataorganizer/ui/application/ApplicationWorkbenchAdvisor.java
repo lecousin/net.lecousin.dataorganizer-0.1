@@ -4,6 +4,7 @@ import net.lecousin.dataorganizer.core.DataOrganizer;
 import net.lecousin.dataorganizer.core.InitializationException;
 import net.lecousin.dataorganizer.internal.EclipsePlugin;
 import net.lecousin.dataorganizer.ui.Perspective;
+import net.lecousin.dataorganizer.ui.application.news.News;
 import net.lecousin.dataorganizer.ui.application.preferences.DOPreferenceNode;
 import net.lecousin.dataorganizer.ui.application.splash.InteractiveSplashHandler;
 import net.lecousin.dataorganizer.ui.plugin.PreferencePageProvider;
@@ -53,6 +54,7 @@ public class ApplicationWorkbenchAdvisor extends WorkbenchAdvisor {
 		InteractiveSplashHandler.postStartup();
 		DataOrganizer.dataSelectionChanged().fire(null);
 		initPreferences();
+		News.check();
 	}
 	
 	private void initPreferences() {

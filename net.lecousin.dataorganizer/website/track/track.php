@@ -12,6 +12,7 @@ function create_table($ref, $name, $result) {
 	echo "<tr><th>Version</th><th>Date</th><th>IP</th>";
         if ($ref == 'launch') {
         	echo "<th>Language</th>";
+        	echo "<th>Count</th>";
         }
 	echo "</tr>";
 	while ($row=mysql_fetch_array($result))
@@ -22,6 +23,7 @@ function create_table($ref, $name, $result) {
         echo "<td>".$row['ip']."</td>";
         if ($ref == 'launch') {
         	echo "<td>".$row['language']."</td>";
+        	echo "<td>".$row['count']."</td>";
         }
       echo '</tr>';
     }
@@ -32,6 +34,7 @@ function doit($db) {
 	$do_ver = $_GET['version'];
 	$do_type = $_GET['type'];
 	$do_lang = $_GET['lang'];
+	$do_count = $_GET['count'];
 	$user_ip = $_SERVER['REMOTE_ADDR'];
 	$date = time();
 
@@ -44,7 +47,7 @@ function doit($db) {
 		$result = mysql_query($query, $db);
 		echo 'Update track successfully added';
 	} else if ($do_type == 'launch') {
-		$query = "INSERT INTO `dataorga_me`.`launch` ( `version`, `date`, `ip`, `language` ) VALUES ( '" . $do_ver . "', CURRENT_TIMESTAMP, '" . $user_ip . "', '" . $do_lang . "');";
+		$query = "INSERT INTO `dataorga_me`.`launch` ( `version`, `date`, `ip`, `language`, `count` ) VALUES ( '" . $do_ver . "', CURRENT_TIMESTAMP, '" . $user_ip . "', '" . $do_lang . "', '" . $do_count . "');";
 		$result = mysql_query($query, $db);
 		echo 'Launch track successfully added';
 	}  else if ($do_type == 'view') {
