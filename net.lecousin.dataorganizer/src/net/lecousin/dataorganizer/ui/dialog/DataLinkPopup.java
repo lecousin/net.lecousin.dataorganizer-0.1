@@ -9,7 +9,7 @@ import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.content.ContentType;
 import net.lecousin.dataorganizer.core.database.info.InfoRetriever;
 import net.lecousin.dataorganizer.core.database.info.Info.DataLink;
-import net.lecousin.dataorganizer.ui.dataoverview.OverviewPanel;
+import net.lecousin.dataorganizer.ui.views.dataoverview.OverviewPanel;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.Triple;
 import net.lecousin.framework.event.Event.Listener;
@@ -74,7 +74,7 @@ public class DataLinkPopup {
 	}
 	
 	private static void createData(Data data, FlatPopupMenu dlg) {
-		OverviewPanel panel = new OverviewPanel(dlg.getControl());
+		OverviewPanel panel = new OverviewPanel(dlg.getControl(), false);
 		panel.refresh(data);
 	}
 	

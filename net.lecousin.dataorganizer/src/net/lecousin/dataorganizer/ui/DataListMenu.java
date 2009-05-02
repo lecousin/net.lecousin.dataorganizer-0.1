@@ -1,4 +1,4 @@
-package net.lecousin.dataorganizer.ui.datalist;
+package net.lecousin.dataorganizer.ui;
 
 import java.io.File;
 import java.net.URI;
@@ -234,7 +234,7 @@ public class DataListMenu {
 		}
 		UIUtil.newImageButton(bar, SharedImages.getImage(SharedImages.icons.x16.basic.INFO), new Listener<Data>() {
 			public void fire(Data event) {
-				DataLinkPopup.open(event, null, null);
+				DataLinkPopup.open(event, null, Orientation.BOTTOM);
 			}
 		}, data).setToolTipText(Local.Data_information.toString());
 		UIUtil.newImageButton(bar, SharedImages.getImage(SharedImages.icons.x16.file.FILE), new Listener<Data>() {

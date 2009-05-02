@@ -1,5 +1,6 @@
 package net.lecousin.dataorganizer.ui.control;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -9,46 +10,42 @@ import net.lecousin.dataorganizer.core.database.content.ContentType;
 import net.lecousin.dataorganizer.core.database.info.Info.DataLink;
 import net.lecousin.dataorganizer.ui.dialog.DataLinkPopup;
 import net.lecousin.framework.Pair;
+import net.lecousin.framework.collections.ArrayUtil;
 import net.lecousin.framework.event.Event.ListenerData;
 import net.lecousin.framework.ui.eclipse.UIUtil;
+import net.lecousin.framework.ui.eclipse.control.LCGrid;
+import net.lecousin.framework.ui.eclipse.control.UIControlUtil;
 import net.lecousin.framework.ui.eclipse.dialog.FlatPopupMenu;
 import net.lecousin.framework.ui.eclipse.graphics.ColorUtil;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.widgets.Hyperlink;
 
-public class DataLinkListPanel extends Composite {
+public class DataLinkListPanel extends LCGrid {
 
 	public DataLinkListPanel(Composite parent, ListProvider provider) {
-		super(parent, SWT.NONE);
+		super(parent, provider.getTitles().length+1, 0, 0, borderColor);
 		this.provider = provider;
 		titles = provider.getTitles();
-		GridLayout layout = UIUtil.gridLayout(this, titles.length*2, 0, 0);
-		layout.horizontalSpacing = 0;
-		layout.verticalSpacing = 0;
-		newLabel("", titleBgColor, titleFgColor);
-		boolean first = true;
-		for (String title : titles) {
-			if (first) first = false;
-			else newLabel(" ", titleBgColor, titleFgColor);
-			newLabel(title, titleBgColor, titleFgColor);
-		}
+		newEmptyCell(titleBgColor);
+		for (String title : titles)
+			UIUtil.newLabel(newCell(3,0,titleBgColor), title, true, true).setForeground(titleFgColor);
 		getDisplay().asyncExec(shower);
 	}
 	
 	private ListProvider provider;
-	private int pos = 0;
 	private String[] titles;
-	private Runnable shower = new Runnable() {
+	private Shower shower = new Shower();
+	private class Shower implements Runnable {
+		private boolean stop = false;
+		private boolean finished = false;
+		private int pos = 0;
 		public void run() {
-			if (DataLinkListPanel.this.isDisposed()) return;
+			if (stop) { finished = true; return; }
+			if (DataLinkListPanel.this.isDisposed()) { finished = true; return; }
 			int nb = provider.getNbRows();
 			int start = pos;
 			for (; pos < nb && pos-start<5; pos++) {
@@ -57,27 +54,20 @@ public class DataLinkListPanel extends Composite {
 				Object[] o = provider.getRow(pos);
 				Data data = getData(o);
 				if (data == null)
-					newLabel("", bg, fg);
-				else {
-					DataImageControl c = new DataImageControl(DataLinkListPanel.this, data, 64, 50);
-					c.setBackground(bg);
-					setGD(c);
-				}
-				boolean first = true;
+					newEmptyCell(bg);
+				else
+					new DataImageControl(newCell(1,0,bg), data, 64, 50);
 				int j;
-				for (j = 0; j < o.length; ++j) {
-					if (first) first = false;
-					else newLabel("", bg, fg);
+				for (j = 0; j < o.length; ++j)
 					createControl(o[j], bg, fg);
-				}
-				while (j++ < titles.length) {
-					newLabel("", bg, fg);
-					newLabel("", bg, fg);
-				}
+				while (j++ < titles.length)
+					newEmptyCell(bg);
 			}
 			UIUtil.resize(DataLinkListPanel.this);
 			if (pos < nb)
 				getDisplay().asyncExec(this);
+			else
+				finished = true;
 		}
 	};
 	
@@ -87,34 +77,28 @@ public class DataLinkListPanel extends Composite {
 		public Object[] getRow(int index);
 	}
 	
-	private static Color titleBgColor = ColorUtil.get(180, 180, 180);
+	private static Color borderColor = ColorUtil.get(180, 180, 180);
+	private static Color titleBgColor = ColorUtil.get(230, 230, 230);
 	private static Color titleFgColor = ColorUtil.getBlack();
 	private static Color rowBgColor1 = ColorUtil.getWhite();
 	private static Color rowFgColor1 = ColorUtil.getBlack();
 	private static Color rowBgColor2 = ColorUtil.get(220, 220, 255);
 	private static Color rowFgColor2 = ColorUtil.getBlack();
 
-	private void newLabel(String text, Color bg, Color fg) {
-		Label label = UIUtil.newLabel(this, text);
-		label.setBackground(bg);
-		label.setForeground(fg);
-		setGD(label);
+	private void newLabel(String text, Color bg, Color fg, Object data) {
+		Composite cell = newCell(3,0,bg);
+		cell.setData(data);
+		Label l = UIUtil.newLabel(cell, text);
+		l.setForeground(fg);
 	}
-	private void newLink(String text, String contentTypeID, List<DataLink> links, Color bg, Color fg) {
-		Hyperlink link = UIUtil.newLinkSoftNetStyle(this, text, new ListenerData<HyperlinkEvent,Pair<String,List<DataLink>>>(new Pair<String,List<DataLink>>(contentTypeID, links)) {
+	private void newLink(String text, String contentTypeID, List<DataLink> links, Color bg, Color fg, Object data) {
+		Composite cell = newCell(3,0,bg);
+		cell.setData(data);
+		UIUtil.newLinkSoftNetStyle(cell, text, new ListenerData<HyperlinkEvent,Pair<String,List<DataLink>>>(new Pair<String,List<DataLink>>(contentTypeID, links)) {
 			public void fire(HyperlinkEvent e) {
 				DataLinkPopup.open(data().getValue1(), data().getValue2(), (Control)e.widget, FlatPopupMenu.Orientation.TOP_BOTTOM);
 			}
 		});
-		link.setBackground(bg);
-		setGD(link);
-	}
-	private void setGD(Control c) {
-		GridData gd = new GridData();
-		gd.horizontalAlignment = SWT.FILL;
-		gd.verticalAlignment = SWT.FILL;
-		gd.horizontalIndent = gd.verticalIndent = 0;
-		c.setLayoutData(gd);
 	}
 	
 	private Data getData(Object[] o) {
@@ -155,8 +139,20 @@ public class DataLinkListPanel extends Composite {
 				Object oo = list.get(0);
 				if (oo instanceof String) {
 					boolean first = true;
-					text = "";
+					List<String> texts = new LinkedList<String>();
 					for (String s : (List<String>)list) {
+						if (s.trim().length() == 0) continue;
+						boolean ok = true;
+						for (Iterator<String> it = texts.iterator(); it.hasNext(); ) {
+							String s2 = it.next();
+							if (s2.toLowerCase().contains(s.toLowerCase())) { ok = false; break; }
+							if (s.toLowerCase().contains(s2.toLowerCase())) { it.remove(); }
+						}
+						if (ok)
+							texts.add(s);
+					}
+					text = "";
+					for (String s : texts) {
 						if (first) first = false;
 						else text += "\r\n";
 						text += s;
@@ -172,8 +168,56 @@ public class DataLinkListPanel extends Composite {
 			}
 		}
 		if (links.isEmpty())
-			newLabel(text, bg, fg);
+			newLabel(text, bg, fg, o);
 		else
-			newLink(text, links.get(0).contentTypeID, links, bg, fg);
+			newLink(text, links.get(0).contentTypeID, links, bg, fg, o);
+	}
+	
+	public void resetProvider(ListProvider p) {
+		provider = p;
+		if (!ArrayUtil.equals(p.getTitles(), titles)) {
+			resetAll();
+			return;
+		}
+		Control[] children = getChildren();
+		int index = titles.length+1;
+		int nb = provider.getNbRows();
+		boolean toAdd = false;
+		for (int i = 0; i < nb; ++i) {
+			if (index >= children.length) { toAdd = true; break; }
+			Object[] row = provider.getRow(i);
+			index++;//skip image
+			int j;
+			for (j = 0; j < row.length; ++j) {
+				if (index >= children.length) { toAdd = true; break; }
+				Object co = children[index++].getData(); 
+				if (co == null || !co.equals(row[j])) {
+					resetAll();
+					return;
+				}
+			}
+			while (j++ < titles.length)
+				index++;
+		}
+		if (index < children.length) {
+			resetAll();
+			return;
+		}
+		if (toAdd) {
+			if (shower.finished) {
+				shower.finished = false;
+				getDisplay().asyncExec(shower);
+			}
+		}
+	}
+	private void resetAll() {
+		shower.stop = true;
+		shower = new Shower();
+		UIControlUtil.clear(this);
+		titles = provider.getTitles();
+		newEmptyCell(titleBgColor);
+		for (String title : titles)
+			UIUtil.newLabel(newCell(3,0,titleBgColor), title, true, true).setForeground(titleFgColor);
+		getDisplay().asyncExec(shower);
 	}
 }

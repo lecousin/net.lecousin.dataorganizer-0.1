@@ -12,6 +12,7 @@ import net.lecousin.dataorganizer.core.database.content.ContentType;
 import net.lecousin.dataorganizer.core.database.info.InfoRetriever;
 import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPlugin;
 import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPluginRegistry;
+import net.lecousin.dataorganizer.core.database.info.InfoRetriever.FeedBackImpl;
 import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.dataorganizer.internal.EclipsePlugin;
 import net.lecousin.framework.Pair;
@@ -162,7 +163,7 @@ public class AddData_Internet extends WizardPage implements AddData_Page {
 			List<InfoRetrieverPlugin> plugins = new ArrayList<InfoRetrieverPlugin>(sources.size());
 			for (String source : sources)
 				plugins.add(InfoRetrieverPluginRegistry.getPlugin(source, typeID));
-			InfoRetriever.retrieve(textName.getShell(), d, plugins, progress, 9900, true);
+			InfoRetriever.retrieve(textName.getShell(), d, plugins, new FeedBackImpl(d), progress, 9900, true);
 			if (!d.getContent().getInfo().getSources().isEmpty() && !progress.isCancelled())
 				result.toAdd.add(d);
 		} catch (CoreException e) {

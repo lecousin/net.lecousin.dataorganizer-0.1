@@ -20,7 +20,7 @@ import net.lecousin.dataorganizer.util.DataImageLoader;
 import net.lecousin.dataorganizer.util.DataImageLoader.FileProvider_FromDataPath;
 import net.lecousin.dataorganizer.util.DataImageLoader.FileProvider_ListStartWith;
 import net.lecousin.dataorganizer.video.ui.DescriptionPanel;
-import net.lecousin.dataorganizer.video.ui.OverviewPanel;
+import net.lecousin.dataorganizer.video.ui.VideoOverviewPanel;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.collections.CollectionUtil;
 import net.lecousin.framework.eclipse.resource.ResourceUtil;
@@ -36,6 +36,7 @@ import net.lecousin.framework.media.util.SnapshotTaker;
 import net.lecousin.framework.media.util.SnapshotTaker.LinkedChecker;
 import net.lecousin.framework.media.util.SnapshotTaker.SameColorChecker;
 import net.lecousin.framework.progress.WorkProgress;
+import net.lecousin.framework.ui.eclipse.control.UIControlUtil;
 import net.lecousin.framework.xml.XmlWriter;
 
 import org.eclipse.core.resources.IFile;
@@ -93,6 +94,18 @@ public class VideoDataType extends DataContentType {
 	
 	void signalNewPoster() {
 		posterImages = null;
+	}
+	@Override
+	public void signalSourceRemoved(SourceInfo source) {
+		if (!((VideoSourceInfo)source).getPostersPaths().isEmpty())
+			posterImages = null;
+		super.signalSourceRemoved(source);
+	}
+	@Override
+	public void signalSourceUpdated(SourceInfo source) {
+		if (!((VideoSourceInfo)source).getPostersPaths().isEmpty())
+			posterImages = null;
+		super.signalSourceUpdated(source);
 	}
 	
 	private static final DataImageCategory[] categories = new DataImageCategory[] {
@@ -291,8 +304,12 @@ public class VideoDataType extends DataContentType {
 	}
 	
 	@Override
-	public void createOverviewPanel(Composite panel, List<SourceInfo> sources) {
-		new OverviewPanel(panel, this, sources);
+	public void createOverviewPanel(Composite panel, List<SourceInfo> sources, boolean big) {
+		panel.setData(new VideoOverviewPanel(panel, this, sources, big));
+	}
+	@Override
+	public void refreshOverviewPanel(Composite panel, List<SourceInfo> sources) {
+		((VideoOverviewPanel)panel.getData()).refresh(sources);
 	}
 	@Override
 	public boolean isOverviewPanelSupportingSourceMerge() {
@@ -301,6 +318,11 @@ public class VideoDataType extends DataContentType {
 	@Override
 	public void createDescriptionPanel(Composite panel) {
 		DescriptionPanel.create(this, panel);
+	}
+	@Override
+	public void refreshDescriptionPanel(Composite panel) {
+		UIControlUtil.clear(panel);
+		createDescriptionPanel(panel);
 	}
 
 	@Override

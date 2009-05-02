@@ -95,6 +95,7 @@ public enum Local {
 	Data_opened("Data opened", "Donnée(s) ouverte(s)"),
 	data__s_to_database("data to database", "donnée(s) à la base de données"),
 	Data_information("Data information", "Information de la donnée"),
+	Data_list("Data list", "Liste de données"),
 	data_successfully_added("data have been successfully added to the database", "donnée(s) ont été ajoutée(s) à la base de données avec succès"),
 	Deselect_all("Deselect all", "Désélectionner tout"),
 	Detecting_data_from_analyzed_files("Detecting data from analyzed files and folders", "Détection de données à partir des fichiers et dossiers analysés"),
@@ -203,7 +204,8 @@ public enum Local {
 	Select_the_labels("Select the labels", "Sélectionnez les étiquettes"),
 	Select_your_rating("Select your rating", "Sélectionnez votre note"),
 	Several_results_found("Several results found", "Plusieurs résultats trouvés"),
-	Some_data_have_been_opened_and_need_action("Some data have been opened and need action", "Des données ont été ouvertes et demande votre action"),
+//	Some_data_have_been_opened_and_need_action("Some data have been opened and need action", "Des données ont été ouvertes et demande votre action"),
+	Some_data_have_been_opened_and_need_action("Data opened", "Données ouvertes"),
 	Sources_information("Files information", "Information des fichiers"),
 	Support_the_project("Support the project", "Aidez le projet"),
 	Take_all_into_account("Take all into account", "Tous les comptabiliser"),
@@ -227,6 +229,7 @@ public enum Local {
 	Update_check_frequency("Check for available update every", "Vérifier les mises à jour disponibles tous les"),
 	Update_current_data_with_new_location("Update the current data with the new location (keep all the information, only update the data location)", "Mettre à jour la donnée actuelle avec son nouvel emplacement (toutes les informations sont conservées, uniquement l'emplacement est mis à jour)"),
 	What_do_you_want_to_do("What do you want to do ?", "Que souhaitez vous faire ?"),
+	You_already_tried_this_name("You already tried this name", "Vous avez déjà essayé avec ce nom"),
 	You_are_requesting_to_remove("You are requesting to remove", "Vous demandez la suppression de"),
 	You_must_select_a_data_type("You must select a data type", "Vous devez sélectionner un type de donnée"),
 	You_must_select_at_least_one_source("You must select at least one source", "Vous devez sélectionner au moins une source"),
@@ -490,6 +493,11 @@ public enum Local {
 	MESSAGE_Merge_Data_2_Sources_Different_Locations(
 		"The two data to merge contain a similar source: the two sources seem to have the same content but are in different locations.",
 		"Les deux données à fusionner contiennent une source similaire: les deux sources semblent avoir le même contenu, mais sont dans des endroits différents."
+	),
+	
+	MESSAGE_Missing_Files_After_Relocate(
+		"The following files are missing, and cannot be found on the computer",
+		"Les fichiers suivants sont manquants, et n'ont pas été trouvés sur l'ordinateur"
 	),
 	
 	;

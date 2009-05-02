@@ -1,5 +1,6 @@
 package net.lecousin.dataorganizer.core.database.refresh;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,8 @@ import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.info.InfoRetriever;
 import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPlugin;
+import net.lecousin.dataorganizer.core.database.info.InfoRetriever.FeedBackImpl;
+import net.lecousin.dataorganizer.core.database.info.InfoRetriever.MultiRetrieveFeedBack;
 import net.lecousin.framework.collections.CollectionUtil;
 import net.lecousin.framework.progress.WorkProgress;
 
@@ -20,6 +23,9 @@ class Refresher_Internet {
 		for (Map.Entry<InfoRetrieverPlugin,List<Data>> entry : plugins.entrySet()) {
 			total += entry.getValue().size();
 			refreshers.add(new PluginRefresher(entry.getKey(), entry.getValue()));
+			for (Data d : entry.getValue())
+				if (!feedbacks.containsKey(d))
+					feedbacks.put(d, new FeedBackImpl(d));
 		}
 		this.progress = progress;
 		this.shell = shell;
@@ -30,6 +36,8 @@ class Refresher_Internet {
 	private List<PluginRefresher> refreshers = new LinkedList<PluginRefresher>();
 	private WorkProgress progress;
 	private Shell shell;
+	private List<Data> inProgress = new LinkedList<Data>();
+	private Map<Data,MultiRetrieveFeedBack> feedbacks = new HashMap<Data,MultiRetrieveFeedBack>();
 	
 	public boolean isDone() {
 		for (PluginRefresher r : refreshers)
@@ -64,9 +72,22 @@ class Refresher_Internet {
 					synchronized (data) {
 						if (data.isEmpty()) break;;
 						d = data.remove(0);
+						synchronized (inProgress) {
+							if (inProgress.contains(d)) {
+								data.add(d);
+								d = null;
+							} else
+								inProgress.add(d);
+						}
+					}
+					if (d == null) {
+						if (data.size() == 1)
+							try { Thread.sleep(100); }
+							catch (InterruptedException e) { break; }
+						continue;
 					}
 					WorkProgress subProgress = progress.addSubWork(plugin.getName()+": "+d.getName(), 100, 10000);
-					InfoRetriever.retrieve(shell, d, CollectionUtil.single_element_list(plugin), subProgress, 10000, false);
+					InfoRetriever.retrieve(shell, d, CollectionUtil.single_element_list(plugin), feedbacks.get(d), subProgress, 10000, false);
 					progress.mergeSubWork(subProgress);
 					if (progress.isCancelled()) break;
 				} while (true);

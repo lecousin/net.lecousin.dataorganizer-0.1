@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.lecousin.dataorganizer.audio.AudioSourceInfo.Track;
-import net.lecousin.dataorganizer.audio.ui.OverviewPanel;
+import net.lecousin.dataorganizer.audio.ui.AudioOverviewPanel;
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.Data.DuplicateAnalysis;
 import net.lecousin.dataorganizer.core.database.content.DataContentType;
@@ -83,8 +83,17 @@ public class AudioDataType extends DataContentType {
 
 	}
 	@Override
-	public void createOverviewPanel(Composite panel, List<SourceInfo> sources) {
-		new OverviewPanel(panel, this, sources);
+	public void refreshDescriptionPanel(Composite panel) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void createOverviewPanel(Composite panel, List<SourceInfo> sources, boolean big) {
+		panel.setData(new AudioOverviewPanel(panel, this, sources, big));
+	}
+	@Override
+	public void refreshOverviewPanel(Composite panel, List<SourceInfo> sources) {
+		((AudioOverviewPanel)panel.getData()).refresh(sources);
 	}
 	@Override
 	public boolean isOverviewPanelSupportingSourceMerge() {

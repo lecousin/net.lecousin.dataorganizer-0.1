@@ -105,11 +105,16 @@ public abstract class Info {
 			sources.put(source, t);
 		}
 		info.setParent(this);
+		data.signalSourceUpdated(info);
+		signalModification();
 	}
 	
 	public void removeSourceInfo(String source) {
-		if (sources.remove(source) != null)
+		Triple<String,String,SourceInfo> s = sources.remove(source); 
+		if (s != null) {
+			data.signalSourceRemoved(s.getValue3());
 			signalModification();
+		}
 	}
 	
 	protected abstract SourceInfo createSourceInfo(Info parent);
@@ -199,6 +204,16 @@ public abstract class Info {
 				}
 			}
 			return changed;
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == null || !(obj instanceof DataLink)) return false;
+			return isSame((DataLink)obj);
+		}
+		@Override
+		public int hashCode() {
+			return id == null ? 0 : id.hashCode();
 		}
 	}
 }

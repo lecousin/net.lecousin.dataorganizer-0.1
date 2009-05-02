@@ -1,7 +1,7 @@
 package net.lecousin.dataorganizer.ui.action;
 
 import net.lecousin.dataorganizer.Local;
-import net.lecousin.dataorganizer.ui.view.label.LabelsView;
+import net.lecousin.dataorganizer.ui.views.label.LabelsView;
 import net.lecousin.framework.ui.eclipse.SharedImages;
 
 import org.eclipse.jface.action.Action;

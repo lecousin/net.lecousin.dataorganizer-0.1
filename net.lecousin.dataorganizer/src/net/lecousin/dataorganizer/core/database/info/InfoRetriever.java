@@ -1,8 +1,10 @@
 package net.lecousin.dataorganizer.core.database.info;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.core.DataOrganizer;
@@ -13,7 +15,7 @@ import net.lecousin.dataorganizer.core.database.info.Info.DataLink;
 import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPlugin.SearchResult;
 import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.dataorganizer.internal.EclipsePlugin;
-import net.lecousin.dataorganizer.ui.datalist.DataListMenu;
+import net.lecousin.dataorganizer.ui.DataListMenu;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.collections.CollectionUtil;
 import net.lecousin.framework.collections.SelfMap;
@@ -50,7 +52,7 @@ public class InfoRetriever {
 	public static void retrieve(Shell shell, Data data, List<InfoRetrieverPlugin> plugins) {
 		WorkProgress progress = new WorkProgress(Local.Retrieve_information.toString(), 1+plugins.size()*100, true);
 		WorkProgressDialog dlg = new WorkProgressDialog(shell, progress);
-		retrieve(shell, data, plugins, progress, 1+plugins.size()*100, true);
+		retrieve(shell, data, plugins, null, progress, 1+plugins.size()*100, true);
 		dlg.close();
 	}
 
@@ -60,10 +62,49 @@ public class InfoRetriever {
 			progress.progress(amount);
 			return;
 		}
-		retrieve(shell, data, plugins, progress, amount, true);
+		retrieve(shell, data, plugins, null, progress, amount, true);
 	}
 	
-	public static void retrieve(Shell shell, Data data, List<InfoRetrieverPlugin> plugins, WorkProgress progress, int amount, boolean showSubWorksPerPlugin) {
+	public static interface MultiRetrieveFeedBack {
+		String getOtherName(List<String> tried);
+		void addTriedName(String name);
+	}
+	public static class FeedBackImpl implements MultiRetrieveFeedBack {
+		public FeedBackImpl(Data d) {
+			this.data = d;
+		}
+		private Data data;
+		private List<String> tried = new LinkedList<String>();
+		public void addTriedName(String name) {
+			tried.add(name);
+		}
+		public String getOtherName(List<String> tried) {
+			Set<String> names = getPossibleNames();
+			for (String s : names)
+				if (!tried.contains(s))
+					return s;
+			return null;
+		}
+		private Set<String> getPossibleNames() {
+			Set<String> list = new HashSet<String>();
+			list.add(data.getName());
+			list.addAll(tried);
+			DataContentType content = data.getContent();
+			if (content != null) {
+				Info info = content.getInfo();
+				if (info != null) {
+					for (String source : info.getSources()) {
+						String s = info.getSourceName(source);
+						if (s != null && s.length() > 0)
+							list.add(s);
+					}
+				}
+			}
+			return list;
+		}
+	}
+	
+	public static void retrieve(Shell shell, Data data, List<InfoRetrieverPlugin> plugins, MultiRetrieveFeedBack feedback, WorkProgress progress, int amount, boolean showSubWorksPerPlugin) {
 		List<Pair<InfoRetrieverPlugin,WorkProgress>> todo = new ArrayList<Pair<InfoRetrieverPlugin,WorkProgress>>(plugins.size());
 		DataContentType content = data.getContent();
 		if (content == null) {
@@ -94,6 +135,8 @@ public class InfoRetriever {
 				WorkProgress retrieve = p.getValue2().addSubWork(Local.Retrieve.toString(), 750, 10001);
 				SearchResult result = null;
 				String name = data.getName();
+				List<String> triedNames = new LinkedList<String>();
+				triedNames.add(name);
 				do {
 					UIUtil.runPendingEventsIfDisplayThread(shell.getDisplay());
 					if (search.isCancelled()) break;
@@ -110,11 +153,21 @@ public class InfoRetriever {
 						break;
 					}
 					if (results.size() == 0) {
-						name = askForNewName(shell, name, p.getValue1());
-						if (name == null) break;
+						String newName = feedback != null ? feedback.getOtherName(triedNames) : null;
+						if (newName != null)
+							name = newName;
+						else {
+							name = askForNewName(shell, name, p.getValue1(), triedNames);
+							if (name == null) break;
+							if (feedback != null) feedback.addTriedName(name);
+						}
+						triedNames.add(name);
 					} else if (results.size() > 1 || !name.equalsIgnoreCase(results.get(0).getName())) {
-						Pair<String,SearchResult> pp = askAmongResults(shell, name, p.getValue1(), results, data);
-						if (pp.getValue1() == null) break;
+						Pair<String,SearchResult> pp = findResult(results, data);
+						if (pp == null) {
+							pp = askAmongResults(shell, name, p.getValue1(), results, data);
+							if (pp.getValue1() == null) break;
+						}
 						name = pp.getValue1();
 						result = pp.getValue2();
 					} else
@@ -236,26 +289,29 @@ public class InfoRetriever {
 	
 	private static Boolean oneQuestionAtATime = new Boolean(true);
 	
-	private static String askForNewName(Shell shell, String name, InfoRetrieverPlugin plugin) {
+	private static String askForNewName(Shell shell, String name, InfoRetrieverPlugin plugin, List<String> tried) {
 		synchronized (oneQuestionAtATime) {
-			AskForNewName ask = new AskForNewName(shell, name, plugin);
+			AskForNewName ask = new AskForNewName(shell, name, plugin, tried);
 			shell.getDisplay().syncExec(ask);
 			return ask.name;
 		}
 	}
 	private static class AskForNewName implements Runnable {
-		public AskForNewName(Shell shell, String name, InfoRetrieverPlugin plugin) {
+		public AskForNewName(Shell shell, String name, InfoRetrieverPlugin plugin, List<String> tried) {
 			this.shell = shell;
 			this.name = name;
 			this.plugin = plugin;
+			this.tried = tried;
 		}
 		private Shell shell;
 		private String name;
 		private InfoRetrieverPlugin plugin;
+		private List<String> tried;
 		public void run() {
 			InputDialog dlgInput = new InputDialog(shell, Local.No_result.toString(), Local.Cannot_found + " " + name + " " + Local.on + " " + plugin.getName() + "\r\n" + Local.You_can_retry_with_a_different_name + ":", name, new IInputValidator() {
 				public String isValid(String newText) {
-					if (newText.length() == 0) return "You must provide a name";
+					if (newText.length() == 0) return Local.You_must_provide_a_name.toString();
+					if (tried.contains(newText)) return Local.You_already_tried_this_name.toString();
 					return null;
 				}
 			});
@@ -264,6 +320,10 @@ public class InfoRetriever {
 			else
 				name = dlgInput.getValue();
 		}
+	}
+	
+	private static Pair<String,SearchResult> findResult(List<SearchResult> results, Data data) {
+		return null; // TODO
 	}
 
 	private static Pair<String,SearchResult> askAmongResults(Shell shell, String name, InfoRetrieverPlugin plugin, List<SearchResult> results, Data data) {

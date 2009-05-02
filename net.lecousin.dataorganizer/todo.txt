@@ -1,23 +1,20 @@
-0.3:
+0.4:
+framework [fix]
+framework.ui
 dataorganizer
 dataorganizer.people
-dataorganizer.video
 dataorganizer.audio
-(dataorganizer.retriever.allocine)
-dataorganizer.datalist
-framework
-framework.net.mime [fix]
-framework.net.http [fix]
-framework.ui
-new:
-(dataorganizer.retriever.allocine)
-dataorganizer.retriever.allcdcovers
-dataorganizer.retriever.cinefil
-eclipse.filesystem.apache_vfs
+dataorganizer.video
+dataorganizer.datalist [fix]
+
 
 ---------------------------------------------------------------------
-+PLS,allcdcovers,essayer d'ameliorer un peu pour Audio,UPDATE
-+UPDATE: update uninstall... complete uninstall...
++Refresh: utiliser les infos deja donnee(titre)/recuperees + donner le nom du fichiers... + les fenetres ne se ferment pas(mediaplayer, infos fichiers...)
++Refresh info from internet: option to retrieve only missing...
++DVD!!!
++PLS,allcdcovers,essayer d'ameliorer un peu pour Audio
++Search: video: par genre...
++Pouvoir changer l'ordre des images, les reattribuer à une autre categorie, changer priorite des categories...
 DataOrganizer
  + Bug LCTable: ne plus utiliser ScrolledComposite a cause de MouseWhell, mais mettre la horizontal scroll bar manuellement
  + Add data: single audio
@@ -37,6 +34,7 @@ Media Player
  + playlist : deplacer les elements par drag'n'drop
 Update
  + really improve the system so even if there is a bug we can show message/update the soft
+ +UPDATE: update uninstall... complete uninstall...
 Audio
  + Lecteur: CDA???
  + essayer avec tous mes CD audios

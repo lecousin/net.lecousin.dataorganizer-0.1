@@ -12,7 +12,7 @@ import net.lecousin.dataorganizer.core.database.info.Info;
 import net.lecousin.dataorganizer.core.database.refresh.RefreshOptions;
 import net.lecousin.dataorganizer.core.database.refresh.Refresher;
 import net.lecousin.dataorganizer.core.database.source.DataSource;
-import net.lecousin.dataorganizer.ui.datalist.DataListMenu;
+import net.lecousin.dataorganizer.ui.DataListMenu;
 import net.lecousin.framework.IDManager;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.collections.SelfMapUniqueLong;

@@ -10,6 +10,7 @@ import net.lecousin.dataorganizer.ui.action.UpdateAction;
 import net.lecousin.dataorganizer.ui.application.bar.ContactItem;
 import net.lecousin.dataorganizer.ui.application.bar.DataViewedItem;
 import net.lecousin.dataorganizer.ui.application.bar.DonateItem;
+import net.lecousin.dataorganizer.ui.application.bar.PerspectiveButtons;
 
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.ICoolBarManager;
@@ -107,6 +108,10 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
         toolbar.add(new ContactItem());
         toolbar.add(new DonateItem());
         toolbar = new ToolBarManager(SWT.FLAT | SWT.RIGHT);
-        coolBar.add(new ToolBarContributionItem(toolbar, "Normal")); 
+        coolBar.add(new ToolBarContributionItem(toolbar, "Normal"));
+        toolbar = new ToolBarManager(SWT.FLAT | SWT.RIGHT);
+        toolbar.add(new PerspectiveButtons());
+        coolBar.add(new ToolBarContributionItem(toolbar, "perspectives"));
     }
+    
 }

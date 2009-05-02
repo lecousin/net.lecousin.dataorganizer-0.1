@@ -11,12 +11,14 @@ import net.lecousin.dataorganizer.audio.AudioSourceInfo.Track;
 import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPluginRegistry;
 import net.lecousin.dataorganizer.core.database.info.SourceInfo;
 import net.lecousin.dataorganizer.core.database.source.DataSource;
+import net.lecousin.dataorganizer.ui.views.dataoverview.OverviewPanel;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.event.Event.Listener;
 import net.lecousin.framework.event.Event.ListenerData;
 import net.lecousin.framework.time.DateTimeUtil;
 import net.lecousin.framework.ui.eclipse.UIUtil;
 import net.lecousin.framework.ui.eclipse.control.LCCombo;
+import net.lecousin.framework.ui.eclipse.control.LCGrid;
 import net.lecousin.framework.ui.eclipse.control.list.LCContentProvider;
 import net.lecousin.framework.ui.eclipse.control.list.LCTableWithControls;
 import net.lecousin.framework.ui.eclipse.control.list.LCTable.ColumnProvider;
@@ -33,9 +35,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 
-public class OverviewPanel {
+public class AudioOverviewPanel {
 
-	public OverviewPanel(Composite panel, AudioDataType data, List<SourceInfo> sourcesNULL) {
+	public AudioOverviewPanel(Composite panel, AudioDataType data, List<SourceInfo> sourcesNULL, boolean big) {
 		GridLayout layout = UIUtil.gridLayout(panel, 1);
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
@@ -43,49 +45,49 @@ public class OverviewPanel {
 		
 		this.info = (AudioInfo)data.getInfo();
 
-		LCCombo combo;
+		LCGrid grid = null;
+		Composite line = null;
 		
-		Composite line = UIUtil.newGridComposite(panel, 0, 0, 6);
-		UIUtil.gridDataHorizFill(line);
-		UIUtil.newLabel(line, Local.Artist+":", true, false);
-		combo = new LCCombo(line, null);
-		for (String s : info.getSources()) {
-			AudioSourceInfo i = (AudioSourceInfo)info.getSourceInfo(s);
-			if (i == null || i.getArtist() == null || i.getArtist().length() == 0) continue;
-			combo.addItem(InfoRetrieverPluginRegistry.getIconForSource(s, AudioContentType.AUDIO_TYPE), i.getArtist(), null);
+		if (big) {
+			grid = new LCGrid(panel, 2, 1, 1, OverviewPanel.GRID_BORDER_COLOR);
+		} else {
+			line = UIUtil.newGridComposite(panel, 0, 0, 6);
+			UIUtil.gridDataHorizFill(line);
 		}
-		combo.setSelection(info.getArtist() != null ? info.getArtist() : "");
-		combo.selectionEvent().addListener(new Listener<Pair<String,Object>>() {
+
+		if (big)
+			UIUtil.newLabel(grid.newCell(3, 0, OverviewPanel.GRID_COLOR_1), Local.Artist.toString(), true, false);
+		else
+			UIUtil.newLabel(line, Local.Artist+":", true, false);
+		comboArtist = big ? new LCCombo(grid.newCell(3, 0, OverviewPanel.GRID_COLOR_2), null, SWT.NONE, true) : new LCCombo(line, null);
+		refreshArtist();
+		comboArtist.selectionEvent().addListener(new Listener<Pair<String,Object>>() {
 			public void fire(Pair<String, Object> event) {
 				info.setArtist(event.getValue1());
 			}
 		});
-		combo.setLayoutData(UIUtil.gridDataHoriz(1, true));
+		comboArtist.setLayoutData(UIUtil.gridDataHoriz(1, true));
 
-		UIUtil.newLabel(line, Local.Album+":", true, false);
-		combo = new LCCombo(line, null);
-		for (String s : info.getSources()) {
-			AudioSourceInfo i = (AudioSourceInfo)info.getSourceInfo(s);
-			if (i == null || i.getAlbum() == null || i.getAlbum().length() == 0) continue;
-			combo.addItem(InfoRetrieverPluginRegistry.getIconForSource(s, AudioContentType.AUDIO_TYPE), i.getAlbum(), null);
-		}
-		combo.setSelection(info.getAlbum() != null ? info.getAlbum() : "");
-		combo.selectionEvent().addListener(new Listener<Pair<String,Object>>() {
+		if (big)
+			UIUtil.newLabel(grid.newCell(3, 0, OverviewPanel.GRID_COLOR_1), Local.Album.toString(), true, false);
+		else
+			UIUtil.newLabel(line, Local.Album+":", true, false);
+		comboAlbum = big ? new LCCombo(grid.newCell(3, 0, OverviewPanel.GRID_COLOR_2), null, SWT.NONE, true) : new LCCombo(line, null);
+		refreshAlbum();
+		comboAlbum.selectionEvent().addListener(new Listener<Pair<String,Object>>() {
 			public void fire(Pair<String, Object> event) {
 				info.setAlbum(event.getValue1());
 			}
 		});
-		combo.setLayoutData(UIUtil.gridDataHoriz(1, true));
+		comboAlbum.setLayoutData(UIUtil.gridDataHoriz(1, true));
 
-		UIUtil.newLabel(line, Local.Year+":", true, false);
-		combo = new LCCombo(line, null);
-		for (String s : info.getSources()) {
-			AudioSourceInfo i = (AudioSourceInfo)info.getSourceInfo(s);
-			if (i == null || i.getYear() <= 0) continue;
-			combo.addItem(InfoRetrieverPluginRegistry.getIconForSource(s, AudioContentType.AUDIO_TYPE), Integer.toString(i.getYear()), null);
-		}
-		combo.setSelection(info.getYear() > 0 ? Integer.toString(info.getYear()) : "");
-		combo.selectionEvent().addListener(new ListenerData<Pair<String,Object>, LCCombo>(combo) {
+		if (big)
+			UIUtil.newLabel(grid.newCell(3, 0, OverviewPanel.GRID_COLOR_1), Local.Year.toString(), true, false);
+		else
+			UIUtil.newLabel(line, Local.Year+":", true, false);
+		comboYear = big ? new LCCombo(grid.newCell(3, 0, OverviewPanel.GRID_COLOR_2), null, SWT.NONE, true) : new LCCombo(line, null);
+		refreshYear();
+		comboYear.selectionEvent().addListener(new ListenerData<Pair<String,Object>, LCCombo>(comboYear) {
 			public void fire(Pair<String, Object> event) {
 				int year;
 				try { 
@@ -97,7 +99,7 @@ public class OverviewPanel {
 				}
 			}
 		});
-		combo.setLayoutData(UIUtil.gridDataHoriz(1, true));
+		comboYear.setLayoutData(UIUtil.gridDataHoriz(1, true));
 
 		// TODO genres (mais avec add, remove...)
 //		line = UIUtil.newGridComposite(panel, 0, 0, 2);
@@ -126,6 +128,56 @@ public class OverviewPanel {
 	private AudioInfo info;
 	private AudioSourceInfo fileInfo;
 	private LCTableWithControls<Track> table;
+	private LCCombo comboArtist, comboAlbum, comboYear;
+	
+	public void refresh(List<SourceInfo> sourcesNULL) {
+		refreshArtist();
+		refreshAlbum();
+		refreshYear();
+		table.refresh(true);
+	}
+	private void refreshArtist() {
+		List<Object> current = comboArtist.getItemsData();
+		for (String s : info.getSources()) {
+			AudioSourceInfo i = (AudioSourceInfo)info.getSourceInfo(s);
+			if (i == null || i.getArtist() == null || i.getArtist().length() == 0) continue;
+			if (current.remove(i))
+				comboArtist.setItemText(i, i.getArtist());
+			else
+				comboArtist.addItem(InfoRetrieverPluginRegistry.getIconForSource(s, AudioContentType.AUDIO_TYPE), i.getArtist(), i);
+		}
+		for (Object o : current)
+			comboArtist.removeItemData(o);
+		comboArtist.setSelection(info.getArtist() != null ? info.getArtist() : "");
+	}
+	private void refreshAlbum() {
+		List<Object> current = comboAlbum.getItemsData();
+		for (String s : info.getSources()) {
+			AudioSourceInfo i = (AudioSourceInfo)info.getSourceInfo(s);
+			if (i == null || i.getAlbum() == null || i.getAlbum().length() == 0) continue;
+			if (current.remove(i))
+				comboAlbum.setItemText(i, i.getAlbum());
+			else
+				comboAlbum.addItem(InfoRetrieverPluginRegistry.getIconForSource(s, AudioContentType.AUDIO_TYPE), i.getAlbum(), i);
+		}
+		for (Object o : current)
+			comboAlbum.removeItemData(o);
+		comboAlbum.setSelection(info.getAlbum() != null ? info.getAlbum() : "");
+	}
+	private void refreshYear() {
+		List<Object> current = comboYear.getItemsData();
+		for (String s : info.getSources()) {
+			AudioSourceInfo i = (AudioSourceInfo)info.getSourceInfo(s);
+			if (i == null || i.getYear() <= 0) continue;
+			if (current.remove(i))
+				comboYear.setItemText(i, i.getArtist());
+			else
+				comboYear.addItem(InfoRetrieverPluginRegistry.getIconForSource(s, AudioContentType.AUDIO_TYPE), Integer.toString(i.getYear()), i);
+		}
+		for (Object o : current)
+			comboYear.removeItemData(o);
+		comboYear.setSelection(info.getYear() > 0 ? Integer.toString(info.getYear()) : "");
+	}
 	
 	private class TrackProvider implements LCTableWithControls.Provider<Track> {
 		@SuppressWarnings("unchecked")

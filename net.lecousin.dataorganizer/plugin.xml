@@ -18,9 +18,14 @@
    <extension
          point="org.eclipse.ui.perspectives">
       <perspective
-            name="DataOrganizer"
-            class="net.lecousin.dataorganizer.ui.Perspective"
-            id="net.lecousin.dataorganizer.perspective">
+            name="Classic"
+            class="net.lecousin.dataorganizer.ui.views.ClassicPerspective"
+            id="net.lecousin.dataorganizer.ClassicPerspective">
+      </perspective>
+      <perspective
+            class="net.lecousin.dataorganizer.ui.views.DetailsPerspective"
+            id="net.lecousin.dataorganizer.DetailsPerspective"
+            name="Details">
       </perspective>
    </extension>
    <extension
@@ -28,23 +33,23 @@
       <view
             name="Search"
             allowMultiple="false"
-            class="net.lecousin.dataorganizer.ui.search.SearchView"
+            class="net.lecousin.dataorganizer.ui.views.search.SearchView"
             id="net.lecousin.dataorganizer.searchView">
       </view>
       <view
             allowMultiple="false"
-            class="net.lecousin.dataorganizer.ui.datalist.DataListView"
+            class="net.lecousin.dataorganizer.ui.views.datalist.DataListView"
             id="net.lecousin.dataorganizer.datalistView"
             name="Data List">
       </view>
       <view
             allowMultiple="false"
-            class="net.lecousin.dataorganizer.ui.dataoverview.DataOverviewView"
-            id="net.lecousin.dataorganizer.datadetailView"
+            class="net.lecousin.dataorganizer.ui.views.dataoverview.DataOverviewView"
+            id="net.lecousin.dataorganizer.dataDetailView"
             name="Overview">
       </view>
       <view
-            class="net.lecousin.dataorganizer.ui.view.label.LabelsView"
+            class="net.lecousin.dataorganizer.ui.views.label.LabelsView"
             id="net.lecousin.dataorganizer.view.label.LabelsView"
             name="Labels"
             restorable="true">

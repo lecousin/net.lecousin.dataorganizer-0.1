@@ -3,7 +3,7 @@ package net.lecousin.dataorganizer.ui.control;
 import net.lecousin.dataorganizer.core.DataOrganizer;
 import net.lecousin.dataorganizer.core.DataLabels.Label;
 import net.lecousin.dataorganizer.core.database.Data;
-import net.lecousin.dataorganizer.ui.dataoverview.HeaderPanel;
+import net.lecousin.dataorganizer.ui.views.dataoverview.HeaderPanel;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.event.Event.Listener;
 import net.lecousin.framework.event.Event.ListenerData;

@@ -67,12 +67,12 @@
 	</Program_Info>
 	<Program_Descriptions>
 		<English>
-			<Keywords>dataorganizer,software,free,orgnize,sort,arrange,library,video,movie,music,audio,album,data,download,media,multimedia,open source,player,mp3,avi,divx,dvd,cd,management,catalog</Keywords>
+			<Keywords>dataorganizer,software,free,organize,manage,sort,arrange,library,video,movie,music,audio,album,data,download,media,multimedia,open source,player,mp3,avi,divx,dvd,cd,management,catalog</Keywords>
 			<Char_Desc_45>organize multimedia data(videos/movies,music)</Char_Desc_45>
-			<Char_Desc_80>free software to organize your multimedia data (videos/movies, music)</Char_Desc_80>
-			<Char_Desc_250>DataOrganizer is a free software to organize your multimedia data (videos/movies, music) into libraries, it retrieves information from Internet, integrates a Media Player...</Char_Desc_250>
-			<Char_Desc_450>DataOrganizer is a free software to organizeyour multimedia data (videos/movies, music) into libraries. Sort, search, play, retrieve information from Internet and many other features. Integrated Media Player provided.</Char_Desc_450>
-			<Char_Desc_2000>DataOrganizer is a free software to organizeyour multimedia data (videos/movies, music) into libraries. Sort, search, play, retrieve information from Internet and many other features. Integrated Media Player provided.</Char_Desc_2000>
+			<Char_Desc_80>free software to organize and manage your multimedia data (videos/movies,music)</Char_Desc_80>
+			<Char_Desc_250>DataOrganizer is a free software to organize and manage your multimedia data (videos/movies/divx, music/mp3) into libraries, it retrieves information from Internet, integrates a Media Player...</Char_Desc_250>
+			<Char_Desc_450>DataOrganizer is a free software to organize and manage your multimedia data (videos/movies/divx, music/mp3) into libraries. Sort, search, play, retrieve information from Internet and many other features. Integrated Media Player provided.</Char_Desc_450>
+			<Char_Desc_2000>DataOrganizer is a free software to organize and manage your multimedia data (videos/movies/divx, music/mp3) into libraries. Sort, search, play, retrieve information from Internet and many other features. Integrated Media Player provided.</Char_Desc_2000>
 		</English>
 		<French>
 			<Keywords>dataorganizer,logiciel,gratuit,organiser,trier,bibliotheque,video,film,musique,audio,album,donnee,telecharger,media,multimedia,open source,lecteur,mp3,avi,divx,dvd,cd,gestion,catalogue</Keywords>

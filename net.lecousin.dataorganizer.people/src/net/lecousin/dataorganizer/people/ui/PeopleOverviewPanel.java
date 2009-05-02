@@ -20,12 +20,13 @@ import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
-public class OverviewPanel extends Composite {
+public class PeopleOverviewPanel extends Composite {
 
-	public OverviewPanel(Composite parent, PeopleDataType people, List<SourceInfo> sources) {
+	public PeopleOverviewPanel(Composite parent, PeopleDataType people, List<SourceInfo> sources, boolean big) {
 		super(parent, SWT.NONE);
 		setBackground(parent.getBackground());
 		GridLayout layout = UIUtil.gridLayout(parent, 1);
@@ -35,6 +36,23 @@ public class OverviewPanel extends Composite {
 		UIUtil.gridLayout(this, 1);
 		UIUtil.gridDataHorizFill(this);
 		
+		labelBirth = UIUtil.newLabel(this, "");
+		refreshBirth(sources);
+		
+		folderActivities = new TabFolder(this, SWT.NONE);
+		folderActivities.setBackground(parent.getBackground());
+		UIUtil.gridDataHorizFill(folderActivities);
+		refreshActivities(sources);
+	}
+	
+	private Label labelBirth;
+	private TabFolder folderActivities;
+	
+	public void refresh(List<SourceInfo> sources) {
+		refreshBirth(sources);
+		refreshActivities(sources);
+	}
+	private void refreshBirth(List<SourceInfo> sources) {
 		StringBuilder str = new StringBuilder();
 		long birthday = -1;
 		for (SourceInfo source : sources)
@@ -48,27 +66,37 @@ public class OverviewPanel extends Composite {
 			if (str.length() == 0) str.append(Local.Born_at).append(' '); else str.append(' ').append(Local.at).append(' ');
 			str.append(birthplace);
 		}
-		UIUtil.newLabel(this, str.toString());
-		
-		TabFolder folder = new TabFolder(this, SWT.NONE);
-		folder.setBackground(parent.getBackground());
-		UIUtil.gridDataHorizFill(folder);
+		labelBirth.setText(str.toString());
+	}
+	private void refreshActivities(List<SourceInfo> sources) {
 		SelfMap<String,MergedActivity> activities = new SelfMapLinkedList<String,MergedActivity>();
 		for (SourceInfo source : sources)
 			PeopleSourceInfo.mergeActivities(activities, ((PeopleSourceInfo)source).getActivities());
+		for (TabItem item : folderActivities.getItems()) {
+			MergedActivity a = activities.get(item.getText());
+			if (a == null)
+				item.dispose();
+			else {
+				activities.remove(a);
+				refreshActivity(a, item);
+			}
+		}
 		for (MergedActivity a : activities) {
-			TabItem item = new TabItem(folder, SWT.NONE);
+			TabItem item = new TabItem(folderActivities, SWT.NONE);
 			item.setText(a.name);
-			DataLinkListPanel panel = new DataLinkListPanel(folder, new Provider(a));
+			DataLinkListPanel panel = new DataLinkListPanel(folderActivities, new Provider(a));
 			item.setControl(panel);
 			panel.addControlListener(new ControlListener() {
 				public void controlMoved(ControlEvent e) {
 				}
 				public void controlResized(ControlEvent e) {
-					UIControlUtil.autoresize(OverviewPanel.this);
+					UIControlUtil.autoresize(PeopleOverviewPanel.this);
 				}
 			});
 		}
+	}
+	private void refreshActivity(MergedActivity a, TabItem item) {
+		((DataLinkListPanel)item.getControl()).resetProvider(new Provider(a));
 	}
 	
 	private static class Provider implements DataLinkListPanel.ListProvider {

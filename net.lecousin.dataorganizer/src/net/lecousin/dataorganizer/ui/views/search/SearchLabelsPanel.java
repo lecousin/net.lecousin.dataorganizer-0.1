@@ -1,4 +1,4 @@
-package net.lecousin.dataorganizer.ui.search;
+package net.lecousin.dataorganizer.ui.views.search;
 
 import java.util.LinkedList;
 

@@ -1,4 +1,4 @@
-package net.lecousin.dataorganizer.ui.view.label;
+package net.lecousin.dataorganizer.ui.views.label;
 
 import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.internal.EclipsePlugin;

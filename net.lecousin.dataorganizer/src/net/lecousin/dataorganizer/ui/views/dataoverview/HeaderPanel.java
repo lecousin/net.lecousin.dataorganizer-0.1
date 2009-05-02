@@ -1,11 +1,11 @@
-package net.lecousin.dataorganizer.ui.dataoverview;
+package net.lecousin.dataorganizer.ui.views.dataoverview;
 
 import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.core.DataOrganizer;
 import net.lecousin.dataorganizer.core.DataLabels.Label;
 import net.lecousin.dataorganizer.core.database.Data;
+import net.lecousin.dataorganizer.ui.DataListMenu;
 import net.lecousin.dataorganizer.ui.control.LabelTree;
-import net.lecousin.dataorganizer.ui.datalist.DataListMenu;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.event.Event.Listener;
 import net.lecousin.framework.ui.eclipse.SharedImages;

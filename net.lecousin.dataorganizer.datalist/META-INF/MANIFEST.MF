@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: DataOrganizer - Data Lists
 Bundle-SymbolicName: net.lecousin.dataorganizer.datalist;singleton:=true
-Bundle-Version: 0.2.0
+Bundle-Version: 0.2.1
 Bundle-Activator: net.lecousin.dataorganizer.datalist.internal.EclipsePlugin
 Bundle-Vendor: Guillaume LE COUSIN
 Require-Bundle: org.eclipse.ui,

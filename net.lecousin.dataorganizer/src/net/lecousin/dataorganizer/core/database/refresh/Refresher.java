@@ -14,18 +14,22 @@ import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.ui.eclipse.UIUtil;
 import net.lecousin.framework.ui.eclipse.progress.WorkProgressDialog;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 public class Refresher {
 
 	public static void refresh(Shell shell, DataBase db, List<Data> data, RefreshOptions options) {
+		shell = new Shell(Display.getDefault(), SWT.PRIMARY_MODAL);
+		
 		WorkProgress progress = new WorkProgress(Local.Refreshing.toString(), data.size()*1000, true);
 		WorkProgressDialog dlg = new WorkProgressDialog(shell, progress);
 
 		// first, relocate sources if necessary
 		if (options.tryToRelocateDataSourceIfNecessary) {
 			Refresher_Relocate.relocateSources(shell, data, progress);
-			if (progress.isCancelled()) return;
+			if (progress.isCancelled()) { dlg.close(); return; }
 			progress.reset(Local.Refreshing.toString(), data.size()*1000);
 		}
 		

@@ -102,8 +102,10 @@ public abstract class DataContentType implements SelfMap.Entry<Long> {
 	public abstract void removeImage(DataImageLoaded image);
 	public abstract Control createImageCategoryControls(Composite parent);
 	
-	public abstract void createOverviewPanel(Composite panel, List<SourceInfo> sources);
+	public abstract void createOverviewPanel(Composite panel, List<SourceInfo> sources, boolean big);
+	public abstract void refreshOverviewPanel(Composite panel, List<SourceInfo> sources);
 	public abstract void createDescriptionPanel(Composite panel);
+	public abstract void refreshDescriptionPanel(Composite panel);
 	public abstract boolean isOverviewPanelSupportingSourceMerge();
 	
 	public abstract DuplicateAnalysis checkForDuplicateOnContent(Data data);
@@ -144,6 +146,8 @@ public abstract class DataContentType implements SelfMap.Entry<Long> {
 	public void signalModification() {
 		data.signalContentModification(this);
 	}
+	public void signalSourceUpdated(SourceInfo source) {}
+	public void signalSourceRemoved(SourceInfo source) {}
 	
 	public final void merge(DataContentType other, Shell shell) {
 		Info oi = other.getInfo();

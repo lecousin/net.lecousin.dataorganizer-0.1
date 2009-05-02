@@ -2,13 +2,16 @@ package net.lecousin.dataorganizer.ui.application;
 
 import net.lecousin.dataorganizer.core.DataOrganizer;
 import net.lecousin.dataorganizer.core.InitializationException;
+import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.internal.EclipsePlugin;
-import net.lecousin.dataorganizer.ui.Perspective;
 import net.lecousin.dataorganizer.ui.application.news.News;
 import net.lecousin.dataorganizer.ui.application.preferences.DOPreferenceNode;
 import net.lecousin.dataorganizer.ui.application.splash.InteractiveSplashHandler;
 import net.lecousin.dataorganizer.ui.plugin.PreferencePageProvider;
+import net.lecousin.dataorganizer.ui.views.ClassicPerspective;
+import net.lecousin.dataorganizer.ui.views.dataoverview.DataOverviewView;
 import net.lecousin.framework.eclipse.extension.EclipsePluginExtensionUtil;
+import net.lecousin.framework.event.Event.Listener;
 import net.lecousin.framework.log.Log;
 import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.ui.eclipse.dialog.ErrorDlg;
@@ -32,7 +35,7 @@ public class ApplicationWorkbenchAdvisor extends WorkbenchAdvisor {
     }
 
 	public String getInitialWindowPerspectiveId() {
-		return Perspective.ID;
+		return ClassicPerspective.ID;
 	} 
 	
 	@Override
@@ -52,6 +55,15 @@ public class ApplicationWorkbenchAdvisor extends WorkbenchAdvisor {
 	public void postStartup() {
 		super.postStartup();
 		InteractiveSplashHandler.postStartup();
+
+		DataOrganizer.dataSelectionChanged().addListener(new Listener<Data>() {
+			public void fire(Data data) {
+				if (data == null)
+					DataOverviewView.hide();
+				else
+					DataOverviewView.show();
+			}
+		});
 		DataOrganizer.dataSelectionChanged().fire(null);
 		initPreferences();
 		News.check();

@@ -1,6 +1,7 @@
 package net.lecousin.dataorganizer.ui.control;
 
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -67,8 +68,9 @@ public class DataImageControl extends Composite {
 						Control c = DataImageControl.this.data.getContent().createImageCategoryControls(group.getInnerControl());
 						if (c != null)
 							c.setData("cat.header");
+						int index = 0;
 						for (DataImage i : cat.images) {
-							Composite header = UIUtil.newGridComposite(group.getInnerControl(), 0, 0, 2, 10, 0);
+							Composite header = UIUtil.newGridComposite(group.getInnerControl(), 0, 0, 2 + (cat.images.size() > 1 ? 1 : 0), 10, 0);
 							Label label = UIUtil.newImage(group.getInnerControl(), i.image.getImage());
 							UIUtil.newLabel(header, i.image.getName());
 							UIUtil.newImageButton(header, SharedImages.getImage(SharedImages.icons.x16.basic.DEL), new ListenerData<DataImage,Triple<LCGroup,Composite,Label>>(new Triple<LCGroup,Composite,Label>(group, header, label)) {
@@ -93,6 +95,7 @@ public class DataImageControl extends Composite {
 								}
 							}, i);
 							// TODO edit??
+							index++;
 						}
 					}
 				}
@@ -133,7 +136,12 @@ public class DataImageControl extends Composite {
 			}
 		});
 		labelImage.addPaintListener(new ImagesTaker());
-		createFromData();
+		if (data == null) {
+			defaultImage = data != null ? EclipseImages.resizeMax(data.getContentType().getDefaultTypeImage(), maxWidth, maxHeight) : null;
+			labelImage.setImage(defaultImage);
+			linkName.setText(Local.No_image.toString());
+		}
+		createFromData(null);
 	}
 	
 	public Point computeSize(int hint, int hint2, boolean changed) {
@@ -148,6 +156,7 @@ public class DataImageControl extends Composite {
 	private Image defaultImage;
 	private SortedListTree<ImageCategory> categories = new SortedListTree<ImageCategory>(new ImageCategory.Comp());
 	private boolean imagesTaken = false;
+	private boolean refreshImages = false;
 	private int buttonHeight;
 	private int marginHeight;
 	
@@ -165,44 +174,69 @@ public class DataImageControl extends Composite {
 		DataImageLoaded image;
 		Image resized;
 		Data data;
+		public boolean isSame(DataImageLoaded i) {
+			if (i == image) return true;
+			if (i.getImage() != image.getImage()) return false;
+			if (!i.getFileName().equals(image.getFileName())) return false;
+			if (!i.getName().equals(image.getName())) return false;
+			return true;
+		}
 	}
 	
 	public void setData(Data data) {
+		Data previous = this.data;
 		this.data = data;
-		createFromData();
+		createFromData(previous);
 	}
 	
-	private void createFromData() {
-		defaultImage = data != null ? EclipseImages.resizeMax(data.getContentType().getDefaultTypeImage(), maxWidth, maxHeight) : null;
+	private void createFromData(Data previous) {
+		if (previous != data)
+			defaultImage = data != null ? EclipseImages.resizeMax(data.getContentType().getDefaultTypeImage(), maxWidth, maxHeight) : null;
 		if (labelImage.isDisposed()) return;
-		labelImage.setImage(defaultImage);
-		linkName.setText(Local.No_image.toString());
-		synchronized (categories) {
-			categories.clear();
-			if (data != null)
-				for (DataImageCategory c : data.getContent().getImagesCategories()) {
-					ImageCategory cat = new ImageCategory();
-					cat.cat = c;
-					categories.add(cat);
-				}
+		if (previous != data) {
+			labelImage.setImage(defaultImage);
+			linkName.setText(Local.No_image.toString());
+			synchronized (categories) {
+				categories.clear();
+				if (data != null)
+					for (DataImageCategory c : data.getContent().getImagesCategories()) {
+						ImageCategory cat = new ImageCategory();
+						cat.cat = c;
+						categories.add(cat);
+					}
+			}
+			imagesTaken = false;
+			refreshImages = false;
+			redraw();
+		} else {
+			refreshImages = true;
+			redraw();
 		}
-		imagesTaken = false;
-		redraw();
 	}
 	
 	private class ImagesTaker implements PaintListener {
 		public void paintControl(PaintEvent e) {
-			if (imagesTaken) return;
-			imagesTaken = true;
-			if (data == null) return;
-			data.getContent().getImages(new ImagesListener(data));
+			if (imagesTaken && !refreshImages) return;
+			if (!imagesTaken) {
+				imagesTaken = true;
+				refreshImages = false;
+				if (data == null) return;
+				data.getContent().getImages(new ImagesListener(data, false));
+			} else {
+				refreshImages = false;
+				if (data == null) return;
+				data.getContent().getImages(new ImagesListener(data, true));
+			}
 		}
 	}
 	private class ImagesListener implements ProcessListener<DataImageLoaded> {
-		public ImagesListener(Data data) {
+		public ImagesListener(Data data, boolean refresh) {
 			this.data = data;
+			this.refresh = refresh;
 		}
 		private Data data;
+		private boolean refresh;
+		private List<DataImage> refreshed = new LinkedList<DataImage>();
 		public void fire(DataImageLoaded event) {
 			if (labelImage.isDisposed()) return;
 			if (this.data != DataImageControl.this.data) return;
@@ -215,12 +249,24 @@ public class DataImageControl extends Composite {
 						break;
 					}
 				if (cat != null) {
-					i = new DataImage();
-					i.image = event;
-					i.category = cat;
-					i.data = data;
-					i.resized = EclipseImages.resizeMax(event.getImage(), maxWidth, maxHeight);
-					cat.images.add(i);
+					if (refresh) {
+						for (DataImage pi : cat.images) {
+							if (pi.isSame(event)) {
+								i = pi;
+								refreshed.add(pi);
+								break;
+							}
+						}
+					}
+					if (i == null) {
+						i = new DataImage();
+						i.image = event;
+						i.category = cat;
+						i.data = data;
+						i.resized = EclipseImages.resizeMax(event.getImage(), maxWidth, maxHeight);
+						cat.images.add(i);
+						refreshed.add(i);
+					}
 				}
 			}
 			if (i != null)
@@ -234,6 +280,30 @@ public class DataImageControl extends Composite {
 				});
 		}
 		public void done() {
+			if (!refresh) return;
+			if (labelImage.isDisposed()) return;
+			labelImage.getDisplay().asyncExec(new Runnable() {
+				public void run() {
+					if (labelImage.isDisposed()) return;
+					boolean setImage = false;
+					Image img = labelImage.getImage(); 
+					synchronized (categories) {
+						for (Iterator<ImageCategory> itCat = categories.iterator(); itCat.hasNext(); ) {
+							ImageCategory cat = itCat.next();
+							for (Iterator<DataImage> itImg = cat.images.iterator(); itImg.hasNext(); ) {
+								DataImage i = itImg.next();
+								if (!refreshed.contains(i)) {
+									itImg.remove();
+									if (img == i.resized || img == i.image.getImage())
+										setImage = true;
+								}
+							}
+						}
+					}
+					if (setImage)
+						setImage(0);
+				}
+			});
 		}
 		public void started() {
 		}
@@ -246,7 +316,7 @@ public class DataImageControl extends Composite {
 	
 	private void next() {
 		int i = getCurrentIndex();
-		if (i >= 0 && i < getNbImages()-2)
+		if (i >= 0 && i < getNbImages()-1)
 			setImage(i+1);
 	}
 	
@@ -299,7 +369,9 @@ public class DataImageControl extends Composite {
 		setImage(getImageAt(index));
 	}
 	private void setImage(DataImage i) {
-		labelImage.setImage(i != null ? i.resized : defaultImage);
+		Image img = i != null ? i.resized : defaultImage;
+		if (labelImage.getImage() != img)
+			labelImage.setImage(img);
 		linkName.setText(i != null ? i.image.getName() : Local.No_image.toString());
 		layout(true, true);
 	}

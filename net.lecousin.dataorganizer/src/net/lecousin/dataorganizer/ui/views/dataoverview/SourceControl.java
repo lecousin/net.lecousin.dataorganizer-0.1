@@ -1,4 +1,4 @@
-package net.lecousin.dataorganizer.ui.dataoverview;
+package net.lecousin.dataorganizer.ui.views.dataoverview;
 
 import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.core.database.Data;

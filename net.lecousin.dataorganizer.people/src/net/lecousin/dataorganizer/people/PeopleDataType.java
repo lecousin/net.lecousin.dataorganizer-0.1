@@ -14,7 +14,7 @@ import net.lecousin.dataorganizer.core.database.info.SourceInfo;
 import net.lecousin.dataorganizer.core.database.info.SourceInfoMergeUtil;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
 import net.lecousin.dataorganizer.people.ui.DescriptionPanel;
-import net.lecousin.dataorganizer.people.ui.OverviewPanel;
+import net.lecousin.dataorganizer.people.ui.PeopleOverviewPanel;
 import net.lecousin.dataorganizer.util.DataImageLoader;
 import net.lecousin.dataorganizer.util.DataImageLoader.FileProvider_FromDataPath;
 import net.lecousin.framework.Pair;
@@ -22,6 +22,7 @@ import net.lecousin.framework.collections.CollectionUtil;
 import net.lecousin.framework.event.ProcessListener;
 import net.lecousin.framework.event.SplitProcessListener;
 import net.lecousin.framework.log.Log;
+import net.lecousin.framework.ui.eclipse.control.UIControlUtil;
 import net.lecousin.framework.xml.XmlWriter;
 
 import org.eclipse.core.resources.IFile;
@@ -91,8 +92,12 @@ public class PeopleDataType extends DataContentType {
 	}
 
 	@Override
-	public void createOverviewPanel(Composite panel, List<SourceInfo> sources) {
-		new OverviewPanel(panel, this, sources);
+	public void createOverviewPanel(Composite panel, List<SourceInfo> sources, boolean big) {
+		panel.setData(new PeopleOverviewPanel(panel, this, sources, big));
+	}
+	@Override
+	public void refreshOverviewPanel(Composite panel, List<SourceInfo> sources) {
+		((PeopleOverviewPanel)panel.getData()).refresh(sources);
 	}
 	@Override
 	public boolean isOverviewPanelSupportingSourceMerge() {
@@ -101,6 +106,11 @@ public class PeopleDataType extends DataContentType {
 	@Override
 	public void createDescriptionPanel(Composite panel) {
 		DescriptionPanel.create(this, panel);
+	}
+	@Override
+	public void refreshDescriptionPanel(Composite panel) {
+		UIControlUtil.clear(panel);
+		createDescriptionPanel(panel);
 	}
 
 	private List<Pair<Image,String>> photos = null;

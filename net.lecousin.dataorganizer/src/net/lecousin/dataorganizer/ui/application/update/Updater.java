@@ -97,19 +97,28 @@ public class Updater {
 		return true;
 	}
 	public static void signalLaunch(long count) {
-		HttpClient client = new HttpClient(SocketFactory.getDefault());
-		HttpRequest req;
-		try {
-			Version v = getCurrentVersion();
-			req = new HttpRequest("dataorganizer.webhop.net", "/track/track.php?type=launch&version=" + (isMySelf() ? "ME" : "") + v.toString()+"&lang="+Application.language.toString()+"&count="+count);
-			try { client.send(req, true, null, 0); }
-			catch (IOException e) {
+		if (isMySelf()) return;
+		Thread t = new Thread(new SignalLaunch(count));
+		t.start();
+	}
+	private static class SignalLaunch implements Runnable {
+		SignalLaunch(long count) { this.count = count; }
+		private long count;
+		public void run() {
+			HttpClient client = new HttpClient(SocketFactory.getDefault());
+			HttpRequest req;
+			try {
+				Version v = getCurrentVersion();
+				req = new HttpRequest("dataorganizer.webhop.net", "/track/track.php?type=launch&version=" + (isMySelf() ? "ME" : "") + v.toString()+"&lang="+Application.language.toString()+"&count="+count);
+				try { client.send(req, true, null, 0); }
+				catch (IOException e) {
+					if (Log.warning(Updater.class))
+						Log.warning(Updater.class, "Unable to track launch", e);
+				}
+			} catch (UpdateException e) {
 				if (Log.warning(Updater.class))
-					Log.warning(Updater.class, "Unable to track launch", e);
+					Log.warning(Updater.class, "Unable to track installation", e);
 			}
-		} catch (UpdateException e) {
-			if (Log.warning(Updater.class))
-				Log.warning(Updater.class, "Unable to track installation", e);
 		}
 	}
 	

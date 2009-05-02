@@ -10,10 +10,16 @@ import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.source.DataSource;
 import net.lecousin.dataorganizer.core.database.source.LocalFileDataSource;
 import net.lecousin.dataorganizer.ui.dialog.DataLinkPopup;
+import net.lecousin.dataorganizer.util.DO_UIUtil;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.progress.WorkProgress;
 import net.lecousin.framework.thread.RunnableWithData;
+import net.lecousin.framework.ui.eclipse.control.list.LCContentProvider;
+import net.lecousin.framework.ui.eclipse.control.list.LCTable;
+import net.lecousin.framework.ui.eclipse.control.list.LCTable.ColumnProvider;
+import net.lecousin.framework.ui.eclipse.control.list.LCTable.TableConfig;
 import net.lecousin.framework.ui.eclipse.dialog.LCMLMessageDialog;
+import net.lecousin.framework.ui.eclipse.dialog.LCTableDialog;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -47,6 +53,24 @@ class Refresher_Relocate {
 			relocateInDir(shell, toFind, root, progress, step);
 		}
 		progress.done();
+		if (!toFind.isEmpty()) {
+			LCTable.LCTableProvider<Pair<LocalFileDataSource,Data>> provider = new LCTable.LCTableProvider_List<Pair<LocalFileDataSource,Data>>(toFind) {
+				public LCContentProvider<Pair<LocalFileDataSource, Data>> getContentProvider() { return new LCContentProvider.StaticList<Pair<LocalFileDataSource,Data>>(list); }
+				public TableConfig getConfig() {
+					TableConfig cfg = new TableConfig();
+					cfg.fixedRowHeight = 18;
+					cfg.multiSelection = false;
+					cfg.sortable = true;
+					return cfg;
+				}
+				@SuppressWarnings("unchecked")
+				public ColumnProvider<Pair<LocalFileDataSource, Data>>[] getColumns() {
+					return new ColumnProvider[] { new DO_UIUtil.ColumnData(new DO_UIUtil.ProviderPair2<LocalFileDataSource,Data>()), new DO_UIUtil.ColumnDataSource(new DO_UIUtil.ProviderPair1<LocalFileDataSource,Data>()) }; 
+				}
+			};
+			LCTableDialog<Pair<LocalFileDataSource,Data>> dlg = new LCTableDialog<Pair<LocalFileDataSource,Data>>(shell, Local.Relocating_sources.toString(), Local.MESSAGE_Missing_Files_After_Relocate.toString(), provider, 600);
+			dlg.open();
+		}
 	}
 	private static void relocateInDir(Shell shell, List<Pair<LocalFileDataSource,Data>> toFind, File dir, WorkProgress progress, int work) {
 		progress.setSubDescription(dir.getAbsolutePath());

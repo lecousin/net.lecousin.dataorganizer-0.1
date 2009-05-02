@@ -1,4 +1,4 @@
-package net.lecousin.dataorganizer.ui.datalist;
+package net.lecousin.dataorganizer.ui.views.datalist;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,6 +14,9 @@ import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.content.ContentType;
 import net.lecousin.dataorganizer.core.database.content.DataContentType;
 import net.lecousin.dataorganizer.core.database.source.DataSource;
+import net.lecousin.dataorganizer.internal.EclipsePlugin;
+import net.lecousin.dataorganizer.ui.DataListActions;
+import net.lecousin.dataorganizer.ui.DataListMenu;
 import net.lecousin.dataorganizer.ui.DataOrganizerDND;
 import net.lecousin.dataorganizer.ui.control.DataImageControl;
 import net.lecousin.dataorganizer.ui.control.LabelsControl;
@@ -23,6 +26,7 @@ import net.lecousin.framework.event.Event;
 import net.lecousin.framework.event.Event.Listener;
 import net.lecousin.framework.event.Event.ListenerData;
 import net.lecousin.framework.time.DateTimeUtil;
+import net.lecousin.framework.ui.eclipse.EclipseImages;
 import net.lecousin.framework.ui.eclipse.UIUtil;
 import net.lecousin.framework.ui.eclipse.control.list.AdvancedList;
 import net.lecousin.framework.ui.eclipse.control.list.LCContentProvider;
@@ -35,6 +39,7 @@ import net.lecousin.framework.ui.eclipse.control.list.LCTable.TableConfig;
 import net.lecousin.framework.ui.eclipse.control.list.LCViewer.DragListener;
 import net.lecousin.framework.ui.eclipse.graphics.ColorUtil;
 
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSourceEvent;
@@ -55,7 +60,14 @@ public class DataListView extends ViewPart {
 	
 	public DataListView() {
 	}
-
+	
+	@Override
+	public void setInitializationData(IConfigurationElement cfig, String propertyName, Object data) {
+		super.setInitializationData(cfig, propertyName, data);
+		setTitleImage(EclipseImages.getImage(EclipsePlugin.ID, "icons/list.gif"));
+		setPartName(Local.Data_list.toString());
+	}
+	
 	private AdvancedList<Data> list;
 	private Event<Data> labellingChanged = new Event<Data>();
 	private Listener<Pair<Label,Data>> labellingListener = new Listener<Pair<Label,Data>>() {

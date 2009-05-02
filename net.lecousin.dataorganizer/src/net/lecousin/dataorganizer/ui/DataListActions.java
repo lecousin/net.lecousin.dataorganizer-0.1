@@ -1,4 +1,4 @@
-package net.lecousin.dataorganizer.ui.datalist;
+package net.lecousin.dataorganizer.ui;
 
 import java.io.File;
 import java.util.LinkedList;

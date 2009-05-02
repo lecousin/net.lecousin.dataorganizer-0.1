@@ -39,14 +39,16 @@ public class RateEditPanel extends Composite {
 		scaleRate.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				if (noRate.getSelection())
+					noRate.setSelection(false);
 				labelRate.setText(Integer.toString(scaleRate.getSelection()));
 				rateChanged.fire(getRate());
 			}
 		});
-		if (rate < 0) scaleRate.setEnabled(false);
+		//if (rate < 0) scaleRate.setEnabled(false);
 		noRate = UIUtil.newCheck(this, Local.Do_not_rate_this_data.toString(), new Listener<Pair<Boolean,Object>>() {
 			public void fire(Pair<Boolean,Object> event) {
-				scaleRate.setEnabled(!noRate.getSelection());
+				//scaleRate.setEnabled(!noRate.getSelection());
 				byte rate = (byte)(noRate.getSelection() ? -1 : scaleRate.getSelection());
 				labelRate.setText(rate >= 0 ? Byte.toString(rate) : Local.No.toString());
 				rateChanged.fire(getRate());
