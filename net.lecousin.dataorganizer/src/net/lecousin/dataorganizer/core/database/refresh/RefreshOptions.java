@@ -2,11 +2,18 @@ package net.lecousin.dataorganizer.core.database.refresh;
 
 public class RefreshOptions {
 
-	public boolean getDataContentIfNotYetDone = false;
-	public boolean refreshAllDataContent = false;
+	public enum GetDataContent {
+		IF_NOT_YET_DONE,
+		ALL,
+	}
+	public GetDataContent getDataContent = null;
 	
 	public boolean tryToRelocateDataSourceIfNecessary = false;
-	
-	public boolean retrieveInfoFromInternet = false;
+
+	public enum RetrieveInfoFromInternet {
+		MISSING,
+		ALL
+	}
+	public RetrieveInfoFromInternet retrieveInfoFromInternet = null;
 	
 }

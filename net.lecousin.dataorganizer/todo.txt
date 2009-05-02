@@ -6,6 +6,7 @@ dataorganizer.people
 dataorganizer.audio
 dataorganizer.video
 dataorganizer.datalist [fix]
+dataorganizer.retriever.cinefil [fix]
 
 
 ---------------------------------------------------------------------
@@ -15,6 +16,7 @@ dataorganizer.datalist [fix]
 +PLS,allcdcovers,essayer d'ameliorer un peu pour Audio
 +Search: video: par genre...
 +Pouvoir changer l'ordre des images, les reattribuer à une autre categorie, changer priorite des categories...
++AutoSaver: pas si modifie depuis peu, sauf si final save (quand on quit)
 DataOrganizer
  + Bug LCTable: ne plus utiliser ScrolledComposite a cause de MouseWhell, mais mettre la horizontal scroll bar manuellement
  + Add data: single audio

@@ -12,6 +12,7 @@ import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPlugin;
 import net.lecousin.dataorganizer.core.database.info.InfoRetriever.FeedBackImpl;
 import net.lecousin.dataorganizer.core.database.info.InfoRetriever.MultiRetrieveFeedBack;
 import net.lecousin.framework.collections.CollectionUtil;
+import net.lecousin.framework.log.Log;
 import net.lecousin.framework.progress.WorkProgress;
 
 import org.eclipse.swt.widgets.Shell;
@@ -67,30 +68,39 @@ class Refresher_Internet {
 			private boolean done = false;
 			@Override
 			public void run() {
-				do {
-					Data d;
-					synchronized (data) {
-						if (data.isEmpty()) break;;
-						d = data.remove(0);
-						synchronized (inProgress) {
-							if (inProgress.contains(d)) {
-								data.add(d);
-								d = null;
-							} else
-								inProgress.add(d);
+				try {
+					do {
+						Data d;
+						synchronized (data) {
+							if (data.isEmpty()) break;;
+							d = data.remove(0);
+							synchronized (inProgress) {
+								if (inProgress.contains(d)) {
+									data.add(d);
+									d = null;
+								} else
+									inProgress.add(d);
+							}
 						}
-					}
-					if (d == null) {
-						if (data.size() == 1)
-							try { Thread.sleep(100); }
-							catch (InterruptedException e) { break; }
-						continue;
-					}
-					WorkProgress subProgress = progress.addSubWork(plugin.getName()+": "+d.getName(), 100, 10000);
-					InfoRetriever.retrieve(shell, d, CollectionUtil.single_element_list(plugin), feedbacks.get(d), subProgress, 10000, false);
-					progress.mergeSubWork(subProgress);
-					if (progress.isCancelled()) break;
-				} while (true);
+						if (d == null) {
+							if (data.size() == 1)
+								try { Thread.sleep(100); }
+								catch (InterruptedException e) { break; }
+							continue;
+						}
+						try {
+							WorkProgress subProgress = progress.addSubWork(plugin.getName()+": "+d.getName(), 100, 10000);
+							InfoRetriever.retrieve(shell, d, CollectionUtil.single_element_list(plugin), feedbacks.get(d), subProgress, 10000, false);
+							progress.mergeSubWork(subProgress);
+						} finally {
+							inProgress.remove(d);
+						}
+						if (progress.isCancelled()) break;
+					} while (true);
+				} catch (Throwable t) {
+					if (Log.error(this))
+						Log.error(this, "Error in a RefresherInternet thread", t);
+				}
 				done = true;
 			}
 		}

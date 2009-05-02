@@ -54,7 +54,7 @@ public class VideoSourceInfo extends SourceInfo {
 		saveCritiks(pressReviews, "pressReview", xml);
 		saveCritiks(publicReviews, "publicReview", xml);
 	}
-	private void saveListLinks(List<Pair<String,DataLink>> list, String tag, XmlWriter xml) {
+	private synchronized void saveListLinks(List<Pair<String,DataLink>> list, String tag, XmlWriter xml) {
 		for (Pair<String,DataLink> p : list) {
 			xml.openTag(tag);
 			xml.openTag("role").addAttribute("name", p.getValue1()).closeTag();
@@ -125,16 +125,16 @@ public class VideoSourceInfo extends SourceInfo {
 		}
 	}
 	
-	public void setDirectors(List<Pair<String,DataLink>> list) {
+	public synchronized void setDirectors(List<Pair<String,DataLink>> list) {
 		mergeNewLinks(directors, list);
 	}
-	public void setActors(List<Pair<String,DataLink>> list) {
+	public synchronized void setActors(List<Pair<String,DataLink>> list) {
 		mergeNewLinks(actors, list);
 	}
-	public void setProductors(List<Pair<String,DataLink>> list) {
+	public synchronized void setProductors(List<Pair<String,DataLink>> list) {
 		mergeNewLinks(productors, list);
 	}
-	public void setScenaristes(List<Pair<String,DataLink>> list) {
+	public synchronized void setScenaristes(List<Pair<String,DataLink>> list) {
 		mergeNewLinks(scenaristes, list);
 	}
 	
@@ -145,10 +145,10 @@ public class VideoSourceInfo extends SourceInfo {
 		signalModification();
 	}
 	
-	public void setPublicReview(String author, String review, Integer note) {
+	public synchronized void setPublicReview(String author, String review, Integer note) {
 		setReview(publicReviews, author, review, note);
 	}
-	public void setPressReview(String author, String review, Integer note) {
+	public synchronized void setPressReview(String author, String review, Integer note) {
 		setReview(pressReviews, author, review, note);
 	}
 	

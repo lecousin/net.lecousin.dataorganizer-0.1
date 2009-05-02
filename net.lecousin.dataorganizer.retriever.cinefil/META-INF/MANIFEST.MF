@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: DataOrganizer - Retriever - CineFil
 Bundle-SymbolicName: net.lecousin.dataorganizer.retriever.cinefil;singleton:=true
-Bundle-Version: 0.1.0
+Bundle-Version: 0.1.1
 Bundle-Activator: net.lecousin.dataorganizer.retriever.cinefil.internal.EclipsePlugin
 Bundle-Vendor: Guillaume LE COUSIN
 Require-Bundle: org.eclipse.ui,

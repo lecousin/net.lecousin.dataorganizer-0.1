@@ -153,6 +153,7 @@ public enum Local {
 	Not_rated("Not rated", "Non noté"),
 	Old_database("Old database", "Ancienne base de données"),
 	Only_data_linked_to_files("Only data linked to file(s)", "Uniquement liées à des fichiers"),
+	Only_from_missing_sources("Only from missing sources", "Seulement les sources manquantes"),
 	Only_if_not_yet_done("Only if not yet done", "Seulement si pas encore fait"),
 	Open_with("Open with", "Ouvrir avec"),
 	Open_with_default_application("Open with default application", "Ouvrir avec l'application par défaut"),

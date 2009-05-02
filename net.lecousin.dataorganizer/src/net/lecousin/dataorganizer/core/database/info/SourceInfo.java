@@ -71,7 +71,7 @@ public abstract class SourceInfo {
 	}
 	
 	
-	protected void saveCritiks(SelfMap<String, Review> reviews, String tag, XmlWriter xml) {
+	protected synchronized void saveCritiks(SelfMap<String, Review> reviews, String tag, XmlWriter xml) {
 		for (Review review : reviews) {
 			xml.openTag(tag).addAttribute("author", review.getAuthor());
 			if (review.getRate() != null)
@@ -81,7 +81,7 @@ public abstract class SourceInfo {
 		}
 	}
 	
-	protected void setReview(SelfMap<String,Review> reviews, String author, String review, Integer note) {
+	protected synchronized void setReview(SelfMap<String,Review> reviews, String author, String review, Integer note) {
 		boolean changed = false;
 		Review authorReview = reviews.get(author);
 		if (authorReview == null) {

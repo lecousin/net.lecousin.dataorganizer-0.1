@@ -13,6 +13,8 @@ import net.lecousin.dataorganizer.core.database.VirtualData;
 import net.lecousin.dataorganizer.core.database.content.ContentType;
 import net.lecousin.dataorganizer.core.database.refresh.RefreshOptions;
 import net.lecousin.dataorganizer.core.database.refresh.Refresher;
+import net.lecousin.dataorganizer.core.database.refresh.RefreshOptions.GetDataContent;
+import net.lecousin.dataorganizer.core.database.refresh.RefreshOptions.RetrieveInfoFromInternet;
 import net.lecousin.dataorganizer.internal.EclipsePlugin;
 import net.lecousin.dataorganizer.ui.dialog.RefreshDialog;
 import net.lecousin.dataorganizer.ui.wizard.adddata.AddData_Page.Result;
@@ -157,8 +159,8 @@ public class AddDataWizard extends Wizard {
     		result.db.close();
     		if (result.showRefreshAfterAdd) {
 	    		RefreshOptions options = new RefreshOptions();
-	    		options.getDataContentIfNotYetDone = true;
-	    		options.retrieveInfoFromInternet = true;
+	    		options.getDataContent = GetDataContent.IF_NOT_YET_DONE;
+	    		options.retrieveInfoFromInternet = RetrieveInfoFromInternet.MISSING;
 	    		RefreshDialog rd = new RefreshDialog(shell, options);
 	    		if (rd.open() != null)
 	    			Refresher.refresh(shell, DataOrganizer.database(), added, options);

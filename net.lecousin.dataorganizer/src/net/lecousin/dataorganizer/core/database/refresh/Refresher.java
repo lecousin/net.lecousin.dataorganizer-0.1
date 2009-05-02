@@ -1,6 +1,7 @@
 package net.lecousin.dataorganizer.core.database.refresh;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,8 @@ import java.util.Map;
 import net.lecousin.dataorganizer.Local;
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.DataBase;
+import net.lecousin.dataorganizer.core.database.content.DataContentType;
+import net.lecousin.dataorganizer.core.database.info.Info;
 import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPlugin;
 import net.lecousin.dataorganizer.core.database.info.InfoRetrieverPluginRegistry;
 import net.lecousin.framework.progress.WorkProgress;
@@ -39,18 +42,17 @@ public class Refresher {
 		for (Data d : data) {
 			if (needDataContent(d, options))
 				refreshContent.add(d);
-			if (options.retrieveInfoFromInternet) {
-				List<InfoRetrieverPlugin> retrievers = InfoRetrieverPluginRegistry.getRetrievers(d.getContentType().getID());
-				if (retrievers != null)
-					for (InfoRetrieverPlugin pi : retrievers) {
-						List<Data> toRetrieve = internet.get(pi);
-						if (toRetrieve == null) {
-							toRetrieve = new LinkedList<Data>();
-							internet.put(pi, toRetrieve);
-						}
-						toRetrieve.add(d);
-						nbToRetrieve++;
+			List<InfoRetrieverPlugin> retrievers = needRetrieveInfo(d, options);
+			if (retrievers != null && !retrievers.isEmpty()) {
+				for (InfoRetrieverPlugin pi : retrievers) {
+					List<Data> toRetrieve = internet.get(pi);
+					if (toRetrieve == null) {
+						toRetrieve = new LinkedList<Data>();
+						internet.put(pi, toRetrieve);
 					}
+					toRetrieve.add(d);
+					nbToRetrieve++;
+				}
 			}
 		}
 		int stepRefreshContent = refreshContent.size()*100;
@@ -81,10 +83,32 @@ public class Refresher {
 	}
 	
 	private static boolean needDataContent(Data data, RefreshOptions options) {
-		boolean getDataContent = options.refreshAllDataContent;
-		if (!getDataContent && options.getDataContentIfNotYetDone)
-			getDataContent = !data.getContent().isContentAvailable();
-		return getDataContent;
+		if (options.getDataContent == null) return false;
+		switch (options.getDataContent) {
+		case ALL: return true;
+		case IF_NOT_YET_DONE: return !data.getContent().isContentAvailable(); 
+		}
+		return false;
+	}
+	private static List<InfoRetrieverPlugin> needRetrieveInfo(Data data, RefreshOptions options) {
+		List<InfoRetrieverPlugin> list = InfoRetrieverPluginRegistry.getRetrievers(data.getContentType().getID());
+		if (list.isEmpty()) return null;
+		if (options.retrieveInfoFromInternet == null) return null;
+		switch (options.retrieveInfoFromInternet) {
+		case ALL: return list;
+		case MISSING:
+			DataContentType content = data.getContent();
+			if (content == null) return null;
+			Info info = content.getInfo();
+			if (info == null) return list;
+			for (Iterator<InfoRetrieverPlugin> it = list.iterator(); it.hasNext(); ) {
+				InfoRetrieverPlugin pi = it.next();
+				if (info.getSources().contains(pi.getSourceID()))
+					it.remove();
+			}
+			return list; 
+		}
+		return null;
 	}
 	
 }

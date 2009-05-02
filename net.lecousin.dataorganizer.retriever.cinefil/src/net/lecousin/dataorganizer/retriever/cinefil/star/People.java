@@ -63,20 +63,21 @@ public class People extends CineFilPage<PeopleSourceInfo> {
 			if (t.getValue1() != null && t.getValue1().name.equalsIgnoreCase("img")) {
 				String url = t.getValue1().attributes.get("src");
 				if (url.indexOf("://") < 0) url = "http://"+CineFilUtil.getHost()+url;
-				if (info.hasPhotoURL(url)) return null;
-				try { 
-					IFileStore netFile = EFS.getStore(new URI(url));
-					IFile file;
-					IFolder f = info.getFolder();
-					f = f.getFolder("cinefil");
-					i = 0;
-					while ((file = f.getFile("poster"+i+"."+FileSystemUtil.getFileNameExtension(netFile.getName()))).exists()) i++;
-					ResourceUtil.createFolderAndParents(f);
-					InputStream in = netFile.openInputStream(EFS.NONE, null);
-					file.create(in, true, null);
-					info.addPhoto(url, "cinefil/"+file.getName());
-				} catch (URISyntaxException e) {
-				} catch (CoreException e) {
+				if (!info.hasPhotoURL(url)) {
+					try { 
+						IFileStore netFile = EFS.getStore(new URI(url));
+						IFile file;
+						IFolder f = info.getFolder();
+						f = f.getFolder("cinefil");
+						i = 0;
+						while ((file = f.getFile("poster"+i+"."+FileSystemUtil.getFileNameExtension(netFile.getName()))).exists()) i++;
+						ResourceUtil.createFolderAndParents(f);
+						InputStream in = netFile.openInputStream(EFS.NONE, null);
+						file.create(in, true, null);
+						info.addPhoto(url, "cinefil/"+file.getName());
+					} catch (URISyntaxException e) {
+					} catch (CoreException e) {
+					}
 				}
 			}
 		}
