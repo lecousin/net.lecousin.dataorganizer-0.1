@@ -37,7 +37,7 @@ import org.eclipse.swt.widgets.Text;
 
 public class AudioOverviewPanel {
 
-	public AudioOverviewPanel(Composite panel, AudioDataType data, List<SourceInfo> sourcesNULL, boolean big) {
+	public AudioOverviewPanel(Composite panel, AudioDataType data, List<SourceInfo> sources, boolean big) {
 		GridLayout layout = UIUtil.gridLayout(panel, 1);
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;

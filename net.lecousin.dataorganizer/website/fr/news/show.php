@@ -47,6 +47,31 @@ Bonne utilisation !<br/>
 }
 ?>
 
+<?php
+if (isShown("2", $ids)) {
+?>
+<h1>Nouvelle version disponible mais erreur de mise à jour</h1>
+<p class="text_1">
+Tout d'abord la bonne nouvelle: la version 0.4 est disponible.<br>
+La mauvaise nouvelle, c'est que la version 0.3 contient un bug dans son système de mise à jour.<br>
+<br>
+Pour installer la dernière version, il vous faut donc:<ul>
+<li>Désinstaller votre version actuelle</li>
+<li>Télécharger la dernière version en <a href="http://cloud.github.com/downloads/lecousin/net.lecousin.dataorganizer/DataOrganizer-Install.exe">cliquant ici</a></li>
+<li>Installer cette nouvelle version</li>
+</ul>
+<br>
+Bien sûr, l'installation de cette nouvelle version ne supprimera aucune de vos données. En effet la désinstallation ne supprime que les exécutables et non votre travail déjà effectué dans le logiciel!<br>
+<br>
+Nous vous prions ne bien vouloir nous excuser pour ce petit problème.
+<br>
+Si vous avez un problème ou une question, n'hésitez pas à nous contacter sur notre adresse mail <a href="mailto:support.dataorganizer@gmail.com">support.dataorganizer@gmail.com</a>.
+<i>L'équipe de DataOrganizer.</i>
+</p>
+<?php
+}
+?>
+
 </div>
 </td></tr></table>
 <script type="text/javascript">

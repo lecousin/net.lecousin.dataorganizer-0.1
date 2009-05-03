@@ -48,7 +48,7 @@ public class DataLinkListPanel extends LCGrid {
 			if (DataLinkListPanel.this.isDisposed()) { finished = true; return; }
 			int nb = provider.getNbRows();
 			int start = pos;
-			for (; pos < nb && pos-start<5; pos++) {
+			for (; pos < nb && pos-start<15; pos++) {
 				Color bg = (pos%2)==0 ? rowBgColor1 : rowBgColor2;
 				Color fg = (pos%2)==0 ? rowFgColor1 : rowFgColor2;
 				Object[] o = provider.getRow(pos);
@@ -63,6 +63,7 @@ public class DataLinkListPanel extends LCGrid {
 				while (j++ < titles.length)
 					newEmptyCell(bg);
 			}
+			DataLinkListPanel.this.layout(true, true);
 			UIUtil.resize(DataLinkListPanel.this);
 			if (pos < nb)
 				getDisplay().asyncExec(this);

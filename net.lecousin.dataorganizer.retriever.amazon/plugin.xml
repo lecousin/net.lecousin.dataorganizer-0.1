@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension
+         point="net.lecousin.dataorganizer.inforetriever">
+      <retriever
+            class="net.lecousin.dataorganizer.retriever.amazon.movie.AmazonMovieRetriever"
+            content_type_id="video"
+            id="Amazon">
+      </retriever>
+      <retriever
+            class="net.lecousin.dataorganizer.retriever.amazon.music.AmazonMusicRetriever"
+            content_type_id="audio"
+            id="Amazon">
+      </retriever>
+   </extension>
+
+</plugin>

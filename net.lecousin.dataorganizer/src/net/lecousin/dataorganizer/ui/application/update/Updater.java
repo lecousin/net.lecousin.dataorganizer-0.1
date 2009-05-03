@@ -419,7 +419,7 @@ public class Updater {
 			
 			if (update.updaterFiles == null || update.updaterFiles.isEmpty())
 				throw new UpdateException(Local.ERROR_UPDATE_INTERNAL.toString());
-			if (update.applicationFiles != null || update.applicationFiles.isEmpty())
+			if (update.applicationFiles != null && update.applicationFiles.isEmpty())
 				throw new UpdateException(Local.ERROR_UPDATE_INTERNAL.toString());
 			if (update.jreFiles != null && update.jreFiles.isEmpty())
 				throw new UpdateException(Local.ERROR_UPDATE_INTERNAL.toString());

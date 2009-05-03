@@ -42,7 +42,7 @@ public class DescriptionPanel {
 				TabItem item = new TabItem(folder, SWT.NONE);
 				item.setText(InfoRetrieverPluginRegistry.getNameForSource(source, PeopleContentType.PEOPLE_TYPE));
 				item.setImage(InfoRetrieverPluginRegistry.getIconForSource(source, PeopleContentType.PEOPLE_TYPE));
-				LCMLText text = new LCMLText(folder, false, false);
+				LCMLText text = new LCMLText(folder, false, true);
 				text.setText(resume);
 				item.setControl(text.getControl());
 			}

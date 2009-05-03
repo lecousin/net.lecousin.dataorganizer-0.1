@@ -13,6 +13,10 @@ import net.lecousin.framework.ui.eclipse.dialog.ErrorDlg;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.PartInitException;
@@ -94,6 +98,16 @@ public class DataOverviewView extends ViewPart {
 		overviewPanel = new OverviewPanel(scroll, big);
 		scroll.setContent(overviewPanel);
 		overviewPanel.setData(new UIControlUtil.TopLevelResize());
+		overviewPanel.addControlListener(new ControlListener() {
+			public void controlMoved(ControlEvent e) {
+			}
+			public void controlResized(ControlEvent e) {
+				Point size1 = overviewPanel.getSize();
+				Rectangle r = scroll.getClientArea();
+				if (size1.x > r.width)
+					overviewPanel.setSize(overviewPanel.computeSize(r.width, SWT.DEFAULT));
+			}
+		});
 		refresh(DataOrganizer.getSelectedData());
 	}
 

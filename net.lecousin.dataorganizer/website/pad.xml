@@ -34,9 +34,9 @@
 	</Company_Info>
 	<Program_Info>
 		<Program_Name>DataOrganizer</Program_Name>
-		<Program_Version>0.3.0</Program_Version>
-		<Program_Release_Month>04</Program_Release_Month>
-		<Program_Release_Day>30</Program_Release_Day>
+		<Program_Version>0.4.0</Program_Version>
+		<Program_Release_Month>05</Program_Release_Month>
+		<Program_Release_Day>03</Program_Release_Day>
 		<Program_Release_Year>2009</Program_Release_Year>
 		<Program_Cost_Dollars />
 		<Program_Cost_Other_Code />
@@ -78,9 +78,9 @@
 			<Keywords>dataorganizer,logiciel,gratuit,organiser,trier,bibliotheque,video,film,musique,audio,album,donnee,telecharger,media,multimedia,open source,lecteur,mp3,avi,divx,dvd,cd,gestion,catalogue</Keywords>
 			<Char_Desc_45 />
 			<Char_Desc_80 />
-			<Char_Desc_250>DataOrganizer est un logiciel gratuit pour organiser vos donnees multimedia (videos/films, musique) dans des bibliotheques,il recupere des informations depuis internet,integre un lecteur..</Char_Desc_250>
-			<Char_Desc_450>DataOrganizer est un logiciel gratuit pour organiser vos donnees multimedia (videos/films, musique) dans des bibliotheques. Nombreuses fonctionnalites, de tri, d'organisation et de recherche. Informations détaillées sur vos données, récupérées depuis les fichiers, mais également depuis Internet. Media Player integre (vidéo+audio), sinon vous pouvez utiliser une application installée sur votre ordinateur.</Char_Desc_450>
-			<Char_Desc_2000>DataOrganizer est un logiciel gratuit pour organiser vos donnees multimedia (videos/films, musique) dans des bibliotheques. Nombreuses fonctionnalites, de tri, d'organisation et de recherche. Informations détaillées sur vos données, récupérées depuis les fichiers, mais également depuis Internet. Media Player integre (vidéo+audio), sinon vous pouvez utiliser une application installée sur votre ordinateur.
+			<Char_Desc_250>DataOrganizer est un logiciel gratuit pour organiser vos donnees multimedia (videos/films/divx, musique/mp3) dans des bibliotheques,il recupere des informations depuis internet,integre un lecteur..</Char_Desc_250>
+			<Char_Desc_450>DataOrganizer est un logiciel gratuit pour organiser vos donnees multimedia (videos/films/divx, musique/mp3) dans des bibliotheques. Nombreuses fonctionnalites, de tri, d'organisation et de recherche. Informations détaillées sur vos données, récupérées depuis les fichiers, mais également depuis Internet. Media Player integre (vidéo+audio), sinon vous pouvez utiliser une application installée sur votre ordinateur.</Char_Desc_450>
+			<Char_Desc_2000>DataOrganizer est un logiciel gratuit pour organiser vos donnees multimedia (videos/films/divx, musique/mp3) dans des bibliotheques. Nombreuses fonctionnalites, de tri, d'organisation et de recherche. Informations détaillées sur vos données, récupérées depuis les fichiers, mais également depuis Internet. Media Player integre (vidéo+audio), sinon vous pouvez utiliser une application installée sur votre ordinateur.
 </Char_Desc_2000>
 		</French>
 	</Program_Descriptions>

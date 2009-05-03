@@ -1,10 +1,12 @@
 package net.lecousin.dataorganizer.audio;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import net.lecousin.dataorganizer.core.database.info.Info;
 import net.lecousin.dataorganizer.core.database.info.SourceInfo;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
+import net.lecousin.framework.collections.CollectionUtil;
 import net.lecousin.framework.xml.XmlWriter;
 
 import org.w3c.dom.Element;
@@ -41,10 +43,11 @@ public class AudioInfo extends Info {
 		return (AudioSourceInfo)super.getSourceInfo(source);
 	}
 
+	static Set<String> reviewsTypes = new HashSet<String>(CollectionUtil.list(new String[] {
+			Local.Public.toString()
+		}));
 	@Override
-	public Set<String> getReviewsTypes() {
-		return null;
-	}
+	public Set<String> getReviewsTypes() { return reviewsTypes; }
 	
 	private String album = null;
 	private String artist = null;

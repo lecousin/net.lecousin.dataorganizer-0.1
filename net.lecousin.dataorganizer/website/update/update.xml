@@ -11,7 +11,7 @@
 			<file host="dataorganizer.webhop.net" port="80">/update/updater.zip</file>
 		</updater>
 		<application>
-			<file host="dataorganizer.webhop.net" port="80">/update/application-0.3.0.zip</file>
+			<file host="dataorganizer.webhop.net" port="80">/update/application-0.4.0.zip</file>
 		</application>
 	</update>
 
@@ -44,6 +44,14 @@
 			<file host="dataorganizer.webhop.net" port="80">/update/application-0.3.0.zip</file>
 		</application>
 	</update>
+	<update version="0.4.0" jre="1.5.10" extras="0.1.0">
+		<updater>
+			<file host="dataorganizer.webhop.net" port="80">/update/updater.zip</file>
+		</updater>
+		<application>
+			<file host="dataorganizer.webhop.net" port="80">/update/application-0.4.0.zip</file>
+		</application>
+	</update>
 
 <!-- 	<jre version="99.99.99">
 		<file host="dataorganizer.webhop.net" port="80">/update/jre-test.zip</file>
@@ -54,8 +62,8 @@
 	</extras>
 	 -->
 	<news version="99.99.99">
-		<content language="FRENCH" url="/update/news-0.3.0-fr.html"/>
-		<content language="ENGLISH" url="/update/news-0.3.0-en.html"/>
+		<content language="FRENCH" url="/update/news-0.4.0-fr.html"/>
+		<content language="ENGLISH" url="/update/news-0.4.0-en.html"/>
 	</news>
 
 	<news version="0.2.0">
@@ -65,5 +73,9 @@
 	<news version="0.3.0">
 		<content language="FRENCH" url="/update/news-0.3.0-fr.html"/>
 		<content language="ENGLISH" url="/update/news-0.3.0-en.html"/>
+	</news>
+	<news version="0.4.0">
+		<content language="FRENCH" url="/update/news-0.4.0-fr.html"/>
+		<content language="ENGLISH" url="/update/news-0.4.0-en.html"/>
 	</news>
 </dataorganizer>

@@ -10,6 +10,7 @@ import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader;
 import net.lecousin.framework.Pair;
 import net.lecousin.framework.collections.ArrayUtil;
 import net.lecousin.framework.collections.SelfMap;
+import net.lecousin.framework.collections.SelfMapLinkedList;
 import net.lecousin.framework.strings.StringUtil;
 import net.lecousin.framework.xml.XmlWriter;
 
@@ -34,6 +35,8 @@ public class AudioSourceInfo extends SourceInfo {
 		cover_back = l.getCoverBack(elt);
 		images = l.getImages(elt);
 		mcdi = l.getMCDI(elt);
+		publicReviews = l.getPublicReviews(this, elt);
+		description = l.getDescription(elt);
 	}
 
 	@Override
@@ -65,10 +68,14 @@ public class AudioSourceInfo extends SourceInfo {
 			xml.openTag("image").addAttribute("description", t.getValue1()).addAttribute("path", t.getValue2()).closeTag();
 		if (mcdi != null)
 			xml.openTag("mcdi").addText(StringUtil.encodeHexa(mcdi)).closeTag();
+		saveCritiks(publicReviews, "publicReview", xml);
+		if (description != null)
+			xml.openTag("description").addText(description).closeTag();
 	}
 
 	@Override
 	public SelfMap<String, Review> getReviews(String type) {
+		if (type.equals(Local.Public.toString())) return publicReviews;
 		return null;
 	}
 	
@@ -81,6 +88,9 @@ public class AudioSourceInfo extends SourceInfo {
 	private List<Pair<String,String>> cover_front = new LinkedList<Pair<String,String>>();
 	private List<Pair<String,String>> cover_back = new LinkedList<Pair<String,String>>();
 	private List<Pair<String,String>> images = new LinkedList<Pair<String,String>>();
+	/** public reviews */
+	private SelfMap<String,Review> publicReviews = new SelfMapLinkedList<String,Review>(5);
+	private String description = null;
 	
 	public class Track {
 		String title = null;
@@ -144,6 +154,19 @@ public class AudioSourceInfo extends SourceInfo {
 		this.mcdi = mcdi;
 		signalModification();
 	}
+	
+	public synchronized void setPublicReview(String author, String review, Integer note) {
+		setReview(publicReviews, author, review, note);
+	}
+	
+	public String getDescription() { return description; }
+	public void setDescription(String s) {
+		if (s == null || s.length() == 0) return;
+		if (s.equals(description)) return;
+		description = s;
+		signalModification();
+	}
+	
 	
 	@Override
 	public void merge(SourceInfo info) {

@@ -42,6 +42,7 @@
       <plugin id="net.lecousin.dataorganizer.neufbox.mediacenter"/>
       <plugin id="net.lecousin.dataorganizer.people"/>
       <plugin id="net.lecousin.dataorganizer.retriever.allocine"/>
+      <plugin id="net.lecousin.dataorganizer.retriever.amazon"/>
       <plugin id="net.lecousin.dataorganizer.retriever.cinefil"/>
       <plugin id="net.lecousin.dataorganizer.retriever.imdb"/>
       <plugin id="net.lecousin.dataorganizer.video"/>

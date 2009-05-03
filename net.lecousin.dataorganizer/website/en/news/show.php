@@ -47,6 +47,31 @@ Enjoy using DataOrganizer!<br/>
 }
 ?>
 
+<?php
+if (isShown("2", $ids)) {
+?>
+<h1>New version available but update error</h1>
+<p class="text_1">
+First the good news: the version 0.4 is available.<br>
+But the bad news is the version 0.3 contains a bug in its update mechanism, so you cannot update to 0.4.<br>
+<br>
+To install the new version, you have to do the following steps:<ul>
+<li>Uninstall your current version</li>
+<li>Download the new version: <a href="http://cloud.github.com/downloads/lecousin/net.lecousin.dataorganizer/DataOrganizer-Install.exe">here</a></li>
+<li>Install this new version</li>
+</ul>
+<br>
+Of course, this process does not remove any of your data. Indeed, when uninstalling your current version, only executables are removed but your data and the work you did within the software are kept!<br>
+<br>
+We apologize for any inconvenience.<br>
+<br>
+For any problem or question, contact us on our email address <a href="mailto:support.dataorganizer@gmail.com">support.dataorganizer@gmail.com</a>.
+<i>The DataOrganizer Team.</i>
+</p>
+<?php
+}
+?>
+
 </div>
 </td></tr></table>
 <script type="text/javascript">

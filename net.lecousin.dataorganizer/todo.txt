@@ -7,16 +7,20 @@ dataorganizer.audio
 dataorganizer.video
 dataorganizer.datalist [fix]
 dataorganizer.retriever.cinefil [fix]
+new:
+dataorganizer.retriever.amazon
 
++++ Mettre a jour le site web, features, home...
 
 ---------------------------------------------------------------------
++Site: verifier si 0 etoile est possible =>*4 au lieu de *5...
 +Refresh: utiliser les infos deja donnee(titre)/recuperees + donner le nom du fichiers... + les fenetres ne se ferment pas(mediaplayer, infos fichiers...)
-+Refresh info from internet: option to retrieve only missing...
 +DVD!!!
 +PLS,allcdcovers,essayer d'ameliorer un peu pour Audio
 +Search: video: par genre...
 +Pouvoir changer l'ordre des images, les reattribuer à une autre categorie, changer priorite des categories...
 +AutoSaver: pas si modifie depuis peu, sauf si final save (quand on quit)
++HTTP: Accept-Encoding: gzip,deflate // content-enconding: gzip => dezipper...
 DataOrganizer
  + Bug LCTable: ne plus utiliser ScrolledComposite a cause de MouseWhell, mais mettre la horizontal scroll bar manuellement
  + Add data: single audio
@@ -54,11 +58,13 @@ Video
 Internet plugins:
  + AlloCine: image DVD
  + freedb.org (audio, english?)
- + allcdcovers.com (video+audio)
- + lyricsreg.com (audio)
+ + allcdcovers.com (video+audio) + covertarget.com + (www.cdcovers.cc)
+ + lyricsreg.com (audio) + www.lyricstime.com + www.superlyrics.net + www.lyrics007.com + www.elyrics.net + www.lyricskid.com
+   + www.allthelyrics.com + www.lyricsmode.com + www.mp3lyrics.org ...
  + cddb.org (audio, ?)
  + google.com/musicsearch
  (+ google.com/movies)
  + cinemovies.fr (?? semble pareil que allocine)
  + moviecovers.com ?? (comparer a allcdcovers.com)
  + wikipedia ???
+ + fnac ??? (comparer a amazon??)

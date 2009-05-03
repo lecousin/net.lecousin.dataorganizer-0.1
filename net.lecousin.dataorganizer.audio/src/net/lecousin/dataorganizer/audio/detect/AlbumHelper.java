@@ -17,6 +17,7 @@ import net.lecousin.dataorganizer.audio.AudioInfo;
 import net.lecousin.dataorganizer.audio.AudioSourceInfo;
 import net.lecousin.dataorganizer.audio.Local;
 import net.lecousin.dataorganizer.audio.detect.AlbumDetector.Album;
+import net.lecousin.dataorganizer.audio.detect.DecidePicturesDialog.Provider;
 import net.lecousin.dataorganizer.audio.internal.EclipsePlugin;
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.VirtualData;
@@ -42,7 +43,10 @@ import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 public class AlbumHelper {
@@ -751,7 +755,16 @@ public class AlbumHelper {
 			}
 		}
 		if (!images.isEmpty()) {
-			DecidePicturesDialog dlg = new DecidePicturesDialog(shell, data, images);
+			Provider<PictureFile> provider = new Provider<PictureFile>() {
+				public Image getImage(PictureFile element) {
+					return new Image(Display.getDefault(), element.image.getInfo().getData()[0]);
+				}
+				public String getText(PictureFile element) {
+					ImageData d = element.image.getInfo().getData()[0];
+					return Local.File+": "+element.file.getName()+" ("+Local.size+':'+d.width+'x'+d.height+')';
+				}
+			};
+			DecidePicturesDialog<PictureFile> dlg = new DecidePicturesDialog<PictureFile>(shell, Local.process(Local.MESSAGE_Pictures, data.getName()), images, provider);
 			if (dlg.open()) {
 				coverFront.addAll(dlg.getCoverFront());
 				coverBack.addAll(dlg.getCoverBack());

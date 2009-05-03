@@ -21,3 +21,5 @@ Require-Bundle: org.eclipse.ui,
  net.lecousin.framework.files.image
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
+Export-Package: net.lecousin.dataorganizer.audio,
+ net.lecousin.dataorganizer.audio.detect

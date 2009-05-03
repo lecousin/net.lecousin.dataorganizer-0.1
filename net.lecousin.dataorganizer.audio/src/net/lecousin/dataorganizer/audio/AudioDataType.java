@@ -8,6 +8,7 @@ import java.util.List;
 
 import net.lecousin.dataorganizer.audio.AudioSourceInfo.Track;
 import net.lecousin.dataorganizer.audio.ui.AudioOverviewPanel;
+import net.lecousin.dataorganizer.audio.ui.DescriptionPanel;
 import net.lecousin.dataorganizer.core.database.Data;
 import net.lecousin.dataorganizer.core.database.Data.DuplicateAnalysis;
 import net.lecousin.dataorganizer.core.database.content.DataContentType;
@@ -24,6 +25,7 @@ import net.lecousin.framework.event.ProcessListener;
 import net.lecousin.framework.event.SplitProcessListener;
 import net.lecousin.framework.io.MyByteArrayOutputStream;
 import net.lecousin.framework.log.Log;
+import net.lecousin.framework.ui.eclipse.control.UIControlUtil;
 import net.lecousin.framework.xml.XmlWriter;
 
 import org.eclipse.core.resources.IFile;
@@ -79,13 +81,12 @@ public class AudioDataType extends DataContentType {
 	
 	@Override
 	public void createDescriptionPanel(Composite panel) {
-		// TODO Auto-generated method stub
-
+		DescriptionPanel.create(this, panel);
 	}
 	@Override
 	public void refreshDescriptionPanel(Composite panel) {
-		// TODO Auto-generated method stub
-		
+		UIControlUtil.clear(panel);
+		createDescriptionPanel(panel);
 	}
 	@Override
 	public void createOverviewPanel(Composite panel, List<SourceInfo> sources, boolean big) {
@@ -97,7 +98,7 @@ public class AudioDataType extends DataContentType {
 	}
 	@Override
 	public boolean isOverviewPanelSupportingSourceMerge() {
-		return false;
+		return true;
 	}
 
 	private List<Pair<Image,String>> coverFront = null; 
@@ -231,12 +232,18 @@ public class AudioDataType extends DataContentType {
 	
 	public void saveCoverFront(ImageData[] image) {
 		saveImage(image, "cover_front_");
+		coverFront = null;
+		signalModification();
 	}
 	public void saveCoverBack(ImageData[] image) {
 		saveImage(image, "cover_back_");
+		coverBack = null;
+		signalModification();
 	}
 	public void saveImage(ImageData[] image) {
 		saveImage(image, "image_");
+		otherImages = null;
+		signalModification();
 	}
 	private void saveImage(ImageData[] data, String prefix) {
 		try {
@@ -318,6 +325,7 @@ public class AudioDataType extends DataContentType {
 					Log.error(this, "Unable to remove image file '" + image.getFileName() + "' for data ID " + getData().getID());
 			}
 		}
+		signalModification();
 	}
 	
 	@Override

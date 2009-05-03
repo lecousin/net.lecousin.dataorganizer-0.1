@@ -3,8 +3,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.lecousin.dataorganizer.audio.AudioSourceInfo.Track;
+import net.lecousin.dataorganizer.core.database.info.SourceInfo;
+import net.lecousin.dataorganizer.core.database.info.SourceInfo.Review;
 import net.lecousin.dataorganizer.core.database.version.ContentTypeLoader_0_1_0;
 import net.lecousin.framework.Pair;
+import net.lecousin.framework.collections.SelfMap;
 import net.lecousin.framework.strings.StringUtil;
 import net.lecousin.framework.version.Version;
 import net.lecousin.framework.xml.XmlUtil;
@@ -66,5 +69,15 @@ public class Loader_0_1_0 extends ContentTypeLoader_0_1_0 implements Loader {
 		Element elt = XmlUtil.get_child_element(root, "mcdi");
 		if (elt == null) return null;
 		return StringUtil.decodeHexa(XmlUtil.get_inner_text(elt));
+	}
+	
+	public SelfMap<String,Review> getPublicReviews(SourceInfo source, Element root) {
+		return loadReviews(source, "publicReview", root);
+	}
+	
+	public String getDescription(Element root) {
+		Element e = XmlUtil.get_child_element(root, "description");
+		if (e == null) return null;
+		return XmlUtil.get_inner_text(e);
 	}
 }

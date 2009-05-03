@@ -329,7 +329,9 @@ public class OverviewPanel extends Composite {
 					groupDescription.setVisible(contentDescriptionPanel.getChildren().length > 0);
 				} else {
 					data.getContent().refreshDescriptionPanel(contentDescriptionPanel);
-					groupDescription.setVisible(true);
+					GridData gd = (GridData)groupDescription.getLayoutData();
+					gd.exclude = contentDescriptionPanel.getChildren().length == 0;
+					groupDescription.setVisible(contentDescriptionPanel.getChildren().length > 0);
 				}
 				layout(true, true);
 				UIControlUtil.resize(OverviewPanel.this);

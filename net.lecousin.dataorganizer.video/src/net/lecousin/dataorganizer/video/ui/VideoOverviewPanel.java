@@ -261,7 +261,7 @@ public class VideoOverviewPanel {
 				if (labelRelease1 != null) {
 					labelRelease1.dispose(); labelRelease1 = null;
 					labelRelease2.dispose(); labelRelease2 = null;
-					labelRelease2.dispose(); labelRelease3 = null;
+					labelRelease3.dispose(); labelRelease3 = null;
 				}
 			}
 		}
