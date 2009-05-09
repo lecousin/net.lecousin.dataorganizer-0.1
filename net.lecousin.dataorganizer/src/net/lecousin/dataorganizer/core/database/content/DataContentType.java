@@ -74,6 +74,7 @@ public abstract class DataContentType implements SelfMap.Entry<Long> {
 	public IFolder getFolder() throws CoreException { return data.getFolder(); }
 	
 	public abstract boolean isContentAvailable();
+	public boolean detailsCanBeEdited() { return false; }
 	
 	public static final class DataImageCategory {
 		public DataImageCategory(String id, String name, int priority)

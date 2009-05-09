@@ -30,6 +30,7 @@ import net.lecousin.framework.ui.eclipse.UIUtil;
 import net.lecousin.framework.ui.eclipse.control.LCCombo;
 import net.lecousin.framework.ui.eclipse.control.LCGrid;
 import net.lecousin.framework.ui.eclipse.control.LCGroup;
+import net.lecousin.framework.ui.eclipse.control.LabelButton;
 import net.lecousin.framework.ui.eclipse.control.Separator;
 import net.lecousin.framework.ui.eclipse.control.UIControlUtil;
 import net.lecousin.framework.ui.eclipse.control.button.MenuButton;
@@ -104,6 +105,7 @@ public class OverviewPanel extends Composite {
 	private Label labelOpened, labelLastOpen, labelAdded;
 	private Composite sourcesPanel;
 	private MenuButton buttonRetrieveInfo;
+	private LabelButton editDetailsButton;
 	
 	private Listener<Data> dataChanged = new Listener<Data>() { public void fire(Data event) { refresh(event); } };
 	private Listener<DataContentType> dataContentChanged = new Listener<DataContentType>() { public void fire(DataContentType event) { refresh(event.getData()); } };
@@ -190,16 +192,27 @@ public class OverviewPanel extends Composite {
 		buttonRetrieveInfo = new MenuButton(sourcesPanel, SharedImages.getImage(SharedImages.icons.x16.basic.SEARCH), Local.Retrieve_information.toString(), true, new RetrieveInfoMenuProvider());
 		// + content Type overview
 		if (big) {
-			Label label = new Label(sourcesParent, SWT.NONE);
+			Composite tmpPanel = UIUtil.newGridComposite(sourcesParent, 0, 0, 2, 2, 0);
+			Label label = new Label(tmpPanel, SWT.NONE);
 			label.setFont(bigTitleFont);
 			label.setForeground(groupColor);
 			label.setText(Local.Details.toString());
 			label.setBackground(sourcesParent.getBackground());
+			editDetailsButton = UIUtil.newImageButton(tmpPanel, SharedImages.getImage(SharedImages.icons.x16.basic.EDIT2), new Listener<Object>() {
+				public void fire(Object event) {
+					editDetails();
+				}
+			}, null);
 			contentTypePanel = UIUtil.newComposite(sourcesParent);
 			UIUtil.gridDataHorizFill(contentTypePanel);
 		} else {
 			LCGroup group = new LCGroup(sourcesParent, Local.Details.toString(), groupColor);
 			group.setBackground(ColorUtil.getWhite());
+			editDetailsButton = UIUtil.newImageButton(group.getTopControl(1), SharedImages.getImage(SharedImages.icons.x16.basic.EDIT2), new Listener<Object>() {
+				public void fire(Object event) {
+					editDetails();
+				}
+			}, null);
 			UIUtil.gridDataHorizFill(group);
 			UIUtil.gridLayout(group.getInnerControl(), 1, 0, 0);
 			contentTypePanel = UIUtil.newComposite(group.getInnerControl());
@@ -314,6 +327,7 @@ public class OverviewPanel extends Composite {
 					comment.setText(s);
 				groupDescription.setVisible(false);
 				contentTypePanel.setVisible(false);
+				editDetailsButton.setEnabled(data.getContent().detailsCanBeEdited());
 				step = 2;
 				layout(true, true);
 				UIControlUtil.resize(OverviewPanel.this);
@@ -547,5 +561,9 @@ public class OverviewPanel extends Composite {
 				});
 			}
 		}
+	}
+	
+	private void editDetails() {
+		// TODO
 	}
 }

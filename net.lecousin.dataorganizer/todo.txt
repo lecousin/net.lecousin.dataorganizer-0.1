@@ -10,9 +10,16 @@ dataorganizer.retriever.cinefil [fix]
 new:
 dataorganizer.retriever.amazon
 
+0.5:
+framework.ui [fix]
+dataorganizer
+
+
 +++ Mettre a jour le site web, features, home...
 
 ---------------------------------------------------------------------
++Editer manuellement les infos (durée d'un film...)
++Ajouter des colonnes dans la table
 +Site: verifier si 0 etoile est possible =>*4 au lieu de *5...
 +Refresh: utiliser les infos deja donnee(titre)/recuperees + donner le nom du fichiers... + les fenetres ne se ferment pas(mediaplayer, infos fichiers...)
 +DVD!!!

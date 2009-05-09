@@ -1,0 +1,1 @@
+DataOrganizer is totally free and open source under <a href="http://www.gnu.org/licenses/gpl-3.0-standalone.html" target="_blank">GPL License</a>

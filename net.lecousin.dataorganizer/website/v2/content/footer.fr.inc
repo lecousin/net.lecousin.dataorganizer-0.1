@@ -1,0 +1,1 @@
+DataOrganizer est totallement gratuit et open source sous la <a href="http://www.april.org/groupes/trad-gpl/doc/GPLv3/www.rodage.org/gpl-3.0.fr.html" target="_blank">licence GPL</a>

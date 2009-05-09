@@ -1,5 +1,5 @@
 mots=dataorganizer,logiciel,gratuit,organiser,trier,bibliotheque,video,film,musique,audio,album,donnee,telecharger,media,multimedia,open source,lecteur,mp3,avi,divx,dvd,cd,gestion,catalogue
-DataOrganizer est un logiciel gratuit pour organiser vos donnees multimedia (videos/films, musique) dans des bibliotheques,il recupere des informations depuis internet,integre un lecteur.. 
+DataOrganizer est un logiciel gratuit pour organiser vos donnees multimedia (videos/films/divx, musique/mp3) dans des bibliotheques,il recupere des informations depuis internet,integre un lecteur.. 
 
 DataOrganizer est un logiciel gratuit pour organiser vos donnees multimedia (videos/films/divx, musique/mp3) dans des bibliotheques.
 Nombreuses fonctionnalites, de tri, d'organisation et de recherche.
@@ -8,7 +8,7 @@ Media Player integre (vidéo+audio), sinon vous pouvez utiliser une application i
 
 
 keywords=dataorganizer,software,free,organize,manage,sort,arrange,library,video,movie,music,audio,album,data,download,media,multimedia,open source,player,mp3,avi,divx,dvd,cd,management,catalog
-DataOrganizer is a free software to organize and manage your multimedia data (videos/movies, music) into libraries, it retrieves information from Internet, integrates a Media Player...
+DataOrganizer is a free software to organize and manage your multimedia data (videos/movies/divx, music/mp3) into libraries, it retrieves information from Internet, integrates a Media Player...
 
 DataOrganizer is a free software to organize and manage your multimedia data (videos/movies/divx, music/mp3) into libraries.
 Sort, search, play, retrieve information from Internet and many other features.
